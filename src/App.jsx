@@ -19,6 +19,7 @@ import { PortTab } from "./screens/PortTab.jsx";
 import { ReportsTab } from "./screens/ReportsTab.jsx";
 import { EmpireTab } from "./screens/EmpireTab.jsx";
 import bgMarble from "./assets/images/bg-marble.webp";
+import victoryColossus from "./assets/images/victory-colossus.webp";
 
 const fmtNum = (n) => (n >= 10000 ? `${Math.floor(n / 1000)}k` : Math.floor(n));
 
@@ -91,24 +92,28 @@ export default function App() {
       {colosseDone && !game.victoryShown && (
         <div style={{ position: "fixed", inset: 0, zIndex: 50, background: "rgba(3,5,8,0.78)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, animation: "fadeIn 0.25s ease-out" }}>
           <div style={{
-            maxWidth: 360, textAlign: "center", position: "relative", overflow: "hidden",
+            width: "100%", maxWidth: 380, textAlign: "center", position: "relative", overflow: "hidden",
             background: `linear-gradient(175deg, ${C.panelUp}, ${C.panel})`, border: `1px solid ${C.gold}55`,
-            borderRadius: 22, padding: "32px 24px", boxShadow: `0 20px 60px rgba(0,0,0,0.55), ${C.glow}`,
-            animation: "scaleIn 0.4s cubic-bezier(0.16,1,0.3,1) both",
+            borderRadius: 22, boxShadow: `0 20px 60px rgba(0,0,0,0.55), ${C.glow}`,
+            animation: "scaleIn 0.4s cubic-bezier(0.16,1,0.3,1) both", maxHeight: "88vh", display: "flex", flexDirection: "column",
           }}>
-            <div aria-hidden style={{ position: "absolute", top: 62, left: "50%", width: 90, height: 90, marginLeft: -45, borderRadius: "50%", border: `1.5px solid ${C.goldHi}`, animation: "burstRing 1.8s ease-out infinite" }} />
-            <I name="colosse" size={54} color={C.goldHi} sw={1.25} style={{ position: "relative" }} />
-            <div style={{ ...fd, fontSize: 22, fontWeight: 700, letterSpacing: 3, color: C.goldHi, margin: "16px 0 4px", position: "relative" }}>LE COLOSSE</div>
-            <div style={{ ...fd, fontSize: 13, fontWeight: 600, letterSpacing: 2, color: C.gold, marginBottom: 14, position: "relative" }}>EST ACHEVÉ</div>
-            <div style={{ width: 150, margin: "0 auto 16px", position: "relative" }}><Meander color={C.goldDim} height={8} /></div>
-            <p style={{ fontSize: 13.5, color: C.textDim, margin: "0 0 16px", lineHeight: 1.5, position: "relative" }}>
-              Ton nom est gravé dans le marbre de l'Égée. La partie est remportée — mais ton empire, lui, continue.
-            </p>
-            <div style={{ fontSize: 11.5, fontVariantNumeric: "tabular-nums", color: C.textDim, marginBottom: 20, lineHeight: 1.9, position: "relative" }}>
-              {Math.max(1, Math.round((nowTick - (game.startedAt || nowTick)) / 60000))} min de règne · {game.stats.wins} victoires<br />
-              {game.islands.length} île{game.islands.length > 1 ? "s" : ""} · {game.stats.raidsRepousses} raids repoussés
+            <div style={{ position: "relative", flexShrink: 0 }}>
+              <img src={victoryColossus} alt="" style={{ width: "100%", height: 230, objectFit: "cover", objectPosition: "50% 20%", display: "block" }} />
+              <div style={{ position: "absolute", inset: 0, background: `linear-gradient(180deg, transparent 45%, ${C.panel} 96%)` }} />
             </div>
-            <div style={{ position: "relative" }}><Btn primary label="Continuer à régner" onClick={() => setGame((g) => ({ ...g, victoryShown: true }))} /></div>
+            <div style={{ padding: "0 24px 28px", overflowY: "auto" }}>
+              <div style={{ ...fd, fontSize: 22, fontWeight: 700, letterSpacing: 3, color: C.goldHi, margin: "0 0 4px" }}>LE COLOSSE</div>
+              <div style={{ ...fd, fontSize: 13, fontWeight: 600, letterSpacing: 2, color: C.gold, marginBottom: 14 }}>EST ACHEVÉ</div>
+              <div style={{ width: 150, margin: "0 auto 16px" }}><Meander color={C.goldDim} height={8} /></div>
+              <p style={{ fontSize: 13.5, color: C.textDim, margin: "0 0 16px", lineHeight: 1.5 }}>
+                Ton nom est gravé dans le marbre de l'Égée. La partie est remportée — mais ton empire, lui, continue.
+              </p>
+              <div style={{ fontSize: 11.5, fontVariantNumeric: "tabular-nums", color: C.textDim, marginBottom: 20, lineHeight: 1.9 }}>
+                {Math.max(1, Math.round((nowTick - (game.startedAt || nowTick)) / 60000))} min de règne · {game.stats.wins} victoires<br />
+                {game.islands.length} île{game.islands.length > 1 ? "s" : ""} · {game.stats.raidsRepousses} raids repoussés
+              </div>
+              <Btn primary label="Continuer à régner" onClick={() => setGame((g) => ({ ...g, victoryShown: true }))} />
+            </div>
           </div>
         </div>
       )}
