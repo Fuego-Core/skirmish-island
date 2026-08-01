@@ -1,6 +1,24 @@
 import { C, RES, RES_ICONN } from "../game/constants.js";
 import { I } from "../ui/Icon.jsx";
 import { Card, SectionTitle, fmtNum } from "../ui/kit.jsx";
+import eventMarchand from "../assets/images/event-marchand.webp";
+import eventTempete from "../assets/images/event-tempete.webp";
+import eventEpave from "../assets/images/event-epave.webp";
+
+// Vignettes en médaillon (bas-relief bronze généré) pour les 3 événements
+// aléatoires — mêmes clés "icone" que le moteur (marche/explorateur/peche).
+const EVENT_CRESTS = { marche: eventMarchand, explorateur: eventTempete, peche: eventEpave };
+
+function EventCrest({ icone }) {
+  return (
+    <div style={{
+      width: 34, height: 34, flexShrink: 0, borderRadius: "50%", overflow: "hidden",
+      border: `1px solid ${C.goldHi}77`, boxShadow: "0 2px 6px rgba(0,0,0,0.5)",
+    }}>
+      <img src={EVENT_CRESTS[icone]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+    </div>
+  );
+}
 
 export function ReportsTab({ game }) {
   return (
@@ -14,8 +32,12 @@ export function ReportsTab({ game }) {
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         {game.reports.map((rep, i) => (
           <Card key={i} style={{ borderColor: rep.win ? C.ok : C.bad }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 12, color: rep.kind === "evenement" ? C.goldHi : rep.win ? C.ok : C.bad, marginBottom: 5, fontFamily: "'Cinzel', Georgia, serif", letterSpacing: 1 }}>
-              <I name={rep.kind === "evenement" ? rep.icone : rep.kind === "defense" ? "muraille" : rep.win ? "epees" : "drapeau"} size={14} color={rep.kind === "evenement" ? C.goldHi : rep.win ? C.ok : C.bad} />
+            <div style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 12, color: rep.kind === "evenement" ? C.goldHi : rep.win ? C.ok : C.bad, marginBottom: 5, fontFamily: "'Cinzel', Georgia, serif", letterSpacing: 1 }}>
+              {rep.kind === "evenement" ? (
+                <EventCrest icone={rep.icone} />
+              ) : (
+                <I name={rep.kind === "defense" ? "muraille" : rep.win ? "epees" : "drapeau"} size={14} color={rep.win ? C.ok : C.bad} />
+              )}
               {rep.kind === "evenement" ? rep.titre : rep.kind === "defense" ? (rep.win ? "RAID REPOUSSÉ" : "RAID PIRATE SUBI") : rep.win ? "VICTOIRE" : "DÉFAITE"}
               {rep.kind !== "evenement" && (
                 <span style={{ color: C.textFaint, fontSize: 9, fontFamily: "monospace", letterSpacing: 0 }}>
