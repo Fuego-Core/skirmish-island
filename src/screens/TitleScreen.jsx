@@ -1,8 +1,8 @@
 import { C } from "../game/constants.js";
 import { FACTIONS } from "../game/factions.js";
 import { I, Meander } from "../ui/Icon.jsx";
-import { TitleBackdrop } from "../ui/TitleBackdrop.jsx";
 import { fd, fb } from "../ui/kit.jsx";
+import titleBackdrop from "../assets/images/title-backdrop.webp";
 
 // Médaillon héraldique (couronne de laurier + icône de faction) — remplace
 // la simple pastille ronde, pensé pour lire comme un emblème, pas une icône.
@@ -37,11 +37,11 @@ export function TitleScreen({ onChooseFaction }) {
     <div style={{ minHeight: "100vh", position: "relative", overflow: "hidden", color: C.text, ...fb, display: "flex", flexDirection: "column" }}>
       {/* Fond : crépuscule sur l'Égée, en mouvement lent (Ken Burns) */}
       <div style={{ position: "absolute", inset: "-6%", zIndex: 0, animation: "kenBurns 32s ease-in-out infinite" }}>
-        <TitleBackdrop />
+        <img src={titleBackdrop} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 30%", display: "block" }} />
       </div>
       <div style={{
         position: "absolute", inset: 0, zIndex: 1,
-        background: `linear-gradient(180deg, ${C.bgDeep}c2 0%, ${C.bgDeep}55 16%, ${C.bgDeep}3d 30%, ${C.bgDeep}70 50%, ${C.bg}e0 76%, ${C.bgDeep} 100%)`,
+        background: `linear-gradient(180deg, ${C.bgDeep}d1 0%, ${C.bgDeep}75 14%, ${C.bgDeep}45 28%, ${C.bgDeep}52 42%, ${C.bgDeep}85 58%, ${C.bg}ea 78%, ${C.bgDeep} 100%)`,
       }} />
 
       <div style={{ position: "relative", zIndex: 2, flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", padding: "30px 18px calc(30px + env(safe-area-inset-bottom))", boxSizing: "border-box" }}>
