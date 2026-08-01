@@ -3,6 +3,25 @@ import { TROOPS } from "../game/troops.js";
 import { SPEED } from "../game/constants.js";
 import { I } from "../ui/Icon.jsx";
 import { Card, SectionTitle, QueueCard, Btn, CostRow, fmtTime } from "../ui/kit.jsx";
+import troopHoplite from "../assets/images/troops/troop-hoplite.webp";
+import troopArcher from "../assets/images/troops/troop-archer.webp";
+import troopCavalier from "../assets/images/troops/troop-cavalier.webp";
+import troopBelier from "../assets/images/troops/troop-belier.webp";
+import troopCatapulte from "../assets/images/troops/troop-catapulte.webp";
+
+const TROOP_PORTRAITS = { hoplite: troopHoplite, archer: troopArcher, cavalier: troopCavalier, belier: troopBelier, catapulte: troopCatapulte };
+
+function TroopPortrait({ type, dim }) {
+  return (
+    <div style={{
+      width: 52, height: 52, flexShrink: 0, borderRadius: "50%", overflow: "hidden",
+      border: `1.5px solid ${C.goldHi}${dim ? "44" : "88"}`, boxShadow: "0 2px 8px rgba(0,0,0,0.5)",
+      opacity: dim ? 0.5 : 1,
+    }}>
+      <img src={TROOP_PORTRAITS[type]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+    </div>
+  );
+}
 
 export function ArmyTab({ game, nowTick, bestCaserne, armyPower, upkeep, recruitTroop }) {
   return (
@@ -35,15 +54,19 @@ export function ArmyTab({ game, nowTick, bestCaserne, armyPower, upkeep, recruit
           const busy = !!game.troopQueue;
           return (
             <Card key={type}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
-                <span style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 13 }}>
-                  <I name={type} size={19} color={C.goldHi} />
-                  {t.label} <span style={{ fontFamily: "monospace", fontSize: 11, color: C.gold }}>×{game.troops[type]}</span>
-                </span>
-                <span style={{ fontSize: 10, fontFamily: "monospace", color: C.textDim }}>atq {t.atk} · déf {t.def} · −{t.upkeep} blé/h</span>
-              </div>
-              <div style={{ fontSize: 11, color: C.textDim, marginBottom: 7, fontStyle: "italic" }}>
-                {t.desc}{!caserneOk && <span style={{ color: C.bad, fontStyle: "normal" }}> — Caserne niv. {t.requiresCaserne} requise</span>}
+              <div style={{ display: "flex", gap: 11, marginBottom: 7 }}>
+                <TroopPortrait type={type} dim={!caserneOk} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 6, flexWrap: "wrap" }}>
+                    <span style={{ fontSize: 13.5, fontWeight: 600 }}>
+                      {t.label} <span style={{ fontFamily: "monospace", fontSize: 11, color: C.gold }}>×{game.troops[type]}</span>
+                    </span>
+                    <span style={{ fontSize: 9.5, fontFamily: "monospace", color: C.textDim }}>atq {t.atk} · déf {t.def} · −{t.upkeep} blé/h</span>
+                  </div>
+                  <div style={{ fontSize: 11, color: C.textDim, marginTop: 3, lineHeight: 1.3 }}>
+                    {t.desc}{!caserneOk && <span style={{ color: C.bad }}> — Caserne niv. {t.requiresCaserne} requise</span>}
+                  </div>
+                </div>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                 <CostRow cost={t.cost} resources={game.resources} />
