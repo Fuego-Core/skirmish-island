@@ -1,5 +1,7 @@
 const CACHE_NAME = "skirmish-island-v1";
-const APP_SHELL = ["/", "/manifest.webmanifest", "/icons/icon-192.png", "/icons/icon-512.png"];
+// Chemins relatifs à sw.js : fonctionnent aussi bien à la racine du domaine
+// (Vercel) que sous un sous-chemin (GitHub Pages, /<repo>/).
+const APP_SHELL = ["./", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -23,7 +25,7 @@ self.addEventListener("fetch", (event) => {
 
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request).catch(() => caches.match("/").then((res) => res || caches.match(request)))
+      fetch(request).catch(() => caches.match("./").then((res) => res || caches.match(request)))
     );
     return;
   }
