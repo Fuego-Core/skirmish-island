@@ -4,6 +4,27 @@ import { upgradeCost } from "../game/buildings.js";
 import { I } from "../ui/Icon.jsx";
 import { CityScene } from "../ui/CityScene.jsx";
 import { Card, QueueCard, Btn, fmtTime, fmtNum } from "../ui/kit.jsx";
+import buildingSenat from "../assets/images/buildings/building-senat.webp";
+import buildingScierie from "../assets/images/buildings/building-scierie.webp";
+import buildingCarriere from "../assets/images/buildings/building-carriere.webp";
+import buildingMineFer from "../assets/images/buildings/building-mine_fer.webp";
+
+const BUILDING_PORTRAITS = { senat: buildingSenat, scierie: buildingScierie, carriere: buildingCarriere, mine_fer: buildingMineFer };
+
+function BuildingIcon({ bKey, col, active }) {
+  if (BUILDING_PORTRAITS[bKey]) {
+    return (
+      <div style={{
+        width: 34, height: 34, borderRadius: "50%", overflow: "hidden", flexShrink: 0,
+        border: `1.5px solid ${active ? col + "aa" : C.borderSoft}`, boxShadow: "0 2px 6px rgba(0,0,0,0.45)",
+        opacity: active ? 1 : 0.55,
+      }}>
+        <img src={BUILDING_PORTRAITS[bKey]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+      </div>
+    );
+  }
+  return <I name={B_ICON[bKey]} size={25} color={active ? col : C.textFaint} sw={1.6} />;
+}
 
 export function CityTab({
   game, nowTick, isl, openBuilding, setOpenBuilding, onSelectIsland,
@@ -122,7 +143,7 @@ export function CityTab({
                       border: `1px solid ${inProgress ? C.goldHi : level > 0 ? col + "66" : C.borderSoft}`,
                       opacity: reqOk ? 1 : 0.45,
                     }}>
-                    <I name={B_ICON[key]} size={25} color={level > 0 ? col : C.textFaint} sw={1.6} />
+                    <BuildingIcon bKey={key} col={col} active={level > 0} />
                     <span style={{ fontSize: 10, textAlign: "center", lineHeight: 1.2, color: level > 0 ? C.text : C.textFaint }}>{b.label}</span>
                     <span style={{ fontSize: 9, fontFamily: "monospace", color: level > 0 ? col : C.textFaint }}>
                       {maxed ? "MAX" : level > 0 ? `niv. ${level}` : "à bâtir"}

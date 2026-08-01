@@ -2,6 +2,14 @@ import { C, RES, RES_ICONN, RES_COLOR, GROUP_COLOR } from "../../game/constants.
 import { BUILDINGS, B_ICON, upgradeCost, buildDuration, prodPerHour, storageCap } from "../../game/buildings.js";
 import { I } from "../Icon.jsx";
 import { Sheet, Btn, fmtNum, fmtTime } from "../kit.jsx";
+import buildingSenat from "../../assets/images/buildings/building-senat.webp";
+import buildingScierie from "../../assets/images/buildings/building-scierie.webp";
+import buildingCarriere from "../../assets/images/buildings/building-carriere.webp";
+import buildingMineFer from "../../assets/images/buildings/building-mine_fer.webp";
+
+// Illustrations peintes générées — un bâtiment à la fois, les autres
+// gardent l'icône trait tant que leur image n'existe pas encore.
+const BUILDING_PORTRAITS = { senat: buildingSenat, scierie: buildingScierie, carriere: buildingCarriere, mine_fer: buildingMineFer };
 
 export function BuildingSheet({
   buildingKey, isl, resources, nowTick,
@@ -24,8 +32,12 @@ export function BuildingSheet({
   return (
     <Sheet open onClose={onClose} title={b.label.toUpperCase()} icon={B_ICON[key]} accent={col}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-        <div style={{ width: 58, height: 58, borderRadius: 12, background: `linear-gradient(180deg, ${col}28, ${C.panel})`, border: `1px solid ${col}66`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          <I name={B_ICON[key]} size={32} color={col} sw={1.5} />
+        <div style={{ width: 58, height: 58, borderRadius: 12, background: `linear-gradient(180deg, ${col}28, ${C.panel})`, border: `1px solid ${col}66`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, overflow: "hidden" }}>
+          {BUILDING_PORTRAITS[key] ? (
+            <img src={BUILDING_PORTRAITS[key]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+          ) : (
+            <I name={B_ICON[key]} size={32} color={col} sw={1.5} />
+          )}
         </div>
         <div style={{ minWidth: 0 }}>
           <div style={{ fontSize: 15, fontFamily: "monospace", color: col }}>
