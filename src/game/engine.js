@@ -1,0 +1,205 @@
+import { RES, SPEED, REGEN_MS, RAID_INTERVAL_MS, EVENT_INTERVAL_MS, MARCHAND_DUREE_MS } from "./constants.js";
+import { BUILDINGS, prodPerHour, storageCap } from "./buildings.js";
+import { TROOPS } from "./troops.js";
+import { PECHE_BLE_H } from "./ships.js";
+import { FACTIONS } from "./factions.js";
+import { tileState, enemyDefense, regionDist } from "./world.js";
+import { freshBuildings } from "./state.js";
+
+// ---- Simulation du temps écoulé ----
+export function applyElapsed(state, now) {
+  const s = JSON.parse(JSON.stringify(state));
+
+  // Régénération : les îles pillées se repeuplent après un délai
+  Object.keys(s.conquered).forEach((k) => {
+    const ts = s.conquered[k] === true ? now : s.conquered[k];
+    if (!s.colonized[k] && now - ts > REGEN_MS) delete s.conquered[k];
+  });
+
+  // Chantiers par île
+  s.islands.forEach((isl) => {
+    if (isl.queue && now >= isl.queue.endsAt) {
+      isl.buildings[isl.queue.key] = isl.queue.targetLevel;
+      isl.queue = null;
+    }
+  });
+  // Bateau
+  if (s.shipQueue && now >= s.shipQueue.endsAt) { s.ships[s.shipQueue.type] += 1; s.shipQueue = null; }
+  // Recrutement par lots
+  if (s.troopQueue) {
+    const dur = TROOPS[s.troopQueue.type].duration * 1000 * SPEED;
+    while (s.troopQueue && now >= s.troopQueue.nextAt) {
+      s.troops[s.troopQueue.type] += 1;
+      s.troopQueue.remaining -= 1;
+      if (s.troopQueue.remaining <= 0) { s.troopQueue = null; break; }
+      s.troopQueue.nextAt += dur;
+    }
+  }
+  // Explorations
+  if (s.exploringTiles.length > 0) {
+    s.exploringTiles.forEach((e) => {
+      if (now >= e.arriveAt && !s.explored[e.key]) { s.explored[e.key] = true; s.stats.explorations += 1; }
+    });
+    const done = s.exploringTiles.filter((e) => now >= e.endsAt).length;
+    if (done > 0) s.ships.explorateur += done;
+    s.exploringTiles = s.exploringTiles.filter((e) => now < e.endsAt);
+  }
+  // Colonisation
+  if (s.colonizingTile && now >= s.colonizingTile.endsAt) {
+    const key = s.colonizingTile.key;
+    const [pxs, pys] = key.split("|")[1].split(",").map(Number);
+    const region = s.colonizingTile.region || { gx: 0, gy: 0 };
+    s.islands.push({ id: s.nextIslandId, name: `Colonie ${s.islands.length}`, region, pos: { px: pxs, py: pys }, buildings: freshBuildings(false), queue: null, esclaves: 0 });
+    s.colonized[key] = s.nextIslandId;
+    s.nextIslandId += 1;
+    s.colonizingTile = null;
+  }
+  // Attaque
+  if (s.attack) {
+    if (!s.attack.resolved && now >= s.attack.arriveAt) {
+      const [regPart, coordPart] = s.attack.key.split("|");
+      const [agx, agy] = regPart.split(":").map(Number);
+      const [px, py] = coordPart.split(",").map(Number);
+      const type = tileState(agx, agy, px, py);
+      const defPower = s.conquered[s.attack.key] ? 0 : enemyDefense(agx, agy, px, py, type);
+      const factionAtk = (s.faction && FACTIONS[s.faction] && FACTIONS[s.faction].atkBonus) || 1;
+      const atkPower = Math.round(Object.keys(s.attack.troops).reduce((a, t) => a + s.attack.troops[t] * TROOPS[t].atk, 0) * factionAtk);
+      const siegeBonus = Object.keys(s.attack.troops).reduce((a, t) => a + (TROOPS[t].siege ? s.attack.troops[t] * TROOPS[t].atk * 0.5 : 0), 0);
+      const win = atkPower + siegeBonus > defPower;
+      const losses = {}, survivors = {};
+      Object.keys(s.attack.troops).forEach((t) => {
+        const sent = s.attack.troops[t];
+        const lossRate = win ? Math.min(0.9, defPower / ((atkPower + siegeBonus) * 2 || 1)) : 0.75;
+        losses[t] = Math.min(sent, Math.round(sent * lossRate));
+        survivors[t] = sent - losses[t];
+      });
+      let butin = null, esclavesGagnes = 0;
+      if (win) {
+        const mult = (type === "ile_joueur" ? 8 : 4) * (1 + regionDist({ gx: agx, gy: agy }) * 0.5);
+        butin = {};
+        RES.forEach((r) => (butin[r] = Math.round(defPower * mult * (0.7 + Math.random() * 0.6))));
+        if (Math.random() < 0.45) esclavesGagnes = 1 + Math.floor(Math.random() * 3);
+        s.conquered[s.attack.key] = now;
+      }
+      if (win) s.stats.wins += 1;
+      s.attack.resolved = true;
+      s.attack.report = { kind: "attaque", win, atkPower: atkPower + siegeBonus, defPower, losses, survivors, butin, esclavesGagnes, targetType: type, key: s.attack.key, at: now };
+    }
+    if (now >= s.attack.endsAt) {
+      const rep = s.attack.report;
+      if (rep) {
+        Object.keys(rep.survivors).forEach((t) => (s.troops[t] += rep.survivors[t]));
+        if (rep.butin) RES.forEach((r) => (s.resources[r] += rep.butin[r]));
+        s.esclaves += rep.esclavesGagnes || 0;
+        s.reports.unshift(rep);
+        s.reports = s.reports.slice(0, 8);
+      }
+      s.ships.transport += 1;
+      if (s.attack.withSiege) s.ships.siege += 1;
+      s.attack = null;
+    }
+  }
+
+  // ---- Espionnage ----
+  if (s.spyMissions.length > 0) {
+    s.spyMissions.forEach((m) => {
+      if (now >= m.arriveAt && !s.spied[m.key]) {
+        const [regPart, coordPart] = m.key.split("|");
+        const [agx, agy] = regPart.split(":").map(Number);
+        const [px, py] = coordPart.split(",").map(Number);
+        const type = tileState(agx, agy, px, py);
+        const def = enemyDefense(agx, agy, px, py, type);
+        const mult = (type === "ile_joueur" ? 8 : 4) * (1 + regionDist({ gx: agx, gy: agy }) * 0.5);
+        s.spied[m.key] = { def, butinMin: Math.round(def * mult * 0.7), butinMax: Math.round(def * mult * 1.3), at: now };
+      }
+    });
+    const doneSpy = s.spyMissions.filter((m) => now >= m.endsAt).length;
+    if (doneSpy > 0) s.ships.eclaireur += doneSpy;
+    s.spyMissions = s.spyMissions.filter((m) => now < m.endsAt);
+  }
+
+  // ---- Événements aléatoires ----
+  let evGuard = 0;
+  while (s.nextEventAt && now >= s.nextEventAt && evGuard < 3) {
+    evGuard += 1;
+    const roll = Math.random();
+    if (roll < 0.36) {
+      // Marchand ambulant : échange 1:1 limité dans le temps
+      const pool = [...RES];
+      const from = pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
+      const to = pool[Math.floor(Math.random() * pool.length)];
+      s.activeEvent = { type: "marchand", from, to, endsAt: s.nextEventAt + MARCHAND_DUREE_MS };
+      s.reports.unshift({ kind: "evenement", titre: "MARCHAND AMBULANT", icone: "marche", win: true, texte: `Un marchand propose un échange sans perte pendant un temps limité.`, at: s.nextEventAt });
+    } else if (roll < 0.68) {
+      // Tempête : toutes les flottes en mer sont retardées de 30%
+      s.exploringTiles.forEach((e) => { const d = Math.round((e.endsAt - now) * 0.3); e.arriveAt += d; e.endsAt += d; });
+      if (s.attack) { const d = Math.round((s.attack.endsAt - now) * 0.3); s.attack.arriveAt += d; s.attack.endsAt += d; }
+      if (s.colonizingTile) { const d = Math.round((s.colonizingTile.endsAt - now) * 0.3); s.colonizingTile.endsAt += d; }
+      s.spyMissions.forEach((m) => { const d = Math.round((m.endsAt - now) * 0.3); m.arriveAt += d; m.endsAt += d; });
+      s.reports.unshift({ kind: "evenement", titre: "TEMPÊTE SUR L'ÉGÉE", icone: "explorateur", win: false, texte: "Poséidon gronde : toutes tes flottes en mer sont retardées.", at: s.nextEventAt });
+    } else {
+      // Naufrage : épave à récupérer — gain immédiat
+      const gains = {};
+      RES.forEach((r) => (gains[r] = Math.round(200 + Math.random() * 600)));
+      RES.forEach((r) => (s.resources[r] += gains[r]));
+      s.reports.unshift({ kind: "evenement", titre: "ÉPAVE ÉCHOUÉE", icone: "peche", win: true, texte: "Une épave s'est échouée sur tes côtes — sa cargaison est à toi.", gains, at: s.nextEventAt });
+    }
+    s.reports = s.reports.slice(0, 8);
+    s.nextEventAt += Math.round(EVENT_INTERVAL_MS * (0.7 + Math.random() * 0.6));
+  }
+  if (s.activeEvent && now >= s.activeEvent.endsAt) s.activeEvent = null;
+
+  // ---- Raids pirates ----
+  let raidGuard = 0;
+  while (s.nextRaidAt && now >= s.nextRaidAt && raidGuard < 4) {
+    raidGuard += 1;
+    const totalSenat = s.islands.reduce((a, i) => a + i.buildings.senat, 0);
+    const troopAtk = Object.keys(TROOPS).reduce((a, t) => a + s.troops[t] * TROOPS[t].atk, 0);
+    const pirate = Math.round((40 + totalSenat * 15 + troopAtk * 0.25) * (0.8 + Math.random() * 0.4));
+    const wall = Math.max(...s.islands.map((i) => i.buildings.muraille || 0));
+    const garrison = Math.round(
+      Object.keys(TROOPS).reduce((a, t) => a + s.troops[t] * TROOPS[t].def, 0) * (1 + wall * 0.06)
+    );
+    const held = garrison >= pirate;
+    const losses = {};
+    Object.keys(TROOPS).forEach((t) => {
+      const rate = held ? Math.min(0.2, pirate / ((garrison || 1) * 3)) : 0.3;
+      losses[t] = Math.round(s.troops[t] * rate);
+      s.troops[t] -= losses[t];
+    });
+    let vol = null;
+    if (!held) {
+      vol = {};
+      RES.forEach((r) => {
+        vol[r] = Math.round(s.resources[r] * 0.15);
+        s.resources[r] -= vol[r];
+      });
+    } else {
+      s.stats.raidsRepousses += 1;
+    }
+    s.reports.unshift({ kind: "defense", win: held, atkPower: garrison, defPower: pirate, losses, vol, wall, at: s.nextRaidAt });
+    s.reports = s.reports.slice(0, 8);
+    s.nextRaidAt += Math.round(RAID_INTERVAL_MS * (0.75 + Math.random() * 0.5));
+  }
+
+  // ---- Économie ----
+  const elapsedH = Math.max(0, (now - s.lastSeen) / 3600000);
+  const capMain = s.islands.reduce((a, i) => a + storageCap(i.buildings.entrepot), 0);
+  const capBle = s.islands.reduce((a, i) => a + storageCap(i.buildings.grenier), 0);
+  const upkeep = Object.keys(TROOPS).reduce((a, t) => a + s.troops[t] * TROOPS[t].upkeep, 0);
+
+  RES.forEach((r) => {
+    const bKey = Object.keys(BUILDINGS).find((k) => BUILDINGS[k].produces === r);
+    if (!bKey) return;
+    let total = s.islands.reduce((a, i) => {
+      const islMult = 1 + Math.min((i.esclaves || 0) * 0.03, 0.6);
+      return a + prodPerHour(i.buildings[bKey]) * islMult;
+    }, 0);
+    if (r === "ble") total += (s.ships.peche || 0) * PECHE_BLE_H - upkeep;
+    const cap = r === "ble" ? capBle : capMain;
+    s.resources[r] = Math.max(0, Math.min(cap, s.resources[r] + total * elapsedH));
+  });
+
+  s.lastSeen = now;
+  return s;
+}
