@@ -1,34 +1,24 @@
 import { C } from "../game/constants.js";
 import { FACTIONS } from "../game/factions.js";
-import { I, Meander } from "../ui/Icon.jsx";
+import { Meander } from "../ui/Icon.jsx";
 import { fd, fb } from "../ui/kit.jsx";
 import titleBackdrop from "../assets/images/title-backdrop.webp";
+import crestAthenes from "../assets/images/crest-athenes.webp";
+import crestSparte from "../assets/images/crest-sparte.webp";
+import crestLogo from "../assets/images/crest-logo.webp";
 
-// Médaillon héraldique (couronne de laurier + icône) — un seul motif de
-// "crest" réutilisé pour le blason du jeu et pour chaque faction.
-function Crest({ icon, size = 60, iconSize = 22 }) {
-  const leafAngles = [];
-  for (let a = -164; a <= 164; a += 16) leafAngles.push(a);
+const CREST_IMAGES = { athenes: crestAthenes, sparte: crestSparte, senat: crestLogo };
+
+// Médaillon héraldique (bas-relief bronze généré) — un seul motif de "blason"
+// réutilisé pour le logo du jeu et pour chaque faction, découpé en cercle.
+function Crest({ icon, size = 60 }) {
   return (
-    <svg width={size} height={size} viewBox="-32 -32 64 64" style={{ flexShrink: 0, filter: "drop-shadow(0 3px 5px rgba(0,0,0,0.45))" }}>
-      <defs>
-        <radialGradient id={`crestFill-${icon}`} cx="35%" cy="28%" r="78%">
-          <stop offset="0%" stopColor="#f3d99a" /><stop offset="55%" stopColor="#c39a3d" /><stop offset="100%" stopColor="#8a662b" />
-        </radialGradient>
-      </defs>
-      <g fill="#6d8a56">
-        {leafAngles.map((a, i) => (
-          <g key={i} transform={`rotate(${a}) translate(0, -29)`}>
-            <path d="M0,5.2 C-2.7,3 -3,-1 0,-5.2 C3,-1 2.7,3 0,5.2 Z" transform={a < 0 ? "scale(-1,1)" : undefined} opacity={0.92} />
-          </g>
-        ))}
-      </g>
-      <circle cx="0" cy="0" r="24" fill={`url(#crestFill-${icon})`} stroke="#3a2a12" strokeWidth="1.2" />
-      <circle cx="0" cy="0" r="24" fill="none" stroke="#fff3d6" strokeWidth="0.7" opacity="0.4" />
-      <g transform={`translate(${-iconSize / 2},${-iconSize / 2})`}>
-        <I name={icon} size={iconSize} color="#1c1509" sw={1.6} />
-      </g>
-    </svg>
+    <div style={{
+      width: size, height: size, flexShrink: 0, borderRadius: "50%", overflow: "hidden",
+      border: `1.5px solid ${C.goldHi}88`, boxShadow: "0 3px 10px rgba(0,0,0,0.55), inset 0 0 12px rgba(0,0,0,0.45)",
+    }}>
+      <img src={CREST_IMAGES[icon]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+    </div>
   );
 }
 
@@ -49,7 +39,7 @@ export function TitleScreen({ onChooseFaction }) {
       <div style={{ position: "relative", zIndex: 2, flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", padding: "30px 18px calc(30px + env(safe-area-inset-bottom))", boxSizing: "border-box" }}>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 28, animation: "riseIn 0.6s cubic-bezier(0.16,1,0.3,1) both" }}>
           <div style={{ animation: "floatY 4.5s ease-in-out infinite" }}>
-            <Crest icon="senat" size={68} iconSize={26} />
+            <Crest icon="senat" size={76} />
           </div>
           <h1 style={{ ...fd, fontSize: 32, fontWeight: 700, letterSpacing: 7, color: C.goldHi, margin: "10px 0 0", textAlign: "center", textShadow: `0 4px 26px rgba(230,196,105,0.4), 0 2px 6px rgba(0,0,0,0.7)` }}>
             SKIRMISH
