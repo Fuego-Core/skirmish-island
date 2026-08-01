@@ -152,31 +152,51 @@ export function CityScene({ isl, onTap, openKey, gold, goldHi, ink }) {
     <svg viewBox="0 0 300 205" style={{ width: "100%", display: "block" }}>
       <defs>
         <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#0f2233" /><stop offset="70%" stopColor="#1c3d54" /><stop offset="100%" stopColor="#2a5a74" />
+          <stop offset="0%" stopColor="#0a1a2a" /><stop offset="55%" stopColor="#1a3d54" /><stop offset="100%" stopColor="#316688" />
         </linearGradient>
         <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#2e6d8c" /><stop offset="100%" stopColor="#153a4d" />
+          <stop offset="0%" stopColor="#2c6787" /><stop offset="100%" stopColor="#102c3c" />
         </linearGradient>
-        <linearGradient id="terr1" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#6c8757" /><stop offset="100%" stopColor="#516b45" />
+        <linearGradient id="terr1" x1="0.15" y1="0" x2="0.85" y2="1">
+          <stop offset="0%" stopColor="#7c9660" /><stop offset="55%" stopColor="#5c7548" /><stop offset="100%" stopColor="#465c37" />
         </linearGradient>
-        <linearGradient id="terr2" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#5d774d" /><stop offset="100%" stopColor="#47603d" />
+        <linearGradient id="terr2" x1="0.15" y1="0" x2="0.85" y2="1">
+          <stop offset="0%" stopColor="#6c8552" /><stop offset="55%" stopColor="#4f6740" /><stop offset="100%" stopColor="#3c4f32" />
         </linearGradient>
-        <linearGradient id="terr3" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#526a45" /><stop offset="100%" stopColor="#3e5536" />
+        <linearGradient id="terr3" x1="0.15" y1="0" x2="0.85" y2="1">
+          <stop offset="0%" stopColor="#5f7a4c" /><stop offset="55%" stopColor="#465937" /><stop offset="100%" stopColor="#33452a" />
         </linearGradient>
         <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#e8c96a" stopOpacity="0.9" /><stop offset="45%" stopColor="#e8c96a" stopOpacity="0.25" /><stop offset="100%" stopColor="#e8c96a" stopOpacity="0" />
+          <stop offset="0%" stopColor="#f0d078" stopOpacity="0.95" /><stop offset="40%" stopColor="#e6c469" stopOpacity="0.3" /><stop offset="100%" stopColor="#e6c469" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id="sunGlowSoft" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#e6c469" stopOpacity="0.22" /><stop offset="100%" stopColor="#e6c469" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id="horizonHaze" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#e8c987" stopOpacity="0.22" /><stop offset="100%" stopColor="#e8c987" stopOpacity="0" />
+        </linearGradient>
+        <radialGradient id="vignette" cx="50%" cy="42%" r="72%">
+          <stop offset="60%" stopColor="#000000" stopOpacity="0" /><stop offset="100%" stopColor="#020608" stopOpacity="0.38" />
+        </radialGradient>
+        <filter id="grain" x="-20%" y="-20%" width="140%" height="140%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" result="noise" />
+          <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.05 0" />
+        </filter>
+        <filter id="softShadow" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="1.1" />
+        </filter>
+        <radialGradient id="badgeFill" cx="35%" cy="30%" r="75%">
+          <stop offset="0%" stopColor="#f0d078" /><stop offset="100%" stopColor="#c39a3d" />
         </radialGradient>
       </defs>
 
       {/* Ciel */}
       <rect width="300" height="205" fill="url(#sky)" />
-      <circle cx="248" cy="36" r="30" fill="url(#sunGlow)" />
-      <circle cx="248" cy="36" r="10" fill="#eed88a" />
+      <circle cx="248" cy="36" r="42" fill="url(#sunGlowSoft)" />
+      <circle cx="248" cy="36" r="26" fill="url(#sunGlow)" />
+      <circle cx="248" cy="36" r="9" fill="#f5e2a0" />
       {/* nuages plats */}
-      <g fill="#c9d6dc" opacity="0.14">
+      <g fill="#c9d6dc" opacity="0.13">
         <ellipse cx="66" cy="30" rx="26" ry="4" /><ellipse cx="84" cy="26" rx="16" ry="3" />
         <ellipse cx="180" cy="48" rx="20" ry="3" />
       </g>
@@ -186,18 +206,19 @@ export function CityScene({ isl, onTap, openKey, gold, goldHi, ink }) {
         <path d="M204 62 q2.5 -2.5 5 0 M209 62 q2.5 -2.5 5 0" />
       </g>
       {/* îles lointaines (perspective atmosphérique) */}
-      <path d="M-5 158 Q 25 146 55 158 Z" fill="#3a5a6c" opacity="0.6" />
-      <path d="M255 156 Q 280 143 305 156 Z" fill="#3a5a6c" opacity="0.6" />
-      <path d="M195 159 Q 215 151 235 159 Z" fill="#456678" opacity="0.45" />
+      <path d="M-5 158 Q 25 146 55 158 Z" fill="#375669" opacity="0.55" />
+      <path d="M255 156 Q 280 143 305 156 Z" fill="#375669" opacity="0.55" />
+      <path d="M195 159 Q 215 151 235 159 Z" fill="#43647a" opacity="0.4" />
+      <rect x="0" y="130" width="300" height="35" fill="url(#horizonHaze)" />
 
       {/* Mer */}
       <rect y="156" width="300" height="49" fill="url(#sea)" />
-      {/* reflet du soleil */}
-      <g fill="#eed88a">
-        <ellipse cx="248" cy="162" rx="13" ry="1.3" opacity="0.35" />
-        <ellipse cx="245" cy="168" rx="9" ry="1.1" opacity="0.25" />
-        <ellipse cx="250" cy="175" rx="11" ry="1.2" opacity="0.18" />
-        <ellipse cx="246" cy="184" rx="7" ry="1" opacity="0.12" />
+      {/* reflet du soleil (scintillement) */}
+      <g fill="#f5e2a0">
+        <ellipse cx="248" cy="162" rx="13" ry="1.3" opacity="0.4"><animate attributeName="opacity" values="0.4;0.75;0.4" dur="3.2s" repeatCount="indefinite" /></ellipse>
+        <ellipse cx="245" cy="168" rx="9" ry="1.1" opacity="0.28"><animate attributeName="opacity" values="0.28;0.6;0.28" dur="2.6s" begin="0.4s" repeatCount="indefinite" /></ellipse>
+        <ellipse cx="250" cy="175" rx="11" ry="1.2" opacity="0.2"><animate attributeName="opacity" values="0.2;0.5;0.2" dur="3.6s" begin="0.9s" repeatCount="indefinite" /></ellipse>
+        <ellipse cx="246" cy="184" rx="7" ry="1" opacity="0.14"><animate attributeName="opacity" values="0.14;0.35;0.14" dur="2.9s" begin="1.3s" repeatCount="indefinite" /></ellipse>
       </g>
       <g stroke="#4d8aa8" strokeWidth="0.8" fill="none" opacity="0.4">
         <path d="M8 166 q8 -2 16 0 M40 172 q8 -2 16 0 M20 184 q8 -2 16 0 M70 178 q8 -2 16 0 M120 190 q8 -2 16 0 M180 186 q8 -2 16 0" />
@@ -205,28 +226,51 @@ export function CityScene({ isl, onTap, openKey, gold, goldHi, ink }) {
 
       {/* Île en 3 terrasses */}
       <path d="M22 165 C 40 118, 70 104, 150 104 C 230 104, 260 118, 278 165 L 278 168 C 240 174, 60 174, 22 168 Z" fill="url(#terr3)" />
+      <path d="M22 165 C 40 118, 70 104, 150 104 C 230 104, 260 118, 278 165 L 278 168 C 240 174, 60 174, 22 168 Z" fill="url(#grain)" opacity="0.5" />
       <path d="M52 118 C 70 88, 100 78, 150 78 C 200 78, 230 88, 248 118 C 220 126, 80 126, 52 118 Z" fill="url(#terr2)" />
+      <path d="M52 118 C 70 88, 100 78, 150 78 C 200 78, 230 88, 248 118 C 220 126, 80 126, 52 118 Z" fill="url(#grain)" opacity="0.5" />
       <path d="M104 80 C 114 62, 130 56, 150 56 C 170 56, 186 62, 196 80 C 178 86, 122 86, 104 80 Z" fill="url(#terr1)" />
-      {/* murs de soutènement */}
-      <path d="M52 118 C 90 127, 210 127, 248 118" stroke="#8b8570" strokeWidth="2.6" fill="none" opacity="0.85" />
-      <path d="M52 121 C 90 130, 210 130, 248 121" stroke="#57523f" strokeWidth="1.4" fill="none" opacity="0.6" />
-      <path d="M104 80 C 130 87, 170 87, 196 80" stroke="#8b8570" strokeWidth="2.4" fill="none" opacity="0.85" />
-      <path d="M104 83 C 130 90, 170 90, 196 83" stroke="#57523f" strokeWidth="1.3" fill="none" opacity="0.6" />
+      <path d="M104 80 C 114 62, 130 56, 150 56 C 170 56, 186 62, 196 80 C 178 86, 122 86, 104 80 Z" fill="url(#grain)" opacity="0.5" />
+      {/* murs de soutènement (lumière rasante côté soleil) */}
+      <path d="M52 118 C 90 127, 210 127, 248 118" stroke="#9a9377" strokeWidth="2.6" fill="none" opacity="0.9" />
+      <path d="M180 119 C 210 121, 235 119, 248 118" stroke="#e6c469" strokeWidth="1.1" fill="none" opacity="0.35" />
+      <path d="M52 121 C 90 130, 210 130, 248 121" stroke="#4a4432" strokeWidth="1.4" fill="none" opacity="0.65" />
+      <path d="M104 80 C 130 87, 170 87, 196 80" stroke="#9a9377" strokeWidth="2.4" fill="none" opacity="0.9" />
+      <path d="M160 81 C 180 83, 190 82, 196 80" stroke="#e6c469" strokeWidth="1" fill="none" opacity="0.35" />
+      <path d="M104 83 C 130 90, 170 90, 196 83" stroke="#4a4432" strokeWidth="1.3" fill="none" opacity="0.65" />
       {/* rivage */}
-      <path d="M22 165 C 60 172, 240 172, 278 165" stroke="#cbb98a" strokeWidth="2.8" fill="none" opacity="0.5" />
+      <path d="M22 165 C 60 172, 240 172, 278 165" stroke="#d9c99a" strokeWidth="2.6" fill="none" opacity="0.55" />
+      <path d="M22 165 C 60 172, 240 172, 278 165" stroke="#f0e2b8" strokeWidth="0.9" fill="none" opacity="0.4" transform="translate(0,-1)" />
       {/* escalier monumental */}
-      <g stroke="#cbb98a" strokeWidth="1.6" opacity="0.7">
+      <g stroke="#d9c99a" strokeWidth="1.6" opacity="0.75">
         <line x1="146" y1="86" x2="154" y2="86" /><line x1="144" y1="92" x2="156" y2="92" />
         <line x1="143" y1="98" x2="157" y2="98" /><line x1="141" y1="112" x2="159" y2="112" />
         <line x1="140" y1="120" x2="160" y2="120" /><line x1="139" y1="130" x2="161" y2="130" />
         <line x1="138" y1="142" x2="162" y2="142" /><line x1="137" y1="154" x2="163" y2="154" />
       </g>
+      {/* rochers et broussailles (densité végétale) */}
+      {[[30,160,1],[270,158,0.9],[96,110,0.8],[206,112,0.85],[130,90,0.7],[172,90,0.7]].map(([rx, ry, sc], i) => (
+        <g key={i} transform={`translate(${rx},${ry}) scale(${sc})`} opacity="0.9">
+          <ellipse cx="0" cy="3.5" rx="6" ry="1.6" fill={PAL.shadow} />
+          <path d="M-5 3 C-6 -1 -3 -3 0 -3 C3 -3 6 -1 5 3 Z" fill="#5c6352" />
+          <path d="M-5 3 C-6 -1 -3 -3 -1 -3 C-1.5 -1 -2 1 -3 3 Z" fill="#454b3c" opacity="0.7" />
+        </g>
+      ))}
+      {[[46,156],[256,152],[112,102],[190,104]].map(([bx, by], i) => (
+        <g key={i} transform={`translate(${bx},${by})`}>
+          <ellipse cx="0" cy="1" rx="4.5" ry="1.3" fill={PAL.shadow} />
+          <circle cx="-1.5" cy="-1.5" r="2.6" fill="#41562f" />
+          <circle cx="1.8" cy="-1" r="2.2" fill="#4d6636" />
+          <circle cx="0" cy="-2.8" r="2.1" fill="#587339" />
+        </g>
+      ))}
       {/* cyprès */}
-      {[[36,146],[266,146],[118,78],[182,78],[64,116],[238,116]].map(([cx, cy], i) => (
+      {[[36,146],[266,146],[118,78],[182,78],[64,116],[238,116],[150,100],[86,150],[222,150]].map(([cx, cy], i) => (
         <g key={i}>
           <ellipse cx={cx} cy={cy + 1} rx="3.4" ry="1.2" fill={PAL.shadow} />
           <path d={`M${cx} ${cy} C ${cx - 3.4} ${cy - 7}, ${cx - 2.6} ${cy - 14}, ${cx} ${cy - 18} C ${cx + 2.6} ${cy - 14}, ${cx + 3.4} ${cy - 7}, ${cx} ${cy}`} fill="#2c4630" />
           <path d={`M${cx} ${cy} C ${cx - 3.4} ${cy - 7}, ${cx - 2.6} ${cy - 14}, ${cx} ${cy - 18}`} fill="#22381f" />
+          <path d={`M${cx} ${cy} C ${cx + 1.6} ${cy - 7}, ${cx + 1.4} ${cy - 13}, ${cx} ${cy - 18}`} fill="#3c5c3a" opacity="0.55" />
         </g>
       ))}
 
@@ -239,19 +283,21 @@ export function CityScene({ isl, onTap, openKey, gold, goldHi, ink }) {
         const building = isl.queue && isl.queue.key === key;
         return (
           <g key={key} onClick={() => onTap(key)} style={{ cursor: "pointer" }}>
-            {active && <ellipse cx={x} cy={y + 1} rx="23" ry="6.5" fill="none" stroke={goldHi} strokeWidth="1.3" opacity="0.9"><animate attributeName="opacity" values="0.9;0.4;0.9" dur="1.6s" repeatCount="indefinite" /></ellipse>}
+            {active && <ellipse cx={x} cy={y + 1} rx="24" ry="7" fill="none" stroke={goldHi} strokeWidth="1" opacity="0.85"><animate attributeName="opacity" values="0.85;0.35;0.85" dur="1.8s" repeatCount="indefinite" /></ellipse>}
             {built ? (
-              <g transform={`translate(${x}, ${y})`}><BSprite k={key} /></g>
+              <g transform={`translate(${x}, ${y})`} filter="url(#softShadow)"><BSprite k={key} /></g>
             ) : (
-              <g opacity="0.55">
-                <ellipse cx={x} cy={y + 1} rx="15" ry="4.5" fill="rgba(0,0,0,0.2)" stroke="#c3b795" strokeWidth="0.9" strokeDasharray="3 2.5" />
-                <text x={x} y={y - 3} textAnchor="middle" fontSize="9" fill="#c3b795" fontFamily="Georgia, serif" fontStyle="italic">+</text>
+              <g opacity="0.6">
+                <ellipse cx={x} cy={y + 1} rx="15" ry="4.5" fill="rgba(0,0,0,0.22)" stroke="#c3b795" strokeWidth="0.9" strokeDasharray="2.5 3" />
+                <line x1={x - 3.5} y1={y - 3} x2={x + 3.5} y2={y - 3} stroke="#d9c99a" strokeWidth="1.1" strokeLinecap="round" />
+                <line x1={x} y1={y - 6.5} x2={x} y2={y + 0.5} stroke="#d9c99a" strokeWidth="1.1" strokeLinecap="round" />
               </g>
             )}
             {built && (
               <g>
-                <circle cx={x + 15} cy={y - 20} r="6" fill={gold} stroke="#0d1720" strokeWidth="1" />
-                <text x={x + 15} y={y - 17.2} textAnchor="middle" fontSize="7" fontFamily="monospace" fontWeight="bold" fill={ink}>{level}</text>
+                <circle cx={x + 15} cy={y - 20} r="6.5" fill="none" stroke={gold} strokeWidth="0.8" opacity="0.5" />
+                <circle cx={x + 15} cy={y - 20} r="5.4" fill="url(#badgeFill)" stroke="#05090e" strokeWidth="1" />
+                <text x={x + 15} y={y - 17.4} textAnchor="middle" fontSize="7" fontFamily="'Manrope', sans-serif" fontWeight="800" fill={ink}>{level}</text>
               </g>
             )}
             {building && (
@@ -264,6 +310,9 @@ export function CityScene({ isl, onTap, openKey, gold, goldHi, ink }) {
           </g>
         );
       })}
+
+      {/* Profondeur atmosphérique */}
+      <rect width="300" height="205" fill="url(#vignette)" style={{ pointerEvents: "none" }} />
     </svg>
   );
 }

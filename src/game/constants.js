@@ -11,15 +11,21 @@ export const SPEED = DEV ? 0.15 : 1;
 export const DEV_CAP_MULT = DEV ? 300 : 1;
 
 // ---- Design tokens ----
+// Palette "marbre et bronze au crépuscule" — plus profonde et moins saturée que
+// l'original, pensée pour une lecture premium sur écran OLED mobile.
 export const C = {
-  bg: "#0d1720", bgDeep: "#091019", panel: "#14222e", panelUp: "#1a2c3a",
-  border: "#2b4050", borderSoft: "#1d3140",
-  text: "#e8e2d4", textDim: "#93a0a3", textFaint: "#5f7076",
-  gold: "#c9a13b", goldHi: "#e8c96a", goldDim: "#7d6524", bronze: "#8a6d1f",
-  ink: "#1a1408",
-  ok: "#6ba579", okBg: "rgba(107,165,121,0.10)",
-  bad: "#c05555",
-  water: "#2f7fa6", empty: "#4f9160", inactive: "#b0722f", enemy: "#b04343", fog: "#2e3d47",
+  bg: "#0a1119", bgDeep: "#05090e", panel: "#141f29", panelUp: "#1b2b38",
+  border: "#33495a", borderSoft: "#213542",
+  text: "#ece5d6", textDim: "#9aa7ac", textFaint: "#67797f",
+  gold: "#c39a3d", goldHi: "#e6c469", goldDim: "#7a6226", bronze: "#96622f",
+  copper: "#b06a3f", ink: "#170f06",
+  ok: "#5fa06d", okBg: "rgba(95,160,109,0.12)",
+  bad: "#bd4d43", badBg: "rgba(189,77,67,0.12)",
+  water: "#215e7c", empty: "#48815a", inactive: "#a8702f", enemy: "#a53f3f", fog: "#293a44",
+  // Surfaces "verre" (glassmorphism) et ombrage — utilisées par le kit UI et les scènes.
+  glass: "rgba(20,31,41,0.62)", glassHi: "rgba(33,49,63,0.55)", glassBorder: "rgba(230,210,160,0.10)",
+  shadowSoft: "0 10px 28px rgba(2,5,9,0.42)", shadowLift: "0 3px 10px rgba(2,5,9,0.35)",
+  glow: "0 0 22px rgba(230,196,105,0.30)",
 };
 
 export const RES = ["bois", "pierre", "fer", "or", "ble"];
@@ -27,8 +33,8 @@ export const RES = ["bois", "pierre", "fer", "or", "ble"];
 export const RES_LABEL = { bois: "Bois", pierre: "Pierre", fer: "Fer", or: "Or", ble: "Blé" };
 
 export const RES_ICONN = { bois: "bois", pierre: "pierre", fer: "fer", or: "or", ble: "ble" };
-export const RES_COLOR = { bois: "#7dab6a", pierre: "#9aa7b8", fer: "#8fb3c9", or: "#e8c96a", ble: "#e0b860" };
-export const GROUP_COLOR = { prod: "#6ba579", infra: "#5b8fc9", mil: "#c06555", merveille: "#e8c96a" };
+export const RES_COLOR = { bois: "#74a166", pierre: "#96a3ac", fer: "#7fa5bc", or: "#e6c469", ble: "#d1a856" };
+export const GROUP_COLOR = { prod: "#5fa06d", infra: "#4f7fb0", mil: "#b5624a", merveille: "#e6c469" };
 
 // ---- Intervalles temporels (dev : accélérés) ----
 export const RAID_INTERVAL_MS = DEV ? 240000 : 6 * 3600000;   // pirates : toutes les ~4 min en dev
