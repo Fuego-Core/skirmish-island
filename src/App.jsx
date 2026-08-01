@@ -98,7 +98,7 @@ export default function App() {
             animation: "scaleIn 0.4s cubic-bezier(0.16,1,0.3,1) both", maxHeight: "88vh", display: "flex", flexDirection: "column",
           }}>
             <div style={{ position: "relative", flexShrink: 0 }}>
-              <img src={victoryColossus} alt="" style={{ width: "100%", height: 230, objectFit: "cover", objectPosition: "50% 20%", display: "block" }} />
+              <img src={victoryColossus} alt="" style={{ width: "100%", height: 250, objectFit: "cover", objectPosition: "50% 3%", display: "block" }} />
               <div style={{ position: "absolute", inset: 0, background: `linear-gradient(180deg, transparent 45%, ${C.panel} 96%)` }} />
             </div>
             <div style={{ padding: "0 24px 28px", overflowY: "auto" }}>
