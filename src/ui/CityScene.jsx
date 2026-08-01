@@ -1,3 +1,5 @@
+import citySky from "../assets/images/city-sky.webp";
+
 // ════════════════════════════════════════════════════════════
 // SCÈNE DE CITÉ — acropole en terrasses, mini-illustrations en volume
 // ════════════════════════════════════════════════════════════
@@ -151,12 +153,6 @@ export function CityScene({ isl, onTap, openKey, gold, goldHi, ink }) {
   return (
     <svg viewBox="0 0 300 205" style={{ width: "100%", display: "block" }}>
       <defs>
-        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#0a1a2a" /><stop offset="55%" stopColor="#1a3d54" /><stop offset="100%" stopColor="#316688" />
-        </linearGradient>
-        <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#2c6787" /><stop offset="100%" stopColor="#102c3c" />
-        </linearGradient>
         <linearGradient id="terr1" x1="0.15" y1="0" x2="0.85" y2="1">
           <stop offset="0%" stopColor="#7c9660" /><stop offset="55%" stopColor="#5c7548" /><stop offset="100%" stopColor="#465c37" />
         </linearGradient>
@@ -166,12 +162,6 @@ export function CityScene({ isl, onTap, openKey, gold, goldHi, ink }) {
         <linearGradient id="terr3" x1="0.15" y1="0" x2="0.85" y2="1">
           <stop offset="0%" stopColor="#5f7a4c" /><stop offset="55%" stopColor="#465937" /><stop offset="100%" stopColor="#33452a" />
         </linearGradient>
-        <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#f0d078" stopOpacity="0.95" /><stop offset="40%" stopColor="#e6c469" stopOpacity="0.3" /><stop offset="100%" stopColor="#e6c469" stopOpacity="0" />
-        </radialGradient>
-        <radialGradient id="sunGlowSoft" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#e6c469" stopOpacity="0.22" /><stop offset="100%" stopColor="#e6c469" stopOpacity="0" />
-        </radialGradient>
         <linearGradient id="horizonHaze" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#e8c987" stopOpacity="0.22" /><stop offset="100%" stopColor="#e8c987" stopOpacity="0" />
         </linearGradient>
@@ -190,38 +180,13 @@ export function CityScene({ isl, onTap, openKey, gold, goldHi, ink }) {
         </radialGradient>
       </defs>
 
-      {/* Ciel */}
-      <rect width="300" height="205" fill="url(#sky)" />
-      <circle cx="248" cy="36" r="42" fill="url(#sunGlowSoft)" />
-      <circle cx="248" cy="36" r="26" fill="url(#sunGlow)" />
-      <circle cx="248" cy="36" r="9" fill="#f5e2a0" />
-      {/* nuages plats */}
-      <g fill="#c9d6dc" opacity="0.13">
-        <ellipse cx="66" cy="30" rx="26" ry="4" /><ellipse cx="84" cy="26" rx="16" ry="3" />
-        <ellipse cx="180" cy="48" rx="20" ry="3" />
-      </g>
+      {/* Ciel et mer — photo générée, fondu au raccord avec l'île dessinée */}
+      <image href={citySky} x="0" y="0" width="300" height="205" preserveAspectRatio="xMidYMid slice" />
+      <rect x="0" y="130" width="300" height="35" fill="url(#horizonHaze)" />
       {/* goélands */}
-      <g stroke="#c9d6dc" strokeWidth="0.9" fill="none" opacity="0.5">
+      <g stroke="#fff6e0" strokeWidth="0.9" fill="none" opacity="0.55">
         <path d="M96 44 q3 -3 6 0 M102 44 q3 -3 6 0" />
         <path d="M204 62 q2.5 -2.5 5 0 M209 62 q2.5 -2.5 5 0" />
-      </g>
-      {/* îles lointaines (perspective atmosphérique) */}
-      <path d="M-5 158 Q 25 146 55 158 Z" fill="#375669" opacity="0.55" />
-      <path d="M255 156 Q 280 143 305 156 Z" fill="#375669" opacity="0.55" />
-      <path d="M195 159 Q 215 151 235 159 Z" fill="#43647a" opacity="0.4" />
-      <rect x="0" y="130" width="300" height="35" fill="url(#horizonHaze)" />
-
-      {/* Mer */}
-      <rect y="156" width="300" height="49" fill="url(#sea)" />
-      {/* reflet du soleil (scintillement) */}
-      <g fill="#f5e2a0">
-        <ellipse cx="248" cy="162" rx="13" ry="1.3" opacity="0.4"><animate attributeName="opacity" values="0.4;0.75;0.4" dur="3.2s" repeatCount="indefinite" /></ellipse>
-        <ellipse cx="245" cy="168" rx="9" ry="1.1" opacity="0.28"><animate attributeName="opacity" values="0.28;0.6;0.28" dur="2.6s" begin="0.4s" repeatCount="indefinite" /></ellipse>
-        <ellipse cx="250" cy="175" rx="11" ry="1.2" opacity="0.2"><animate attributeName="opacity" values="0.2;0.5;0.2" dur="3.6s" begin="0.9s" repeatCount="indefinite" /></ellipse>
-        <ellipse cx="246" cy="184" rx="7" ry="1" opacity="0.14"><animate attributeName="opacity" values="0.14;0.35;0.14" dur="2.9s" begin="1.3s" repeatCount="indefinite" /></ellipse>
-      </g>
-      <g stroke="#4d8aa8" strokeWidth="0.8" fill="none" opacity="0.4">
-        <path d="M8 166 q8 -2 16 0 M40 172 q8 -2 16 0 M20 184 q8 -2 16 0 M70 178 q8 -2 16 0 M120 190 q8 -2 16 0 M180 186 q8 -2 16 0" />
       </g>
 
       {/* Île en 3 terrasses */}
