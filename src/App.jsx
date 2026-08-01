@@ -18,6 +18,7 @@ import { ArmyTab } from "./screens/ArmyTab.jsx";
 import { PortTab } from "./screens/PortTab.jsx";
 import { ReportsTab } from "./screens/ReportsTab.jsx";
 import { EmpireTab } from "./screens/EmpireTab.jsx";
+import bgMarble from "./assets/images/bg-marble.webp";
 
 const fmtNum = (n) => (n >= 10000 ? `${Math.floor(n / 1000)}k` : Math.floor(n));
 
@@ -84,7 +85,9 @@ export default function App() {
   const colosseDone = Math.max(...game.islands.map((i) => i.buildings.colosse || 0)) >= 5;
 
   return (
-    <div style={{ minHeight: "100vh", background: `radial-gradient(ellipse 120% 60% at 50% -5%, #16293a 0%, ${C.bg} 55%, ${C.bgDeep} 100%)`, color: C.text, ...fb }}>
+    <div style={{ minHeight: "100vh", position: "relative", color: C.text, ...fb }}>
+      <div style={{ position: "fixed", inset: 0, zIndex: -2, backgroundImage: `url(${bgMarble})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat" }} />
+      <div style={{ position: "fixed", inset: 0, zIndex: -1, background: `radial-gradient(ellipse 120% 60% at 50% -5%, rgba(58,40,24,0.4) 0%, ${C.bg}d9 55%, ${C.bgDeep}f7 100%)` }} />
       {colosseDone && !game.victoryShown && (
         <div style={{ position: "fixed", inset: 0, zIndex: 50, background: "rgba(3,5,8,0.78)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, animation: "fadeIn 0.25s ease-out" }}>
           <div style={{
