@@ -4,18 +4,32 @@ import { Card, SectionTitle, fmtNum } from "../ui/kit.jsx";
 import eventMarchand from "../assets/images/event-marchand.webp";
 import eventTempete from "../assets/images/event-tempete.webp";
 import eventEpave from "../assets/images/event-epave.webp";
+import reportVictoire from "../assets/images/reports/report-victoire.webp";
+import reportDefaite from "../assets/images/reports/report-defaite.webp";
+import reportRaidRepousse from "../assets/images/reports/report-raid-repousse.webp";
+import reportRaidSubi from "../assets/images/reports/report-raid-subi.webp";
 
 // Vignettes en médaillon (bas-relief bronze généré) pour les 3 événements
 // aléatoires — mêmes clés "icone" que le moteur (marche/explorateur/peche).
 const EVENT_CRESTS = { marche: eventMarchand, explorateur: eventTempete, peche: eventEpave };
 
-function EventCrest({ icone }) {
+// Vignettes en médaillon pour les 4 issues possibles d'un rapport de combat.
+const BATTLE_CRESTS = {
+  victoire: reportVictoire, defaite: reportDefaite,
+  "raid-repousse": reportRaidRepousse, "raid-subi": reportRaidSubi,
+};
+function battleCrestKey(rep) {
+  if (rep.kind === "defense") return rep.win ? "raid-repousse" : "raid-subi";
+  return rep.win ? "victoire" : "defaite";
+}
+
+function Crest({ src }) {
   return (
     <div style={{
       width: 34, height: 34, flexShrink: 0, borderRadius: "50%", overflow: "hidden",
       border: `1px solid ${C.goldHi}77`, boxShadow: "0 2px 6px rgba(0,0,0,0.5)",
     }}>
-      <img src={EVENT_CRESTS[icone]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+      <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
     </div>
   );
 }
@@ -34,9 +48,9 @@ export function ReportsTab({ game }) {
           <Card key={i} style={{ borderColor: rep.win ? C.ok : C.bad, animation: "riseIn 0.32s ease-out both", animationDelay: `${Math.min(i, 8) * 0.045}s` }}>
             <div style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 12, color: rep.kind === "evenement" ? C.goldHi : rep.win ? C.ok : C.bad, marginBottom: 5, fontFamily: "'Cinzel', Georgia, serif", letterSpacing: 1 }}>
               {rep.kind === "evenement" ? (
-                <EventCrest icone={rep.icone} />
+                <Crest src={EVENT_CRESTS[rep.icone]} />
               ) : (
-                <I name={rep.kind === "defense" ? "muraille" : rep.win ? "epees" : "drapeau"} size={14} color={rep.win ? C.ok : C.bad} />
+                <Crest src={BATTLE_CRESTS[battleCrestKey(rep)]} />
               )}
               {rep.kind === "evenement" ? rep.titre : rep.kind === "defense" ? (rep.win ? "RAID REPOUSSÉ" : "RAID PIRATE SUBI") : rep.win ? "VICTOIRE" : "DÉFAITE"}
               {rep.kind !== "evenement" && (
