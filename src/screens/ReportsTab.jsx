@@ -31,7 +31,7 @@ export function ReportsTab({ game }) {
       )}
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         {game.reports.map((rep, i) => (
-          <Card key={i} style={{ borderColor: rep.win ? C.ok : C.bad }}>
+          <Card key={i} style={{ borderColor: rep.win ? C.ok : C.bad, animation: "riseIn 0.32s ease-out both", animationDelay: `${Math.min(i, 8) * 0.045}s` }}>
             <div style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 12, color: rep.kind === "evenement" ? C.goldHi : rep.win ? C.ok : C.bad, marginBottom: 5, fontFamily: "'Cinzel', Georgia, serif", letterSpacing: 1 }}>
               {rep.kind === "evenement" ? (
                 <EventCrest icone={rep.icone} />

@@ -4,6 +4,7 @@ import { upgradeCost } from "../game/buildings.js";
 import { I } from "../ui/Icon.jsx";
 import { CityScene } from "../ui/CityScene.jsx";
 import { Card, QueueCard, Btn, fmtTime, fmtNum } from "../ui/kit.jsx";
+import { haptic } from "../ui/haptics.js";
 import buildingSenat from "../assets/images/buildings/building-senat.webp";
 import buildingScierie from "../assets/images/buildings/building-scierie.webp";
 import buildingCarriere from "../assets/images/buildings/building-carriere.webp";
@@ -108,7 +109,7 @@ export function CityTab({
 
       <div style={{ border: `1px solid ${C.borderSoft}`, borderRadius: 12, overflow: "hidden", marginBottom: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.35)" }}>
         <CityScene isl={isl} openKey={openBuilding} gold={C.gold} goldHi={C.goldHi} ink={C.ink}
-          onTap={(key) => setOpenBuilding(key)} />
+          onTap={(key) => { haptic(9); setOpenBuilding(key); }} />
       </div>
 
       {isl.queue && (
@@ -148,7 +149,7 @@ export function CityTab({
                 const ready = reqOk && canAfford && !isl.queue && !maxed;
                 const inProgress = isl.queue && isl.queue.key === key;
                 return (
-                  <button key={key} onClick={() => setOpenBuilding(key)}
+                  <button key={key} onClick={() => { haptic(9); setOpenBuilding(key); }}
                     style={{
                       position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 5,
                       padding: "11px 5px 9px", borderRadius: 11, cursor: "pointer", color: C.text,

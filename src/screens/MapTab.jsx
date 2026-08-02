@@ -3,6 +3,7 @@ import { C } from "../game/constants.js";
 import { ISLAND_GRID, REGION_LIMIT, rk, tileState, tileColor } from "../game/world.js";
 import { I } from "../ui/Icon.jsx";
 import { QueueCard, fmtTime } from "../ui/kit.jsx";
+import { haptic } from "../ui/haptics.js";
 
 export function MapTab({ game, nowTick, selectedTileKey, setSelectedTileKey, onChangeRegion }) {
   const [showRegionMap, setShowRegionMap] = useState(false);
@@ -103,7 +104,7 @@ export function MapTab({ game, nowTick, selectedTileKey, setSelectedTileKey, onC
                 const isSelected = selectedTileKey === key;
                 const tileIcon = isMine ? "senat" : isExploring ? "explorateur" : isColonizing ? "colonisation" : isAttacking ? "transport" : isConquered ? "drapeau" : null;
                 return (
-                  <button key={key} onClick={() => setSelectedTileKey(key)}
+                  <button key={key} onClick={() => { haptic(6); setSelectedTileKey(key); }}
                     style={{
                       width: 36, height: 36, borderRadius: 5, padding: 0,
                       background: st === "ma_ville"

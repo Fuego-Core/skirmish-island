@@ -1,5 +1,6 @@
 import { C, RES, RES_ICONN, RES_COLOR } from "../game/constants.js";
 import { I } from "./Icon.jsx";
+import { haptic } from "./haptics.js";
 
 // ---- Polices ----
 // Cinzel : titres, empreinte "gravé dans le marbre" — réservé aux headers/CTA.
@@ -41,7 +42,7 @@ export const CostRow = ({ cost, resources, mult = 1 }) => (
 );
 
 export const Btn = ({ label, disabled, onClick, small, primary }) => (
-  <button onClick={onClick} disabled={disabled}
+  <button onClick={(e) => { haptic(primary ? 12 : 7); onClick?.(e); }} disabled={disabled}
     style={{
       padding: small ? "8px 14px" : "11px 20px", minHeight: small ? 32 : 44, borderRadius: 10,
       fontSize: small ? 11 : 13, ...fd, fontWeight: 600, letterSpacing: 0.6,
@@ -57,10 +58,10 @@ export const Btn = ({ label, disabled, onClick, small, primary }) => (
 
 export const Stepper = ({ value, max, onChange }) => (
   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-    <button onClick={() => onChange(Math.max(0, value - 1))}
+    <button onClick={() => { haptic(5); onChange(Math.max(0, value - 1)); }}
       style={{ width: 34, height: 34, borderRadius: 9, background: C.glassHi, border: `1px solid ${C.border}`, color: C.text, cursor: "pointer", fontSize: 16, lineHeight: 1 }}>−</button>
     <span style={{ ...fmono, fontSize: 13, fontWeight: 600, width: 58, textAlign: "center", color: C.text }}>{value}/{max}</span>
-    <button onClick={() => onChange(Math.min(max, value + 1))}
+    <button onClick={() => { haptic(5); onChange(Math.min(max, value + 1)); }}
       style={{ width: 34, height: 34, borderRadius: 9, background: C.glassHi, border: `1px solid ${C.border}`, color: C.text, cursor: "pointer", fontSize: 16, lineHeight: 1 }}>+</button>
   </div>
 );

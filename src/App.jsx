@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { C, RES, RES_ICONN, RES_COLOR } from "./game/constants.js";
 import { BUILDINGS, prodPerHour, storageCap } from "./game/buildings.js";
 import { TROOPS } from "./game/troops.js";
@@ -8,6 +8,7 @@ import { tileState } from "./game/world.js";
 import { useGame } from "./hooks/useGame.js";
 import { I, Meander } from "./ui/Icon.jsx";
 import { fd, fb, Btn } from "./ui/kit.jsx";
+import { haptic } from "./ui/haptics.js";
 import { BuildingSheet } from "./ui/sheets/BuildingSheet.jsx";
 import { TileSheet } from "./ui/sheets/TileSheet.jsx";
 import { MissionsSheet } from "./ui/sheets/MissionsSheet.jsx";
@@ -38,6 +39,13 @@ export default function App() {
   const [marketFrom, setMarketFrom] = useState("bois");
   const [marketTo, setMarketTo] = useState("fer");
   const [showMissions, setShowMissions] = useState(false);
+
+  const colosseDoneNow = game && game.faction
+    ? Math.max(...game.islands.map((i) => i.buildings.colosse || 0)) >= 5
+    : false;
+  useEffect(() => {
+    if (colosseDoneNow && game && !game.victoryShown) haptic([15, 60, 15, 60, 40]);
+  }, [colosseDoneNow]);
 
   if (!game) {
     return (
@@ -83,7 +91,7 @@ export default function App() {
     return { px, py, st };
   })() : null;
 
-  const colosseDone = Math.max(...game.islands.map((i) => i.buildings.colosse || 0)) >= 5;
+  const colosseDone = colosseDoneNow;
 
   return (
     <div style={{ minHeight: "100vh", position: "relative", color: C.text, ...fb }}>
@@ -148,7 +156,7 @@ export default function App() {
         <Meander color={C.goldDim} />
       </div>
 
-      <div style={{ maxWidth: 480, margin: "0 auto", padding: "12px 12px 92px", boxSizing: "border-box" }}>
+      <div key={tab} style={{ maxWidth: 480, margin: "0 auto", padding: "12px 12px 92px", boxSizing: "border-box", animation: "tabIn 0.22s ease-out both" }}>
         {tab === "cite" && (
           <CityTab
             game={game} nowTick={nowTick} isl={isl}
@@ -209,6 +217,7 @@ export default function App() {
             return (
               <button key={k}
                 onClick={() => {
+                  if (k !== tab) haptic(6);
                   setTab(k);
                   if (k === "rapports") setGame((g) => ({ ...g, reports: g.reports.map((r) => ({ ...r, read: true })) }));
                 }}

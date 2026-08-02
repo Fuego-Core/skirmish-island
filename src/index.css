@@ -49,6 +49,11 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes tabIn {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes burstRing {
   from { transform: scale(0.4); opacity: 0.9; }
   to { transform: scale(2.2); opacity: 0; }
