@@ -20,6 +20,7 @@ import { PortTab } from "./screens/PortTab.jsx";
 import { ReportsTab } from "./screens/ReportsTab.jsx";
 import { EmpireTab } from "./screens/EmpireTab.jsx";
 import victoryColossus from "./assets/images/victory-colossus.webp";
+import crestLogo from "./assets/images/crest-logo.webp";
 
 const fmtNum = (n) => (n >= 10000 ? `${Math.floor(n / 1000)}k` : Math.floor(n));
 
@@ -48,8 +49,30 @@ export default function App() {
 
   if (!game) {
     return (
-      <div style={{ minHeight: "100vh", background: C.bg, color: C.textDim, display: "flex", alignItems: "center", justifyContent: "center", ...fb, fontSize: 13.5 }}>
-        Chargement de l'archipel…
+      <div style={{ minHeight: "100vh", position: "relative", display: "flex", alignItems: "center", justifyContent: "center", ...fb }}>
+        <div style={{
+          position: "fixed", inset: 0, zIndex: -1,
+          background: `radial-gradient(ellipse 60% 40% at 15% 8%, rgba(255,255,255,0.65) 0%, transparent 60%),
+            radial-gradient(ellipse 50% 35% at 88% 14%, rgba(216,196,150,0.35) 0%, transparent 65%),
+            linear-gradient(165deg, #fffdf7 0%, ${C.bg} 55%, ${C.bgDeep} 100%)`,
+        }} />
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+          <div style={{
+            width: 64, height: 64, borderRadius: "50%", overflow: "hidden", flexShrink: 0,
+            border: `1.5px solid ${C.goldHi}88`, boxShadow: `0 4px 14px rgba(80,60,20,0.25), ${C.glow}`,
+            animation: "floatY 2.6s ease-in-out infinite",
+          }}>
+            <img src={crestLogo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+          </div>
+          <div style={{ ...fd, fontSize: 12.5, fontWeight: 600, letterSpacing: 3.5, color: C.goldHi, textTransform: "uppercase" }}>
+            Skirmish Island
+          </div>
+          <div style={{ display: "flex", gap: 6 }}>
+            {[0, 1, 2].map((i) => (
+              <span key={i} style={{ width: 6, height: 6, borderRadius: 3, background: C.gold, animation: `pulse 1.1s ease-in-out ${i * 0.15}s infinite` }} />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
