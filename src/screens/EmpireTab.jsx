@@ -3,12 +3,27 @@ import { C, DEV } from "../game/constants.js";
 import { FACTIONS } from "../game/factions.js";
 import { I } from "../ui/Icon.jsx";
 import { Card, SectionTitle, Btn } from "../ui/kit.jsx";
+import { notificationsSupported, notificationsEnabled, enableNotifications, disableNotifications } from "../ui/notifications.js";
 
 export function EmpireTab({ game, nowTick, renameIsland, exportSave, importSave, resetGame }) {
   const [editingIsland, setEditingIsland] = useState(null); // { id, name }
   const [importCode, setImportCode] = useState("");
   const [exportCode, setExportCode] = useState("");
   const [importMsg, setImportMsg] = useState("");
+  const [notifOn, setNotifOn] = useState(notificationsEnabled());
+  const [notifMsg, setNotifMsg] = useState("");
+
+  const handleToggleNotif = async () => {
+    if (notifOn) {
+      disableNotifications();
+      setNotifOn(false);
+      setNotifMsg("");
+    } else {
+      const ok = await enableNotifications();
+      setNotifOn(ok);
+      setNotifMsg(ok ? "" : "Autorisation refusée par le navigateur.");
+    }
+  };
 
   const handleExport = () => setExportCode(exportSave());
   const handleImport = () => {
@@ -73,6 +88,19 @@ export function EmpireTab({ game, nowTick, renameIsland, exportSave, importSave,
           </Card>
         ))}
       </div>
+
+      {notificationsSupported() && (
+        <>
+          <SectionTitle>Notifications</SectionTitle>
+          <Card style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ fontSize: 11.5, color: C.textDim, lineHeight: 1.4, paddingRight: 10 }}>
+              Prévient quand un chantier finit, une flotte revient ou un raid a lieu — tant que le jeu reste ouvert (pas de vrai push, l'app n'a pas de serveur).
+              {notifMsg && <div style={{ color: C.bad, marginTop: 4 }}>{notifMsg}</div>}
+            </div>
+            <Btn small primary={!notifOn} label={notifOn ? "Activées" : "Activer"} onClick={handleToggleNotif} />
+          </Card>
+        </>
+      )}
 
       <SectionTitle>Sauvegarde</SectionTitle>
       <Card>

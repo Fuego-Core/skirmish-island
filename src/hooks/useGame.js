@@ -8,8 +8,36 @@ import { MISSIONS } from "../game/missions.js";
 import { rk, tileState, absDist } from "../game/world.js";
 import { newGameState } from "../game/state.js";
 import { applyElapsed } from "../game/engine.js";
+import { notify } from "../ui/notifications.js";
 
 const SAVE_KEY = "skirmish-save";
+
+// Titre lisible pour un rapport fraîchement ajouté (même logique que ReportsTab).
+function reportTitle(rep) {
+  if (rep.kind === "evenement") return rep.titre;
+  if (rep.kind === "defense") return rep.win ? "Raid repoussé" : "Raid pirate subi";
+  return rep.win ? "Victoire" : "Défaite";
+}
+
+// Compare l'état avant/après un tick et notifie les chantiers/flottes qui
+// viennent de se terminer, ainsi que tout nouveau rapport (combat ou événement).
+function notifyCompletions(before, after) {
+  before.islands.forEach((isl, i) => {
+    const nextIsl = after.islands[i];
+    if (isl.queue && nextIsl && !nextIsl.queue) {
+      notify("Chantier terminé", `${BUILDINGS[isl.queue.key].label} — niveau ${isl.queue.targetLevel} atteint sur ${isl.name}.`);
+    }
+  });
+  if (before.shipQueue && !after.shipQueue) {
+    notify("Navire prêt", `${SHIPS[before.shipQueue.type].label} a rejoint ta flotte.`);
+  }
+  if (before.troopQueue && !after.troopQueue) {
+    notify("Troupes recrutées", `${TROOPS[before.troopQueue.type].label} — recrutement terminé.`);
+  }
+  if (after.reports.length > 0 && JSON.stringify(after.reports[0]) !== JSON.stringify(before.reports[0])) {
+    notify(reportTitle(after.reports[0]), "Nouveau rapport disponible dans l'onglet Rapports.");
+  }
+}
 
 export function useGame() {
   const [game, setGame] = useState(null);
@@ -32,7 +60,12 @@ export function useGame() {
   useEffect(() => {
     const id = setInterval(() => {
       setNowTick(Date.now());
-      setGame((g) => (g ? applyElapsed(g, Date.now()) : g));
+      setGame((g) => {
+        if (!g) return g;
+        const next = applyElapsed(g, Date.now());
+        notifyCompletions(g, next);
+        return next;
+      });
     }, 1000);
     return () => clearInterval(id);
   }, []);
