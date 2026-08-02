@@ -12,10 +12,16 @@ import buildingMineOr from "../assets/images/buildings/building-mine_or.webp";
 import buildingFerme from "../assets/images/buildings/building-ferme.webp";
 import buildingEntrepot from "../assets/images/buildings/building-entrepot.webp";
 import buildingGrenier from "../assets/images/buildings/building-grenier.webp";
+import buildingMarche from "../assets/images/buildings/building-marche.webp";
+import buildingPort from "../assets/images/buildings/building-port.webp";
+import buildingCaserne from "../assets/images/buildings/building-caserne.webp";
+import buildingMuraille from "../assets/images/buildings/building-muraille.webp";
+import buildingColosse from "../assets/images/buildings/building-colosse.webp";
 
 const BUILDING_PORTRAITS = {
   senat: buildingSenat, scierie: buildingScierie, carriere: buildingCarriere, mine_fer: buildingMineFer,
   mine_or: buildingMineOr, ferme: buildingFerme, entrepot: buildingEntrepot, grenier: buildingGrenier,
+  marche: buildingMarche, port: buildingPort, caserne: buildingCaserne, muraille: buildingMuraille, colosse: buildingColosse,
 };
 
 function BuildingIcon({ bKey, col, active }) {
