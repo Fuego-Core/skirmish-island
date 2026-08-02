@@ -33,7 +33,7 @@ export function MapTab({ game, nowTick, selectedTileKey, setSelectedTileKey, onC
                       style={{
                         width: 22, height: 22, borderRadius: 4, padding: 0, cursor: "pointer",
                         background: isCurrent ? `linear-gradient(160deg, ${C.goldHi}, ${C.bronze})` : `rgba(42,101,132,${0.85 - distC * 0.12})`,
-                        border: `1px solid ${isCurrent ? C.goldHi : C.bgDeep}`,
+                        border: `1px solid ${isCurrent ? C.goldHi : "#4a3620"}`,
                         display: "flex", alignItems: "center", justifyContent: "center",
                       }}>
                       {hasIsland && !isCurrent && <span style={{ width: 6, height: 6, borderRadius: 3, background: C.goldHi, display: "inline-block" }} />}
@@ -110,7 +110,7 @@ export function MapTab({ game, nowTick, selectedTileKey, setSelectedTileKey, onC
                       background: st === "ma_ville"
                         ? `linear-gradient(160deg, ${C.goldHi}, ${C.bronze})`
                         : `linear-gradient(160deg, ${tileColor(st)}, ${tileColor(st)}cc)`,
-                      border: `1px solid ${isSelected ? C.goldHi : C.bgDeep}`,
+                      border: `1px solid ${isSelected ? C.goldHi : "#4a3620"}`,
                       boxShadow: isSelected ? `0 0 7px ${C.gold}` : "inset 0 1px 0 rgba(255,255,255,0.06)",
                       cursor: "pointer",
                       opacity: isExploring || isColonizing ? 0.5 : 1,
