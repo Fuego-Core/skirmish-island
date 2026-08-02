@@ -55,7 +55,9 @@ export function ReportsTab({ game }) {
               {rep.kind === "evenement" ? rep.titre : rep.kind === "defense" ? (rep.win ? "RAID REPOUSSÉ" : "RAID PIRATE SUBI") : rep.win ? "VICTOIRE" : "DÉFAITE"}
               {rep.kind !== "evenement" && (
                 <span style={{ color: C.textFaint, fontSize: 9, fontFamily: "monospace", letterSpacing: 0 }}>
-                  · {rep.kind === "defense" ? "pirates égéens" : rep.targetType === "ile_joueur" ? "île joueur" : "île inactive"}
+                  · {rep.kind === "defense"
+                    ? (rep.attaquant || "pirates égéens")
+                    : (rep.cible || (rep.targetType === "ile_joueur" ? "cité rivale" : "île inactive"))}
                 </span>
               )}
             </div>

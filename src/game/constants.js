@@ -41,6 +41,11 @@ export const GROUP_COLOR = { prod: "#3f7a4c", infra: "#3d6f8f", mil: "#a04a35", 
 
 // ---- Intervalles temporels (dev : accélérés) ----
 export const RAID_INTERVAL_MS = DEV ? 240000 : 6 * 3600000;   // pirates : toutes les ~4 min en dev
+export const BOT_RAID_INTERVAL_MS = DEV ? 300000 : 9 * 3600000; // raids des cités rivales
+// Montée en puissance des cités rivales, par heure de partie (plafonnée).
+// Divisée par SPEED pour que le rythme dev accéléré fasse aussi grandir les bots plus vite.
+export const BOT_GROWTH_PER_H = 0.06 / SPEED;
+export const BOT_GROWTH_MAX = 1.5;                            // au plus × 2,5 à terme
 export const REGEN_MS = DEV ? 180000 : 8 * 3600000;           // îles pillées : repeuplées après ce délai
 export const EVENT_INTERVAL_MS = DEV ? 150000 : 3 * 3600000;  // événements aléatoires
 export const MARCHAND_DUREE_MS = DEV ? 90000 : 45 * 60000;    // durée de l'offre du marchand

@@ -4,13 +4,15 @@ import { newGameState, freshBuildings } from "../state.js";
 import { prodPerHour, storageCap, upgradeCost, buildDuration, BUILDINGS } from "../buildings.js";
 import { TROOPS } from "../troops.js";
 import { rk, tileState, enemyDefense, regionDist } from "../world.js";
-import { SPEED, REGEN_MS } from "../constants.js";
+import { SPEED, REGEN_MS, BOT_GROWTH_MAX } from "../constants.js";
+import { botName, botGrowth, tilePower, knownBots, playerScore } from "../bots.js";
 
 // Construit un état de base isolé (raids/événements désactivés par défaut,
 // pour ne pas interférer avec les assertions du test en cours).
 function baseState(now) {
   const s = newGameState();
   s.nextRaidAt = now + 1e9;
+  s.nextBotRaidAt = now + 1e9;
   s.nextEventAt = now + 1e9;
   s.lastSeen = now;
   return s;
@@ -249,5 +251,54 @@ describe("défense plus forte en région lointaine", () => {
     const avgFar = sampleAt(6, 6);
     expect(regionDist({ gx: 6, gy: 6 })).toBeGreaterThan(regionDist({ gx: 0, gy: 0 }));
     expect(avgFar).toBeGreaterThan(avgNear * 1.5);
+  });
+});
+
+describe("cités rivales (bots)", () => {
+  it("le nom d'une cité rivale est stable pour des coordonnées données", () => {
+    expect(botName(0, 0, 3, 4)).toBe(botName(0, 0, 3, 4));
+    // deux cases différentes ne donnent pas systématiquement le même nom
+    const names = new Set();
+    for (let px = 0; px < 9; px++) for (let py = 0; py < 9; py++) names.add(botName(0, 0, px, py));
+    expect(names.size).toBeGreaterThan(5);
+  });
+
+  it("les cités rivales montent en puissance avec le temps, les îles inactives non", () => {
+    const jour = 3600000 * 24;
+    const rival0 = tilePower(0, 0, 3, 4, "ile_joueur", 0);
+    const rivalPlusTard = tilePower(0, 0, 3, 4, "ile_joueur", jour);
+    expect(rivalPlusTard).toBeGreaterThan(rival0);
+
+    const inactive0 = tilePower(0, 0, 3, 4, "ile_inactive", 0);
+    const inactivePlusTard = tilePower(0, 0, 3, 4, "ile_inactive", jour);
+    expect(inactivePlusTard).toBe(inactive0);
+  });
+
+  it("la montée en puissance est plafonnée", () => {
+    expect(botGrowth(3600000 * 24 * 365)).toBeCloseTo(1 + BOT_GROWTH_MAX, 5);
+  });
+
+  it("une cité rivale finit par lancer un raid sur le joueur", () => {
+    const now = Date.now();
+    const s = baseState(now);
+    s.troops = { hoplite: 2, archer: 0, cavalier: 0, catapulte: 0, belier: 0 };
+    s.nextBotRaidAt = now + 1000;
+
+    const after = applyElapsed(s, now + 2000);
+    const raid = after.reports.find((r) => r.kind === "defense" && r.attaquant);
+    expect(raid).toBeTruthy();
+    expect(typeof raid.attaquant).toBe("string");
+    expect(raid.defPower).toBeGreaterThan(0);
+  });
+
+  it("le classement contient le joueur et des rivaux, trié par puissance", () => {
+    const now = Date.now();
+    const s = baseState(now);
+    const rivaux = knownBots(s, now);
+    expect(rivaux.length).toBeGreaterThan(0);
+    for (let i = 1; i < rivaux.length; i++) {
+      expect(rivaux[i - 1].power).toBeGreaterThanOrEqual(rivaux[i].power);
+    }
+    expect(playerScore(s)).toBeGreaterThan(0);
   });
 });

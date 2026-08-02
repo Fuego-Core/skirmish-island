@@ -1,9 +1,10 @@
-import { RES, SPEED, REGEN_MS, RAID_INTERVAL_MS, EVENT_INTERVAL_MS, MARCHAND_DUREE_MS } from "./constants.js";
+import { RES, SPEED, REGEN_MS, RAID_INTERVAL_MS, BOT_RAID_INTERVAL_MS, EVENT_INTERVAL_MS, MARCHAND_DUREE_MS } from "./constants.js";
 import { BUILDINGS, prodPerHour, storageCap } from "./buildings.js";
 import { TROOPS } from "./troops.js";
 import { PECHE_BLE_H } from "./ships.js";
 import { FACTIONS } from "./factions.js";
-import { tileState, enemyDefense, regionDist } from "./world.js";
+import { tileState, regionDist } from "./world.js";
+import { tilePower, botRaidPower, botName, knownBots } from "./bots.js";
 import { freshBuildings } from "./state.js";
 
 // ---- Simulation du temps écoulé ----
@@ -61,7 +62,7 @@ export function applyElapsed(state, now) {
       const [agx, agy] = regPart.split(":").map(Number);
       const [px, py] = coordPart.split(",").map(Number);
       const type = tileState(agx, agy, px, py);
-      const defPower = s.conquered[s.attack.key] ? 0 : enemyDefense(agx, agy, px, py, type);
+      const defPower = s.conquered[s.attack.key] ? 0 : tilePower(agx, agy, px, py, type, now - (s.startedAt || now));
       const factionAtk = (s.faction && FACTIONS[s.faction] && FACTIONS[s.faction].atkBonus) || 1;
       const atkPower = Math.round(Object.keys(s.attack.troops).reduce((a, t) => a + s.attack.troops[t] * TROOPS[t].atk, 0) * factionAtk);
       const siegeBonus = Object.keys(s.attack.troops).reduce((a, t) => a + (TROOPS[t].siege ? s.attack.troops[t] * TROOPS[t].atk * 0.5 : 0), 0);
@@ -83,7 +84,11 @@ export function applyElapsed(state, now) {
       }
       if (win) s.stats.wins += 1;
       s.attack.resolved = true;
-      s.attack.report = { kind: "attaque", win, atkPower: atkPower + siegeBonus, defPower, losses, survivors, butin, esclavesGagnes, targetType: type, key: s.attack.key, at: now };
+      s.attack.report = {
+        kind: "attaque", win, atkPower: atkPower + siegeBonus, defPower, losses, survivors, butin, esclavesGagnes,
+        targetType: type, cible: type === "ile_joueur" ? botName(agx, agy, px, py) : null,
+        key: s.attack.key, at: now,
+      };
     }
     if (now >= s.attack.endsAt) {
       const rep = s.attack.report;
@@ -108,7 +113,7 @@ export function applyElapsed(state, now) {
         const [agx, agy] = regPart.split(":").map(Number);
         const [px, py] = coordPart.split(",").map(Number);
         const type = tileState(agx, agy, px, py);
-        const def = enemyDefense(agx, agy, px, py, type);
+        const def = tilePower(agx, agy, px, py, type, now - (s.startedAt || now));
         const mult = (type === "ile_joueur" ? 8 : 4) * (1 + regionDist({ gx: agx, gy: agy }) * 0.5);
         s.spied[m.key] = { def, butinMin: Math.round(def * mult * 0.7), butinMax: Math.round(def * mult * 1.3), at: now };
       }
@@ -180,6 +185,52 @@ export function applyElapsed(state, now) {
     s.reports.unshift({ kind: "defense", win: held, atkPower: garrison, defPower: pirate, losses, vol, wall, at: s.nextRaidAt });
     s.reports = s.reports.slice(0, 8);
     s.nextRaidAt += Math.round(RAID_INTERVAL_MS * (0.75 + Math.random() * 0.5));
+  }
+
+  // ---- Raids des cités rivales ----
+  // Une cité rivale connue vient piller le joueur : même résolution que les
+  // pirates, mais l'assaillant est nommé et sa force dépend de sa propre
+  // montée en puissance (pas seulement de celle du joueur).
+  if (!s.nextBotRaidAt) s.nextBotRaidAt = now + BOT_RAID_INTERVAL_MS;
+  let botGuard = 0;
+  while (now >= s.nextBotRaidAt && botGuard < 3) {
+    botGuard += 1;
+    const rivals = knownBots(s, s.nextBotRaidAt).filter((b) => !b.pillee);
+    if (rivals.length === 0) {
+      s.nextBotRaidAt += BOT_RAID_INTERVAL_MS;
+      continue;
+    }
+    // Un des trois plus puissants rivaux connus mène l'assaut.
+    const pick = rivals[Math.floor(Math.random() * Math.min(3, rivals.length))];
+    const elapsed = s.nextBotRaidAt - (s.startedAt || s.nextBotRaidAt);
+    const assault = Math.round(botRaidPower(pick.gx, pick.gy, pick.px, pick.py, elapsed) * (0.85 + Math.random() * 0.3));
+    const wall = Math.max(...s.islands.map((i) => i.buildings.muraille || 0));
+    const garrison = Math.round(
+      Object.keys(TROOPS).reduce((a, t) => a + s.troops[t] * TROOPS[t].def, 0) * (1 + wall * 0.06)
+    );
+    const held = garrison >= assault;
+    const losses = {};
+    Object.keys(TROOPS).forEach((t) => {
+      const rate = held ? Math.min(0.2, assault / ((garrison || 1) * 3)) : 0.3;
+      losses[t] = Math.round(s.troops[t] * rate);
+      s.troops[t] -= losses[t];
+    });
+    let vol = null;
+    if (!held) {
+      vol = {};
+      RES.forEach((r) => {
+        vol[r] = Math.round(s.resources[r] * 0.12);
+        s.resources[r] -= vol[r];
+      });
+    } else {
+      s.stats.raidsRepousses += 1;
+    }
+    s.reports.unshift({
+      kind: "defense", win: held, atkPower: garrison, defPower: assault,
+      losses, vol, wall, attaquant: pick.name, at: s.nextBotRaidAt,
+    });
+    s.reports = s.reports.slice(0, 8);
+    s.nextBotRaidAt += Math.round(BOT_RAID_INTERVAL_MS * (0.75 + Math.random() * 0.5));
   }
 
   // ---- Économie ----

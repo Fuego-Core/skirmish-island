@@ -1,4 +1,4 @@
-import { DEV, RAID_INTERVAL_MS, EVENT_INTERVAL_MS } from "./constants.js";
+import { DEV, RAID_INTERVAL_MS, BOT_RAID_INTERVAL_MS, EVENT_INTERVAL_MS } from "./constants.js";
 import { BUILDINGS } from "./buildings.js";
 import { ISLAND_GRID, rk } from "./world.js";
 
@@ -20,6 +20,7 @@ export function newGameState() {
     faction: null,
     startedAt: Date.now(),
     nextRaidAt: Date.now() + RAID_INTERVAL_MS,
+    nextBotRaidAt: Date.now() + BOT_RAID_INTERVAL_MS,
     nextEventAt: Date.now() + EVENT_INTERVAL_MS,
     activeEvent: null,
     victoryShown: false,

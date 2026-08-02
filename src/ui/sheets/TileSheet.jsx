@@ -1,6 +1,7 @@
 import { C } from "../../game/constants.js";
 import { TROOPS } from "../../game/troops.js";
-import { ISLAND_GRID, TILE_LABELS, enemyDefense } from "../../game/world.js";
+import { ISLAND_GRID, TILE_LABELS } from "../../game/world.js";
+import { botName, tilePower } from "../../game/bots.js";
 import { REGEN_MS } from "../../game/constants.js";
 import { I } from "../Icon.jsx";
 import { Sheet, Btn, Stepper, fmtTime, fmtNum } from "../kit.jsx";
@@ -15,7 +16,11 @@ export function TileSheet({
 
   return (
     <Sheet open onClose={onClose}
-      title={conquered && selectedTile.st !== "ma_ville" ? "ÎLE PILLÉE" : TILE_LABELS[selectedTile.st].toUpperCase()}
+      title={conquered && selectedTile.st !== "ma_ville"
+        ? "ÎLE PILLÉE"
+        : selectedTile.st === "ile_joueur"
+          ? botName(game.region.gx, game.region.gy, selectedTile.px, selectedTile.py).toUpperCase()
+          : TILE_LABELS[selectedTile.st].toUpperCase()}
       icon={selectedTile.st === "ma_ville" ? "senat" : selectedTile.st === "fog" ? "explorateur" : selectedTile.st === "eau" ? "peche" : "ile"}
       accent={selectedTile.st === "ma_ville" ? C.goldHi : selectedTile.st === "ile_vide" ? "#4f9160" : selectedTile.st === "ile_joueur" ? "#b04343" : selectedTile.st === "ile_inactive" ? "#b0722f" : C.gold}>
       <div style={{ textAlign: "center" }}>
@@ -47,7 +52,7 @@ export function TileSheet({
               </div>
             ) : (
               <div style={{ fontSize: 10, color: C.textDim, marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
-                <span>Défense inconnue (~{Math.round(enemyDefense(game.region.gx, game.region.gy, selectedTile.px, selectedTile.py, selectedTile.st) * (0.7 + ((selectedTile.px * 7 + selectedTile.py * 13) % 7) * 0.1))} ?)</span>
+                <span>Défense inconnue (~{Math.round(tilePower(game.region.gx, game.region.gy, selectedTile.px, selectedTile.py, selectedTile.st, nowTick - (game.startedAt || nowTick)) * (0.7 + ((selectedTile.px * 7 + selectedTile.py * 13) % 7) * 0.1))} ?)</span>
                 <Btn small label={`Espionner (${game.ships.eclaireur} nef)`}
                   disabled={game.ships.eclaireur < 1 || game.spyMissions.some((m) => m.key === selectedTileKey)}
                   onClick={() => startSpy(selectedTile.px, selectedTile.py)} />
