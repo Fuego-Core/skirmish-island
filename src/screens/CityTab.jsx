@@ -5,25 +5,7 @@ import { I } from "../ui/Icon.jsx";
 import { CityScene } from "../ui/CityScene.jsx";
 import { Card, QueueCard, Btn, fmtTime, fmtNum } from "../ui/kit.jsx";
 import { haptic } from "../ui/haptics.js";
-import buildingSenat from "../assets/images/buildings/building-senat.webp";
-import buildingScierie from "../assets/images/buildings/building-scierie.webp";
-import buildingCarriere from "../assets/images/buildings/building-carriere.webp";
-import buildingMineFer from "../assets/images/buildings/building-mine_fer.webp";
-import buildingMineOr from "../assets/images/buildings/building-mine_or.webp";
-import buildingFerme from "../assets/images/buildings/building-ferme.webp";
-import buildingEntrepot from "../assets/images/buildings/building-entrepot.webp";
-import buildingGrenier from "../assets/images/buildings/building-grenier.webp";
-import buildingMarche from "../assets/images/buildings/building-marche.webp";
-import buildingPort from "../assets/images/buildings/building-port.webp";
-import buildingCaserne from "../assets/images/buildings/building-caserne.webp";
-import buildingMuraille from "../assets/images/buildings/building-muraille.webp";
-import buildingColosse from "../assets/images/buildings/building-colosse.webp";
-
-const BUILDING_PORTRAITS = {
-  senat: buildingSenat, scierie: buildingScierie, carriere: buildingCarriere, mine_fer: buildingMineFer,
-  mine_or: buildingMineOr, ferme: buildingFerme, entrepot: buildingEntrepot, grenier: buildingGrenier,
-  marche: buildingMarche, port: buildingPort, caserne: buildingCaserne, muraille: buildingMuraille, colosse: buildingColosse,
-};
+import { BUILDING_PORTRAITS } from "../ui/buildingPortraits.js";
 
 function BuildingIcon({ bKey, col, active }) {
   if (BUILDING_PORTRAITS[bKey]) {
@@ -108,7 +90,7 @@ export function CityTab({
       })()}
 
       <div style={{ border: `1px solid ${C.borderSoft}`, borderRadius: 12, overflow: "hidden", marginBottom: 10, boxShadow: "0 4px 16px rgba(0,0,0,0.35)" }}>
-        <CityScene isl={isl} openKey={openBuilding} gold={C.gold} goldHi={C.goldHi} ink={C.ink}
+        <CityScene isl={isl} openKey={openBuilding} goldHi={C.goldHi}
           onTap={(key) => { haptic(9); setOpenBuilding(key); }} />
       </div>
 

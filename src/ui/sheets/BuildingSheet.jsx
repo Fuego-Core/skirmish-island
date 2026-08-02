@@ -2,26 +2,7 @@ import { C, RES, RES_ICONN, RES_COLOR, GROUP_COLOR } from "../../game/constants.
 import { BUILDINGS, B_ICON, upgradeCost, buildDuration, prodPerHour, storageCap } from "../../game/buildings.js";
 import { I } from "../Icon.jsx";
 import { Sheet, Btn, fmtNum, fmtTime } from "../kit.jsx";
-import buildingSenat from "../../assets/images/buildings/building-senat.webp";
-import buildingScierie from "../../assets/images/buildings/building-scierie.webp";
-import buildingCarriere from "../../assets/images/buildings/building-carriere.webp";
-import buildingMineFer from "../../assets/images/buildings/building-mine_fer.webp";
-import buildingMineOr from "../../assets/images/buildings/building-mine_or.webp";
-import buildingFerme from "../../assets/images/buildings/building-ferme.webp";
-import buildingEntrepot from "../../assets/images/buildings/building-entrepot.webp";
-import buildingGrenier from "../../assets/images/buildings/building-grenier.webp";
-import buildingMarche from "../../assets/images/buildings/building-marche.webp";
-import buildingPort from "../../assets/images/buildings/building-port.webp";
-import buildingCaserne from "../../assets/images/buildings/building-caserne.webp";
-import buildingMuraille from "../../assets/images/buildings/building-muraille.webp";
-import buildingColosse from "../../assets/images/buildings/building-colosse.webp";
-
-// Illustrations peintes générées pour les 13 bâtiments.
-const BUILDING_PORTRAITS = {
-  senat: buildingSenat, scierie: buildingScierie, carriere: buildingCarriere, mine_fer: buildingMineFer,
-  mine_or: buildingMineOr, ferme: buildingFerme, entrepot: buildingEntrepot, grenier: buildingGrenier,
-  marche: buildingMarche, port: buildingPort, caserne: buildingCaserne, muraille: buildingMuraille, colosse: buildingColosse,
-};
+import { BUILDING_PORTRAITS } from "../buildingPortraits.js";
 
 export function BuildingSheet({
   buildingKey, isl, resources, nowTick,
