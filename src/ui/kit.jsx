@@ -46,7 +46,7 @@ export const Btn = ({ label, disabled, onClick, small, primary }) => (
     style={{
       padding: small ? "8px 14px" : "11px 20px", minHeight: small ? 32 : 44, borderRadius: 10,
       fontSize: small ? 11 : 13, ...fd, fontWeight: 600, letterSpacing: 0.6,
-      background: disabled ? "rgba(255,255,255,0.03)" : primary ? `linear-gradient(180deg, ${C.goldHi}, ${C.gold} 55%, ${C.bronze})` : C.glassHi,
+      background: disabled ? C.ghost : primary ? `linear-gradient(180deg, ${C.goldHi}, ${C.gold} 55%, ${C.bronze})` : C.glassHi,
       backdropFilter: disabled || primary ? "none" : "blur(10px)",
       border: `1px solid ${disabled ? C.borderSoft : primary ? C.goldHi : C.border}`,
       color: disabled ? C.textFaint : primary ? C.ink : C.text,
@@ -69,7 +69,7 @@ export const Stepper = ({ value, max, onChange }) => (
 export const Sheet = ({ open, onClose, title, icon, accent, children }) => {
   if (!open) return null;
   return (
-    <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 40, background: "rgba(3,6,10,0.66)", backdropFilter: "blur(2px)", display: "flex", alignItems: "flex-end", justifyContent: "center", animation: "fadeIn 0.18s ease-out" }}>
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 40, background: "rgba(30,22,10,0.42)", backdropFilter: "blur(2px)", display: "flex", alignItems: "flex-end", justifyContent: "center", animation: "fadeIn 0.18s ease-out" }}>
       <div onClick={(e) => e.stopPropagation()}
         style={{
           width: "100%", maxWidth: 480, maxHeight: "82vh", overflowY: "auto", boxSizing: "border-box",

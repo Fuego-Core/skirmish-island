@@ -153,7 +153,7 @@ export function CityTab({
                     style={{
                       position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 5,
                       padding: "11px 5px 9px", borderRadius: 11, cursor: "pointer", color: C.text,
-                      background: level > 0 ? `linear-gradient(180deg, ${col}22, ${C.panel})` : "rgba(255,255,255,0.02)",
+                      background: level > 0 ? `linear-gradient(180deg, ${col}22, ${C.panel})` : C.ghost,
                       border: `1px solid ${inProgress ? C.goldHi : level > 0 ? col + "66" : C.borderSoft}`,
                       opacity: reqOk ? 1 : 0.45,
                     }}>

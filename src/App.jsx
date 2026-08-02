@@ -19,7 +19,6 @@ import { ArmyTab } from "./screens/ArmyTab.jsx";
 import { PortTab } from "./screens/PortTab.jsx";
 import { ReportsTab } from "./screens/ReportsTab.jsx";
 import { EmpireTab } from "./screens/EmpireTab.jsx";
-import bgMarble from "./assets/images/bg-marble.webp";
 import victoryColossus from "./assets/images/victory-colossus.webp";
 
 const fmtNum = (n) => (n >= 10000 ? `${Math.floor(n / 1000)}k` : Math.floor(n));
@@ -95,8 +94,16 @@ export default function App() {
 
   return (
     <div style={{ minHeight: "100vh", position: "relative", color: C.text, ...fb }}>
-      <div style={{ position: "fixed", inset: 0, zIndex: -2, backgroundImage: `url(${bgMarble})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat" }} />
-      <div style={{ position: "fixed", inset: 0, zIndex: -1, background: `radial-gradient(ellipse 120% 60% at 50% -5%, rgba(58,40,24,0.4) 0%, ${C.bg}d9 55%, ${C.bgDeep}f7 100%)` }} />
+      {/* Fond "marbre ivoire" — dégradés superposés, aucune photo nécessaire */}
+      <div style={{
+        position: "fixed", inset: 0, zIndex: -2,
+        background: `radial-gradient(ellipse 60% 40% at 15% 8%, rgba(255,255,255,0.65) 0%, transparent 60%),
+          radial-gradient(ellipse 50% 35% at 88% 14%, rgba(216,196,150,0.35) 0%, transparent 65%),
+          radial-gradient(ellipse 70% 50% at 28% 92%, rgba(200,175,120,0.22) 0%, transparent 60%),
+          radial-gradient(ellipse 55% 42% at 92% 88%, rgba(255,255,255,0.4) 0%, transparent 55%),
+          linear-gradient(165deg, #fffdf7 0%, ${C.bg} 55%, ${C.bgDeep} 100%)`,
+      }} />
+      <div style={{ position: "fixed", inset: 0, zIndex: -1, background: `radial-gradient(ellipse 130% 55% at 50% -10%, rgba(255,255,255,0.5) 0%, transparent 42%), radial-gradient(ellipse 140% 65% at 50% 112%, rgba(110,80,40,0.12) 0%, transparent 55%)` }} />
       {colosseDone && !game.victoryShown && (
         <div style={{ position: "fixed", inset: 0, zIndex: 50, background: "rgba(3,5,8,0.78)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, animation: "fadeIn 0.25s ease-out" }}>
           <div style={{

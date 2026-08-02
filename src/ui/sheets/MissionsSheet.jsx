@@ -7,7 +7,7 @@ export function MissionsSheet({ open, onClose, visibleMissions, claimMission }) 
     <Sheet open={open} onClose={onClose} title="MISSIONS" icon="laurier">
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {visibleMissions.map((m) => (
-          <div key={m.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, padding: "9px 11px", background: "rgba(0,0,0,0.18)", borderRadius: 9, border: `1px solid ${m.done ? C.gold : C.borderSoft}` }}>
+          <div key={m.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, padding: "9px 11px", background: C.inset, borderRadius: 9, border: `1px solid ${m.done ? C.gold : C.borderSoft}` }}>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: 13, color: m.done ? C.goldHi : C.text }}>{m.label}</div>
               <div style={{ fontSize: 10, color: C.textDim, fontStyle: "italic" }}>{m.desc}</div>
