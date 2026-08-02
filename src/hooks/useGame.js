@@ -251,16 +251,13 @@ export function useGame() {
   }, []);
 
   const exportSave = useCallback(() => {
-    let code = "";
-    setGame((g) => {
-      if (g) {
-        try {
-          code = btoa(unescape(encodeURIComponent(JSON.stringify(g))));
-        } catch (e) { code = "erreur d'export"; }
-      }
-      return g;
-    });
-    return code;
+    const g = gameRef.current;
+    if (!g) return "";
+    try {
+      return btoa(unescape(encodeURIComponent(JSON.stringify(g))));
+    } catch (e) {
+      return "erreur d'export";
+    }
   }, []);
 
   const importSave = useCallback((importCode) => {
