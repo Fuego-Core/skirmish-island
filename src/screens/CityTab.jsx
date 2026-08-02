@@ -46,7 +46,7 @@ export function CityTab({
 }) {
   return (
     <>
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 6 }}>
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 9 }}>
         {game.islands.map((i, idx) => (
           <button key={i.id} onClick={() => onSelectIsland(idx)}
             style={{
@@ -63,7 +63,7 @@ export function CityTab({
       </div>
 
       {game.activeEvent && game.activeEvent.type === "marchand" && (
-        <Card style={{ borderColor: C.gold, marginBottom: 8, padding: "10px 14px" }}>
+        <Card style={{ borderColor: C.gold, marginBottom: 10, padding: "11px 15px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
             <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: C.goldHi }}>
               <I name="marche" size={15} color={C.goldHi} />
@@ -92,7 +92,7 @@ export function CityTab({
               width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center",
               background: next.done ? "rgba(201,161,59,0.12)" : `linear-gradient(180deg, ${C.panelUp}, ${C.panel})`,
               border: `1px solid ${next.done ? C.gold : C.borderSoft}`, borderRadius: 10,
-              padding: "9px 13px", marginBottom: 8, cursor: "pointer", color: C.text, textAlign: "left",
+              padding: "10px 14px", marginBottom: 10, cursor: "pointer", color: C.text, textAlign: "left",
             }}>
             <span style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 12, minWidth: 0 }}>
               <I name="laurier" size={16} color={C.goldHi} />
@@ -107,7 +107,7 @@ export function CityTab({
         );
       })()}
 
-      <div style={{ border: `1px solid ${C.borderSoft}`, borderRadius: 12, overflow: "hidden", marginBottom: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.35)" }}>
+      <div style={{ border: `1px solid ${C.borderSoft}`, borderRadius: 12, overflow: "hidden", marginBottom: 10, boxShadow: "0 4px 16px rgba(0,0,0,0.35)" }}>
         <CityScene isl={isl} openKey={openBuilding} gold={C.gold} goldHi={C.goldHi} ink={C.ink}
           onTap={(key) => { haptic(9); setOpenBuilding(key); }} />
       </div>
@@ -132,12 +132,12 @@ export function CityTab({
         const col = GROUP_COLOR[gKey];
         return (
           <div key={gKey}>
-            <div style={{ display: "flex", alignItems: "center", gap: 9, margin: "16px 2px 9px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 9, margin: "22px 2px 12px" }}>
               <span style={{ width: 7, height: 7, borderRadius: 4, background: col, boxShadow: `0 0 7px ${col}` }} />
               <span style={{ fontFamily: "'Cinzel', Georgia, serif", fontSize: 11, letterSpacing: 2.2, textTransform: "uppercase", color: col }}>{gLabel}</span>
               <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, ${col}55, transparent)` }} />
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 7 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 9 }}>
               {Object.keys(BUILDINGS).filter((k) => BUILDINGS[k].group === gKey).map((key) => {
                 const b = BUILDINGS[key];
                 const level = isl.buildings[key];
@@ -151,8 +151,8 @@ export function CityTab({
                 return (
                   <button key={key} onClick={() => { haptic(9); setOpenBuilding(key); }}
                     style={{
-                      position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 5,
-                      padding: "11px 5px 9px", borderRadius: 11, cursor: "pointer", color: C.text,
+                      position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+                      padding: "13px 5px 11px", borderRadius: 11, cursor: "pointer", color: C.text,
                       background: level > 0 ? `linear-gradient(180deg, ${col}22, ${C.panel})` : C.ghost,
                       border: `1px solid ${inProgress ? C.goldHi : level > 0 ? col + "66" : C.borderSoft}`,
                       opacity: reqOk ? 1 : 0.45,

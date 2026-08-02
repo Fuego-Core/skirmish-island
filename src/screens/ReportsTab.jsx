@@ -43,7 +43,7 @@ export function ReportsTab({ game }) {
           <span style={{ fontSize: 12, color: C.textDim, fontStyle: "italic" }}>Aucune bataille livrée pour l'instant.</span>
         </Card>
       )}
-      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
         {game.reports.map((rep, i) => (
           <Card key={i} style={{ borderColor: rep.win ? C.ok : C.bad, animation: "riseIn 0.32s ease-out both", animationDelay: `${Math.min(i, 8) * 0.045}s` }}>
             <div style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 12, color: rep.kind === "evenement" ? C.goldHi : rep.win ? C.ok : C.bad, marginBottom: 5, fontFamily: "'Cinzel', Georgia, serif", letterSpacing: 1 }}>

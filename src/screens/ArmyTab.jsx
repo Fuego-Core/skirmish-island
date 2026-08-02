@@ -47,14 +47,14 @@ export function ArmyTab({ game, nowTick, bestCaserne, armyPower, upkeep, recruit
         </Card>
       )}
       <SectionTitle>Unités</SectionTitle>
-      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
         {Object.keys(TROOPS).map((type) => {
           const t = TROOPS[type];
           const caserneOk = bestCaserne >= t.requiresCaserne;
           const busy = !!game.troopQueue;
           return (
             <Card key={type}>
-              <div style={{ display: "flex", gap: 11, marginBottom: 7 }}>
+              <div style={{ display: "flex", gap: 12, marginBottom: 10 }}>
                 <TroopPortrait type={type} dim={!caserneOk} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 6, flexWrap: "wrap" }}>

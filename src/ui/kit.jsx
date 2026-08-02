@@ -19,7 +19,7 @@ const glassSurface = {
 };
 
 export const Card = ({ children, style }) => (
-  <div style={{ ...glassSurface, borderRadius: 14, padding: "13px 15px", ...style }}>{children}</div>
+  <div style={{ ...glassSurface, borderRadius: 14, padding: "15px 17px", ...style }}>{children}</div>
 );
 
 export const SectionTitle = ({ children }) => (
@@ -76,11 +76,11 @@ export const Sheet = ({ open, onClose, title, icon, accent, children }) => {
           background: `linear-gradient(175deg, ${C.panelUp}, ${C.panel})`,
           borderTop: `1px solid ${accent || C.gold}66`, borderLeft: `1px solid ${C.glassBorder}`, borderRight: `1px solid ${C.glassBorder}`,
           borderRadius: "20px 20px 0 0",
-          padding: "10px 18px calc(26px + env(safe-area-inset-bottom))", boxShadow: "0 -16px 40px rgba(2,4,7,0.55)",
+          padding: "12px 20px calc(28px + env(safe-area-inset-bottom))", boxShadow: "0 -16px 40px rgba(2,4,7,0.55)",
           animation: "sheetUp 0.32s cubic-bezier(0.16, 1, 0.3, 1)",
         }}>
-        <div style={{ width: 40, height: 4, borderRadius: 2, background: C.border, margin: "0 auto 14px" }} />
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+        <div style={{ width: 40, height: 4, borderRadius: 2, background: C.border, margin: "0 auto 16px" }} />
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
           <span style={{ display: "flex", alignItems: "center", gap: 10, ...fd, fontSize: 15, fontWeight: 600, letterSpacing: 1.2, color: accent || C.goldHi }}>
             {icon && <I name={icon} size={20} color={accent || C.goldHi} />}
             {title}

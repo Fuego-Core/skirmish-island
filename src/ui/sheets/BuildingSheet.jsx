@@ -43,7 +43,7 @@ export function BuildingSheet({
 
   return (
     <Sheet open onClose={onClose} title={b.label.toUpperCase()} icon={B_ICON[key]} accent={col}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 13, marginBottom: 16 }}>
         <div style={{ width: 58, height: 58, borderRadius: 12, background: `linear-gradient(180deg, ${col}28, ${C.panel})`, border: `1px solid ${col}66`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, overflow: "hidden" }}>
           {BUILDING_PORTRAITS[key] ? (
             <img src={BUILDING_PORTRAITS[key]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
@@ -61,7 +61,7 @@ export function BuildingSheet({
       </div>
 
       {b.produces && (
-        <div style={{ display: "flex", alignItems: "center", gap: 8, background: C.inset, borderRadius: 9, padding: "9px 12px", marginBottom: 9 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, background: C.inset, borderRadius: 9, padding: "11px 13px", marginBottom: 12 }}>
           <I name={RES_ICONN[b.produces]} size={16} color={RES_COLOR[b.produces]} />
           <span style={{ fontSize: 12, fontFamily: "monospace", color: C.textDim }}>
             +{prodPerHour(level)}/h <span style={{ color: C.ok }}>→ +{prodPerHour(level + 1)}/h</span>
@@ -69,18 +69,18 @@ export function BuildingSheet({
         </div>
       )}
       {(key === "entrepot" || key === "grenier") && (
-        <div style={{ background: C.inset, borderRadius: 9, padding: "9px 12px", marginBottom: 9, fontSize: 12, fontFamily: "monospace", color: C.textDim }}>
+        <div style={{ background: C.inset, borderRadius: 9, padding: "11px 13px", marginBottom: 12, fontSize: 12, fontFamily: "monospace", color: C.textDim }}>
           Capacité {fmtNum(storageCap(level))} <span style={{ color: C.ok }}>→ {fmtNum(storageCap(level + 1))}</span>
         </div>
       )}
       {key === "muraille" && (
-        <div style={{ background: C.inset, borderRadius: 9, padding: "9px 12px", marginBottom: 9, fontSize: 12, fontFamily: "monospace", color: C.textDim }}>
+        <div style={{ background: C.inset, borderRadius: 9, padding: "11px 13px", marginBottom: 12, fontSize: 12, fontFamily: "monospace", color: C.textDim }}>
           Garnison +{level * 6}% <span style={{ color: C.ok }}>→ +{(level + 1) * 6}%</span>
         </div>
       )}
       {key === "colosse" && (
-        <div style={{ background: C.inset, borderRadius: 9, padding: "10px 12px", marginBottom: 9 }}>
-          <div style={{ fontSize: 11, color: C.textDim, marginBottom: 6 }}>Étapes de construction</div>
+        <div style={{ background: C.inset, borderRadius: 9, padding: "12px 13px", marginBottom: 12 }}>
+          <div style={{ fontSize: 11, color: C.textDim, marginBottom: 8 }}>Étapes de construction</div>
           <div style={{ display: "flex", gap: 5 }}>
             {[1, 2, 3, 4, 5].map((n) => (
               <div key={n} style={{ flex: 1, height: 7, borderRadius: 4, background: n <= level ? C.goldHi : C.border }} />
@@ -89,19 +89,19 @@ export function BuildingSheet({
         </div>
       )}
       {!reqOk && (
-        <div style={{ background: "rgba(192,85,85,0.10)", border: `1px solid ${C.bad}44`, borderRadius: 9, padding: "9px 12px", marginBottom: 9, fontSize: 11, color: C.bad }}>
+        <div style={{ background: "rgba(192,85,85,0.10)", border: `1px solid ${C.bad}44`, borderRadius: 9, padding: "11px 13px", marginBottom: 12, fontSize: 11, color: C.bad }}>
           Requiert : {Object.keys(req).map((rq) => `${BUILDINGS[rq].label} niv. ${req[rq]}`).join(", ")}
         </div>
       )}
       {inProgress && (
-        <div style={{ background: "rgba(201,161,59,0.10)", border: `1px solid ${C.gold}`, borderRadius: 9, padding: "9px 12px", marginBottom: 9, fontSize: 12, color: C.goldHi, display: "flex", justifyContent: "space-between" }}>
+        <div style={{ background: "rgba(201,161,59,0.10)", border: `1px solid ${C.gold}`, borderRadius: 9, padding: "11px 13px", marginBottom: 12, fontSize: 12, color: C.goldHi, display: "flex", justifyContent: "space-between" }}>
           <span>Chantier en cours</span>
           <span style={{ fontFamily: "monospace" }}>{fmtTime(isl.queue.endsAt - nowTick)}</span>
         </div>
       )}
 
       {key === "marche" && level > 0 && (
-        <div style={{ background: C.inset, borderRadius: 10, padding: "11px 12px", marginBottom: 10, border: `1px solid ${C.borderSoft}` }}>
+        <div style={{ background: C.inset, borderRadius: 10, padding: "13px 14px", marginBottom: 13, border: `1px solid ${C.borderSoft}` }}>
           <div style={{ fontSize: 11, color: C.textDim, marginBottom: 9 }}>Échange — 3 donnés contre 2 reçus</div>
           <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap", marginBottom: 9 }}>
             {RES.map((r) => (
@@ -130,8 +130,8 @@ export function BuildingSheet({
 
       {!maxed && (
         <>
-          <div style={{ fontSize: 10, color: C.textFaint, fontFamily: "'Cinzel', Georgia, serif", letterSpacing: 1.5, marginBottom: 7 }}>COÛT</div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 6, marginBottom: 12 }}>
+          <div style={{ fontSize: 10, color: C.textFaint, fontFamily: "'Cinzel', Georgia, serif", letterSpacing: 1.5, marginBottom: 9 }}>COÛT</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 7, marginBottom: 15 }}>
             {RES.map((r) => {
               const enough = resources[r] >= cost[r];
               return (

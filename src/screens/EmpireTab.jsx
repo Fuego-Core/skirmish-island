@@ -32,7 +32,7 @@ export function EmpireTab({ game, nowTick, renameIsland, exportSave, importSave,
       </Card>
 
       <SectionTitle>Tes îles ({game.islands.length})</SectionTitle>
-      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
         {game.islands.map((i) => (
           <Card key={i.id}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
