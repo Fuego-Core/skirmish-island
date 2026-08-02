@@ -6,10 +6,17 @@ import buildingSenat from "../../assets/images/buildings/building-senat.webp";
 import buildingScierie from "../../assets/images/buildings/building-scierie.webp";
 import buildingCarriere from "../../assets/images/buildings/building-carriere.webp";
 import buildingMineFer from "../../assets/images/buildings/building-mine_fer.webp";
+import buildingMineOr from "../../assets/images/buildings/building-mine_or.webp";
+import buildingFerme from "../../assets/images/buildings/building-ferme.webp";
+import buildingEntrepot from "../../assets/images/buildings/building-entrepot.webp";
+import buildingGrenier from "../../assets/images/buildings/building-grenier.webp";
 
 // Illustrations peintes générées — un bâtiment à la fois, les autres
 // gardent l'icône trait tant que leur image n'existe pas encore.
-const BUILDING_PORTRAITS = { senat: buildingSenat, scierie: buildingScierie, carriere: buildingCarriere, mine_fer: buildingMineFer };
+const BUILDING_PORTRAITS = {
+  senat: buildingSenat, scierie: buildingScierie, carriere: buildingCarriere, mine_fer: buildingMineFer,
+  mine_or: buildingMineOr, ferme: buildingFerme, entrepot: buildingEntrepot, grenier: buildingGrenier,
+};
 
 export function BuildingSheet({
   buildingKey, isl, resources, nowTick,

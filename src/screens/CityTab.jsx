@@ -8,8 +8,15 @@ import buildingSenat from "../assets/images/buildings/building-senat.webp";
 import buildingScierie from "../assets/images/buildings/building-scierie.webp";
 import buildingCarriere from "../assets/images/buildings/building-carriere.webp";
 import buildingMineFer from "../assets/images/buildings/building-mine_fer.webp";
+import buildingMineOr from "../assets/images/buildings/building-mine_or.webp";
+import buildingFerme from "../assets/images/buildings/building-ferme.webp";
+import buildingEntrepot from "../assets/images/buildings/building-entrepot.webp";
+import buildingGrenier from "../assets/images/buildings/building-grenier.webp";
 
-const BUILDING_PORTRAITS = { senat: buildingSenat, scierie: buildingScierie, carriere: buildingCarriere, mine_fer: buildingMineFer };
+const BUILDING_PORTRAITS = {
+  senat: buildingSenat, scierie: buildingScierie, carriere: buildingCarriere, mine_fer: buildingMineFer,
+  mine_or: buildingMineOr, ferme: buildingFerme, entrepot: buildingEntrepot, grenier: buildingGrenier,
+};
 
 function BuildingIcon({ bKey, col, active }) {
   if (BUILDING_PORTRAITS[bKey]) {
