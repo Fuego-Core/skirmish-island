@@ -12,7 +12,6 @@ import { haptic } from "./ui/haptics.js";
 import { BuildingSheet } from "./ui/sheets/BuildingSheet.jsx";
 import { TileSheet } from "./ui/sheets/TileSheet.jsx";
 import { MissionsSheet } from "./ui/sheets/MissionsSheet.jsx";
-import { OnboardingSheet } from "./ui/sheets/OnboardingSheet.jsx";
 import { MarketTab } from "./screens/MarketTab.jsx";
 import { TitleScreen } from "./screens/TitleScreen.jsx";
 import { CityTab } from "./screens/CityTab.jsx";
@@ -244,8 +243,6 @@ export default function App() {
       {/* ═══ Sheet Missions ═══ */}
       <MissionsSheet open={showMissions} onClose={() => setShowMissions(false)} visibleMissions={visibleMissions} claimMission={claimMission} />
 
-      {/* ═══ Accueil — première ouverture après le choix de faction ═══ */}
-      <OnboardingSheet open={!game.onboardingSeen} onClose={() => setGame((g) => ({ ...g, onboardingSeen: true }))} />
 
       {/* ═══ Navigation basse ═══ */}
       <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: `${C.bgDeep}f2`, backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", borderTop: `1px solid ${C.borderSoft}`, zIndex: 30, paddingBottom: "env(safe-area-inset-bottom)" }}>

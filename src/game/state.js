@@ -26,7 +26,6 @@ export function newGameState() {
     nextEventAt: Date.now() + EVENT_INTERVAL_MS,
     activeEvent: null,
     victoryShown: false,
-    onboardingSeen: false,
     spied: {},
     spyMissions: [],
     claimedMissions: {},
