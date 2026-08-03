@@ -13,7 +13,7 @@ import { BuildingSheet } from "./ui/sheets/BuildingSheet.jsx";
 import { TileSheet } from "./ui/sheets/TileSheet.jsx";
 import { MissionsSheet } from "./ui/sheets/MissionsSheet.jsx";
 import { OnboardingSheet } from "./ui/sheets/OnboardingSheet.jsx";
-import { MarketSheet } from "./ui/sheets/MarketSheet.jsx";
+import { MarketTab } from "./screens/MarketTab.jsx";
 import { TitleScreen } from "./screens/TitleScreen.jsx";
 import { CityTab } from "./screens/CityTab.jsx";
 import { MapTab } from "./screens/MapTab.jsx";
@@ -39,7 +39,6 @@ export default function App() {
   const [selectedTileKey, setSelectedTileKey] = useState(null);
   const [attackForm, setAttackForm] = useState({ hoplite: 0, archer: 0, cavalier: 0, catapulte: 0, belier: 0 });
   const [showMissions, setShowMissions] = useState(false);
-  const [showMarket, setShowMarket] = useState(false);
 
   const colosseDoneNow = game && game.faction
     ? Math.max(...game.islands.map((i) => i.buildings.colosse || 0)) >= 5
@@ -215,6 +214,9 @@ export default function App() {
           <EmpireTab game={game} nowTick={nowTick} renameIsland={renameIsland} exportSave={exportSave} importSave={importSave} resetGame={resetGame} />
         )}
         {tab === "rapports" && <ReportsTab game={game} />}
+        {tab === "marche" && (
+          <MarketTab game={game} nowTick={nowTick} onAccept={acceptMarketOffer} onPost={postMarketOffer} onCancel={cancelMarketOffer} />
+        )}
       </div>
 
       {/* ═══ Sheet Case de carte ═══ */}
@@ -232,19 +234,12 @@ export default function App() {
         <BuildingSheet
           buildingKey={openBuilding} isl={isl} resources={game.resources} nowTick={nowTick}
           onClose={() => setOpenBuilding(null)} onUpgrade={startUpgrade}
-          onOpenMarket={() => { setOpenBuilding(null); setShowMarket(true); }}
+          onOpenMarket={() => { setOpenBuilding(null); setTab("marche"); }}
         />
       )}
 
       {/* ═══ Sheet Missions ═══ */}
       <MissionsSheet open={showMissions} onClose={() => setShowMissions(false)} visibleMissions={visibleMissions} claimMission={claimMission} />
-
-      {/* ═══ Sheet Marché ═══ */}
-      <MarketSheet
-        open={showMarket} onClose={() => setShowMarket(false)}
-        resources={game.resources} marketOffers={game.marketOffers} nowTick={nowTick}
-        onAccept={acceptMarketOffer} onPost={postMarketOffer} onCancel={cancelMarketOffer}
-      />
 
       {/* ═══ Accueil — première ouverture après le choix de faction ═══ */}
       <OnboardingSheet open={!game.onboardingSeen} onClose={() => setGame((g) => ({ ...g, onboardingSeen: true }))} />
@@ -252,8 +247,8 @@ export default function App() {
       {/* ═══ Navigation basse ═══ */}
       <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: `${C.bgDeep}f2`, backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", borderTop: `1px solid ${C.borderSoft}`, zIndex: 30, paddingBottom: "env(safe-area-inset-bottom)" }}>
         <Meander color={C.goldDim} />
-        <div style={{ maxWidth: 480, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(6, 1fr)", padding: "4px 4px 0" }}>
-          {[["cite", "senat", "Cité"], ["carte", "carte", "Carte"], ["armee", "epees", "Armée"], ["port", "port", "Port"], ["rapports", "rapports", "Rapports"], ["empire", "couronne", "Empire"]].map(([k, icon, label]) => {
+        <div style={{ maxWidth: 480, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(7, 1fr)", padding: "4px 4px 0" }}>
+          {[["cite", "senat", "Cité"], ["carte", "carte", "Carte"], ["armee", "epees", "Armée"], ["port", "port", "Port"], ["marche", "marche", "Marché"], ["rapports", "rapports", "Rapports"], ["empire", "couronne", "Empire"]].map(([k, icon, label]) => {
             const activeTab = tab === k;
             return (
               <button key={k}

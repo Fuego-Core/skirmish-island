@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { C, RES, RES_LABEL } from "../../game/constants.js";
-import { Sheet, Btn, ResIcon, fmtNum, fmtTime } from "../kit.jsx";
+import { C, RES, RES_LABEL } from "../game/constants.js";
+import { I } from "../ui/Icon.jsx";
+import { Card, SectionTitle, Btn, ResIcon, fmtNum, fmtTime } from "../ui/kit.jsx";
 
 function OfferRow({ offer, nowTick, resources, onAccept, onCancel }) {
   const isPlayer = offer.author === "player";
@@ -28,12 +29,13 @@ function OfferRow({ offer, nowTick, resources, onAccept, onCancel }) {
   );
 }
 
-export function MarketSheet({ open, onClose, resources, marketOffers, nowTick, onAccept, onPost, onCancel }) {
+export function MarketTab({ game, nowTick, onAccept, onPost, onCancel }) {
   const [giveRes, setGiveRes] = useState("bois");
   const [wantRes, setWantRes] = useState("fer");
   const [amt, setAmt] = useState(100);
 
-  const offers = marketOffers || [];
+  const resources = game.resources;
+  const offers = game.marketOffers || [];
   const botOffers = offers.filter((o) => o.author === "bot");
   const playerOffers = offers.filter((o) => o.author === "player");
   const rate = 1.5;
@@ -41,9 +43,16 @@ export function MarketSheet({ open, onClose, resources, marketOffers, nowTick, o
   const canPost = giveRes !== wantRes && amt > 0 && resources[giveRes] >= amt;
 
   return (
-    <Sheet open={open} onClose={onClose} title="MARCHÉ DE L'ÉGÉE" icon="marche">
-      <div style={{ background: C.inset, borderRadius: 10, padding: "13px 14px", marginBottom: 14, border: `1px solid ${C.borderSoft}` }}>
-        <div style={{ fontSize: 11, color: C.textDim, marginBottom: 9 }}>Poster une offre</div>
+    <>
+      <Card style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+        <I name="marche" size={17} color={C.gold} />
+        <span style={{ fontSize: 12, color: C.textDim, lineHeight: 1.4 }}>
+          Offres réelles des cités rivales et des joueurs — taux variables, à repérer.
+        </span>
+      </Card>
+
+      <SectionTitle>Poster une offre</SectionTitle>
+      <Card>
         <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap", marginBottom: 9 }}>
           {RES.map((r) => (
             <button key={"g" + r} onClick={() => setGiveRes(r)}
@@ -65,10 +74,10 @@ export function MarketSheet({ open, onClose, resources, marketOffers, nowTick, o
           <span style={{ fontSize: 11, color: C.textFaint }}>{RES_LABEL[giveRes]} → ~{fmtNum(wantAmt)} {RES_LABEL[wantRes]} demandé</span>
         </div>
         <Btn primary label="Publier l'offre" disabled={!canPost} onClick={() => onPost(giveRes, amt, wantRes, wantAmt)} />
-      </div>
+      </Card>
 
-      <div style={{ fontSize: 10, color: C.textFaint, fontFamily: "'Cinzel', Georgia, serif", letterSpacing: 1.5, marginBottom: 8 }}>OFFRES DES CITÉS RIVALES</div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
+      <SectionTitle>Offres des cités rivales</SectionTitle>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {botOffers.length === 0 && <div style={{ fontSize: 12, color: C.textFaint, fontStyle: "italic" }}>Aucune offre pour l'instant.</div>}
         {botOffers.map((o) => (
           <OfferRow key={o.id} offer={o} nowTick={nowTick} resources={resources} onAccept={onAccept} onCancel={onCancel} />
@@ -77,7 +86,7 @@ export function MarketSheet({ open, onClose, resources, marketOffers, nowTick, o
 
       {playerOffers.length > 0 && (
         <>
-          <div style={{ fontSize: 10, color: C.textFaint, fontFamily: "'Cinzel', Georgia, serif", letterSpacing: 1.5, marginBottom: 8 }}>TES OFFRES EN COURS</div>
+          <SectionTitle>Tes offres en cours</SectionTitle>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {playerOffers.map((o) => (
               <OfferRow key={o.id} offer={o} nowTick={nowTick} resources={resources} onAccept={onAccept} onCancel={onCancel} />
@@ -85,6 +94,6 @@ export function MarketSheet({ open, onClose, resources, marketOffers, nowTick, o
           </div>
         </>
       )}
-    </Sheet>
+    </>
   );
 }
