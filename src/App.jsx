@@ -16,11 +16,11 @@ import { OnboardingSheet } from "./ui/sheets/OnboardingSheet.jsx";
 import { MarketTab } from "./screens/MarketTab.jsx";
 import { TitleScreen } from "./screens/TitleScreen.jsx";
 import { CityTab } from "./screens/CityTab.jsx";
+import { ConstructionTab } from "./screens/ConstructionTab.jsx";
 import { MapTab } from "./screens/MapTab.jsx";
 import { ArmyTab } from "./screens/ArmyTab.jsx";
 import { PortTab } from "./screens/PortTab.jsx";
 import { ReportsTab } from "./screens/ReportsTab.jsx";
-import { EmpireTab } from "./screens/EmpireTab.jsx";
 import victoryColossus from "./assets/images/victory-colossus.webp";
 import crestLogo from "./assets/images/crest-logo.webp";
 
@@ -96,12 +96,12 @@ export default function App() {
   const claimableCount = visibleMissions.filter((m) => m.done).length;
   const citeReady = game.islands.some((i) => (i.queue || []).some((q) => q.endsAt && nowTick >= q.endsAt - 500));
   const badges = {
-    cite: claimableCount > 0 ? String(claimableCount) : citeReady ? "!" : null,
+    cite: claimableCount > 0 ? String(claimableCount) : null,
+    construction: citeReady ? "!" : null,
     carte: null,
     armee: (game.troopQueue || []).some((q) => q.nextAt && nowTick >= q.nextAt - 500) ? "!" : null,
     port: (game.shipQueue || []).some((q) => q.endsAt && nowTick >= q.endsAt - 500) ? "!" : null,
     rapports: unreadReports > 0 ? String(unreadReports) : null,
-    empire: null,
   };
 
   const selectedTile = selectedTileKey ? (() => {
@@ -189,11 +189,17 @@ export default function App() {
       <div key={tab} style={{ maxWidth: 480, margin: "0 auto", padding: "12px 12px 92px", boxSizing: "border-box", animation: "tabIn 0.22s ease-out both" }}>
         {tab === "cite" && (
           <CityTab
-            game={game} nowTick={nowTick} isl={isl}
-            openBuilding={openBuilding} setOpenBuilding={setOpenBuilding}
+            game={game} nowTick={nowTick} isl={isl} setTab={setTab}
             onSelectIsland={(idx) => { setGame((g) => ({ ...g, activeIsland: idx })); setOpenBuilding(null); }}
             tradeEvent={tradeEvent}
             visibleMissions={visibleMissions} onOpenMissions={() => setShowMissions(true)}
+            renameIsland={renameIsland} exportSave={exportSave} importSave={importSave} resetGame={resetGame}
+          />
+        )}
+        {tab === "construction" && (
+          <ConstructionTab
+            game={game} nowTick={nowTick} isl={isl}
+            openBuilding={openBuilding} setOpenBuilding={setOpenBuilding}
             assignEsclave={assignEsclave} freeEsclaves={freeEsclaves}
           />
         )}
@@ -209,9 +215,6 @@ export default function App() {
         )}
         {tab === "port" && (
           <PortTab game={game} nowTick={nowTick} bestPort={bestPort} buildShip={buildShip} />
-        )}
-        {tab === "empire" && (
-          <EmpireTab game={game} nowTick={nowTick} renameIsland={renameIsland} exportSave={exportSave} importSave={importSave} resetGame={resetGame} />
         )}
         {tab === "rapports" && <ReportsTab game={game} />}
         {tab === "marche" && (
@@ -248,7 +251,7 @@ export default function App() {
       <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: `${C.bgDeep}f2`, backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", borderTop: `1px solid ${C.borderSoft}`, zIndex: 30, paddingBottom: "env(safe-area-inset-bottom)" }}>
         <Meander color={C.goldDim} />
         <div style={{ maxWidth: 480, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(7, 1fr)", padding: "4px 4px 0" }}>
-          {[["cite", "senat", "Cité"], ["carte", "carte", "Carte"], ["armee", "epees", "Armée"], ["port", "port", "Port"], ["marche", "marche", "Marché"], ["rapports", "rapports", "Rapports"], ["empire", "couronne", "Empire"]].map(([k, icon, label]) => {
+          {[["cite", "couronne", "Cité"], ["construction", "senat", "Bâtir"], ["carte", "carte", "Carte"], ["armee", "epees", "Armée"], ["port", "port", "Port"], ["marche", "marche", "Marché"], ["rapports", "rapports", "Rapports"]].map(([k, icon, label]) => {
             const activeTab = tab === k;
             return (
               <button key={k}
