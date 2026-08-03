@@ -20,3 +20,10 @@ export const SHIPS = {
     desc: "Espionne une île : révèle sa défense exacte et son butin. Revient au port." },
 };
 export const PECHE_BLE_H = 180;
+
+// Emplacements de file au chantier naval : un de plus par niveau de Port,
+// plafonné. Les nefs sortent l'une après l'autre.
+export const SHIP_SLOTS_MAX = 10;
+export function shipSlots(portLevel) {
+  return Math.max(1, Math.min(SHIP_SLOTS_MAX, portLevel + 1));
+}

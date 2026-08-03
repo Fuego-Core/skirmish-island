@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { applyElapsed } from "../engine.js";
 import { newGameState, freshBuildings } from "../state.js";
-import { prodPerHour, storageCap, upgradeCost, buildDuration, BUILDINGS } from "../buildings.js";
-import { TROOPS } from "../troops.js";
+import { prodPerHour, storageCap, upgradeCost, buildDuration, BUILDINGS, buildSlots } from "../buildings.js";
+import { TROOPS, troopSlots } from "../troops.js";
+import { SHIPS, shipSlots } from "../ships.js";
 import { rk, tileState, enemyDefense, regionDist } from "../world.js";
 import { SPEED, REGEN_MS, BOT_GROWTH_MAX } from "../constants.js";
 import { botName, botGrowth, tilePower, knownBots, playerScore } from "../bots.js";
@@ -56,19 +57,19 @@ describe("chantiers", () => {
   it("un chantier terminé applique le niveau cible et vide la file", () => {
     const now = Date.now();
     const s = baseState(now);
-    s.islands[0].queue = { key: "senat", targetLevel: 2, endsAt: now - 1 };
+    s.islands[0].queue = [{ key: "senat", targetLevel: 2, endsAt: now - 1 }];
     const after = applyElapsed(s, now);
     expect(after.islands[0].buildings.senat).toBe(2);
-    expect(after.islands[0].queue).toBeNull();
+    expect(after.islands[0].queue.length).toBe(0);
   });
 
   it("un chantier non terminé reste en file", () => {
     const now = Date.now();
     const s = baseState(now);
-    s.islands[0].queue = { key: "senat", targetLevel: 2, endsAt: now + 5000 };
+    s.islands[0].queue = [{ key: "senat", targetLevel: 2, endsAt: now + 5000 }];
     const after = applyElapsed(s, now);
     expect(after.islands[0].buildings.senat).toBe(1);
-    expect(after.islands[0].queue).not.toBeNull();
+    expect(after.islands[0].queue.length).toBe(1);
   });
 });
 
@@ -78,10 +79,10 @@ describe("recrutement par lots", () => {
     const s = baseState(now);
     s.troops.hoplite = 0;
     const dur = TROOPS.hoplite.duration * 1000 * SPEED;
-    s.troopQueue = { type: "hoplite", remaining: 3, nextAt: now + dur };
+    s.troopQueue = [{ type: "hoplite", remaining: 3, nextAt: now + dur }];
     const after = applyElapsed(s, now + dur * 3 + 1);
     expect(after.troops.hoplite).toBe(3);
-    expect(after.troopQueue).toBeNull();
+    expect(after.troopQueue.length).toBe(0);
   });
 
   it("ne recrute que les lots déjà dus", () => {
@@ -89,11 +90,11 @@ describe("recrutement par lots", () => {
     const s = baseState(now);
     s.troops.hoplite = 0;
     const dur = TROOPS.hoplite.duration * 1000 * SPEED;
-    s.troopQueue = { type: "hoplite", remaining: 3, nextAt: now + dur };
+    s.troopQueue = [{ type: "hoplite", remaining: 3, nextAt: now + dur }];
     const after = applyElapsed(s, now + dur * 1.5);
     expect(after.troops.hoplite).toBe(1);
-    expect(after.troopQueue).not.toBeNull();
-    expect(after.troopQueue.remaining).toBe(2);
+    expect(after.troopQueue.length).toBe(1);
+    expect(after.troopQueue[0].remaining).toBe(2);
   });
 });
 
@@ -300,5 +301,85 @@ describe("cités rivales (bots)", () => {
       expect(rivaux[i - 1].power).toBeGreaterThanOrEqual(rivaux[i].power);
     }
     expect(playerScore(s)).toBeGreaterThan(0);
+  });
+});
+
+describe("files d'attente séquentielles", () => {
+  it("les emplacements s'ouvrent avec le niveau de Sénat / Port / Caserne", () => {
+    expect(buildSlots(1)).toBe(1);
+    expect(buildSlots(5)).toBe(2);
+    expect(buildSlots(10)).toBe(3);
+    expect(buildSlots(20)).toBe(3); // plafonné
+
+    expect(shipSlots(0)).toBe(1);
+    expect(shipSlots(3)).toBe(4);
+    expect(shipSlots(50)).toBe(10); // plafonné
+
+    expect(troopSlots(0)).toBe(1);
+    expect(troopSlots(4)).toBe(5);
+    expect(troopSlots(50)).toBe(10); // plafonné
+  });
+
+  it("un chantier en file démarre à la fin du précédent, pas en parallèle", () => {
+    const now = Date.now();
+    const s = baseState(now);
+    s.islands[0].buildings.scierie = 1;
+    s.islands[0].queue = [
+      { key: "senat", targetLevel: 2, endsAt: now + 1000 },
+      { key: "scierie", targetLevel: 2, endsAt: null },
+    ];
+
+    // Juste après la fin du premier : le second démarre seulement maintenant
+    const after = applyElapsed(s, now + 1000);
+    expect(after.islands[0].buildings.senat).toBe(2);
+    expect(after.islands[0].buildings.scierie).toBe(1); // pas encore construit
+    expect(after.islands[0].queue.length).toBe(1);
+    expect(after.islands[0].queue[0].endsAt).toBeGreaterThan(now + 1000);
+  });
+
+  it("rattrape plusieurs achèvements d'un coup après une absence", () => {
+    const now = Date.now();
+    const s = baseState(now);
+    s.ships.peche = 0;
+    s.ships.explorateur = 0;
+    const d = (t) => SHIPS[t].duration * 1000 * SPEED;
+    s.shipQueue = [
+      { type: "peche", endsAt: now + d("peche") },
+      { type: "explorateur", endsAt: null },
+    ];
+
+    const after = applyElapsed(s, now + d("peche") + d("explorateur") + 1);
+    expect(after.ships.peche).toBe(1);
+    expect(after.ships.explorateur).toBe(1);
+    expect(after.shipQueue.length).toBe(0);
+  });
+
+  it("migre une sauvegarde de l'ancien format sans perdre le chantier en cours", () => {
+    const now = Date.now();
+    const legacy = baseState(now);
+    legacy.islands[0].queue = { key: "senat", targetLevel: 2, endsAt: now + 5000 };
+    legacy.shipQueue = { type: "peche", endsAt: now + 5000 };
+    legacy.troopQueue = { type: "hoplite", remaining: 2, nextAt: now + 5000 };
+
+    const after = applyElapsed(legacy, now);
+    expect(Array.isArray(after.islands[0].queue)).toBe(true);
+    expect(after.islands[0].queue[0].key).toBe("senat");
+    expect(Array.isArray(after.shipQueue)).toBe(true);
+    expect(after.shipQueue[0].type).toBe("peche");
+    expect(Array.isArray(after.troopQueue)).toBe(true);
+    expect(after.troopQueue[0].remaining).toBe(2);
+  });
+
+  it("migre une sauvegarde sans chantier en cours vers des files vides", () => {
+    const now = Date.now();
+    const legacy = baseState(now);
+    legacy.islands[0].queue = null;
+    legacy.shipQueue = null;
+    legacy.troopQueue = null;
+
+    const after = applyElapsed(legacy, now);
+    expect(after.islands[0].queue).toEqual([]);
+    expect(after.shipQueue).toEqual([]);
+    expect(after.troopQueue).toEqual([]);
   });
 });

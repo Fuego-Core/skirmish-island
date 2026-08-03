@@ -95,12 +95,12 @@ export default function App() {
   const missionList = MISSIONS.map((m) => ({ ...m, done: m.check(game), claimed: !!game.claimedMissions[m.id] }));
   const visibleMissions = missionList.filter((m) => !m.claimed).slice(0, 3);
   const claimableCount = visibleMissions.filter((m) => m.done).length;
-  const citeReady = game.islands.some((i) => i.queue && nowTick >= i.queue.endsAt - 500);
+  const citeReady = game.islands.some((i) => (i.queue || []).some((q) => q.endsAt && nowTick >= q.endsAt - 500));
   const badges = {
     cite: claimableCount > 0 ? String(claimableCount) : citeReady ? "!" : null,
     carte: null,
-    armee: game.troopQueue && nowTick >= game.troopQueue.nextAt - 500 ? "!" : null,
-    port: game.shipQueue && nowTick >= game.shipQueue.endsAt - 500 ? "!" : null,
+    armee: (game.troopQueue || []).some((q) => q.nextAt && nowTick >= q.nextAt - 500) ? "!" : null,
+    port: (game.shipQueue || []).some((q) => q.endsAt && nowTick >= q.endsAt - 500) ? "!" : null,
     rapports: unreadReports > 0 ? String(unreadReports) : null,
     empire: null,
   };

@@ -11,3 +11,10 @@ export const TROOPS = {
   catapulte:{ label: "Catapulte", atk: 40, def: 2, upkeep: 3, siege: true, requiresCaserne: 5, duration: 80,
     cost: { bois: 320, pierre: 180, fer: 260, or: 80, ble: 90 }, desc: "Dévastatrice — nécessite un bateau de siège." },
 };
+
+// Emplacements de file à la caserne : un de plus par niveau de Caserne,
+// plafonné. Les lots sont levés l'un après l'autre.
+export const TROOP_SLOTS_MAX = 10;
+export function troopSlots(caserneLevel) {
+  return Math.max(1, Math.min(TROOP_SLOTS_MAX, caserneLevel + 1));
+}

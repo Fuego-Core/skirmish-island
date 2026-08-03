@@ -51,7 +51,7 @@ export function CityScene({ isl, onTap, openKey, goldHi }) {
         const level = isl.buildings[key];
         const built = level > 0;
         const active = openKey === key;
-        const building = isl.queue && isl.queue.key === key;
+        const building = (isl.queue || []).some((q) => q.key === key);
         const portrait = BUILDING_PORTRAITS[key];
         return (
           <g key={key} onClick={() => onTap(key)} style={{ cursor: "pointer" }}>

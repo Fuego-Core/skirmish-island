@@ -1,15 +1,30 @@
 import { RES, SPEED, REGEN_MS, RAID_INTERVAL_MS, BOT_RAID_INTERVAL_MS, EVENT_INTERVAL_MS, MARCHAND_DUREE_MS } from "./constants.js";
-import { BUILDINGS, prodPerHour, storageCap } from "./buildings.js";
+import { BUILDINGS, prodPerHour, storageCap, buildDuration } from "./buildings.js";
 import { TROOPS } from "./troops.js";
-import { PECHE_BLE_H } from "./ships.js";
+import { SHIPS, PECHE_BLE_H } from "./ships.js";
 import { FACTIONS } from "./factions.js";
 import { tileState, regionDist } from "./world.js";
 import { tilePower, botRaidPower, botName, knownBots } from "./bots.js";
 import { freshBuildings } from "./state.js";
 
+// ---- Migration des sauvegardes ----
+// Les files étaient auparavant un seul chantier/commande à la fois (objet ou
+// null) ; elles sont désormais des tableaux. On convertit à la volée pour ne
+// pas perdre une partie en cours.
+export function migrateQueues(s) {
+  s.islands.forEach((isl) => {
+    if (!Array.isArray(isl.queue)) isl.queue = isl.queue ? [isl.queue] : [];
+  });
+  if (!Array.isArray(s.shipQueue)) s.shipQueue = s.shipQueue ? [s.shipQueue] : [];
+  if (!Array.isArray(s.troopQueue)) s.troopQueue = s.troopQueue ? [s.troopQueue] : [];
+  return s;
+}
+
 // ---- Simulation du temps écoulé ----
 export function applyElapsed(state, now) {
-  const s = JSON.parse(JSON.stringify(state));
+  const s = migrateQueues(JSON.parse(JSON.stringify(state)));
+  const fShip = (s.faction && FACTIONS[s.faction] && FACTIONS[s.faction].shipSpeed) || 1;
+  const fTroop = (s.faction && FACTIONS[s.faction] && FACTIONS[s.faction].troopSpeed) || 1;
 
   // Régénération : les îles pillées se repeuplent après un délai
   Object.keys(s.conquered).forEach((k) => {
@@ -17,23 +32,49 @@ export function applyElapsed(state, now) {
     if (!s.colonized[k] && now - ts > REGEN_MS) delete s.conquered[k];
   });
 
-  // Chantiers par île
+  // Chantiers par île — file séquentielle : le suivant démarre à la fin du
+  // précédent, y compris pour rattraper une longue absence hors ligne.
   s.islands.forEach((isl) => {
-    if (isl.queue && now >= isl.queue.endsAt) {
-      isl.buildings[isl.queue.key] = isl.queue.targetLevel;
-      isl.queue = null;
+    let guard = 0;
+    while (isl.queue.length > 0 && isl.queue[0].endsAt && now >= isl.queue[0].endsAt && guard < 50) {
+      guard += 1;
+      const done = isl.queue.shift();
+      isl.buildings[done.key] = done.targetLevel;
+      const next = isl.queue[0];
+      if (next) {
+        const dur = buildDuration(next.key, next.targetLevel - 1, isl.buildings.senat);
+        next.endsAt = done.endsAt + dur * 1000;
+      }
     }
   });
-  // Bateau
-  if (s.shipQueue && now >= s.shipQueue.endsAt) { s.ships[s.shipQueue.type] += 1; s.shipQueue = null; }
-  // Recrutement par lots
-  if (s.troopQueue) {
-    const dur = TROOPS[s.troopQueue.type].duration * 1000 * SPEED;
-    while (s.troopQueue && now >= s.troopQueue.nextAt) {
-      s.troops[s.troopQueue.type] += 1;
-      s.troopQueue.remaining -= 1;
-      if (s.troopQueue.remaining <= 0) { s.troopQueue = null; break; }
-      s.troopQueue.nextAt += dur;
+  // Chantier naval — même principe
+  {
+    let guard = 0;
+    while (s.shipQueue.length > 0 && s.shipQueue[0].endsAt && now >= s.shipQueue[0].endsAt && guard < 60) {
+      guard += 1;
+      const done = s.shipQueue.shift();
+      s.ships[done.type] += 1;
+      const next = s.shipQueue[0];
+      if (next) next.endsAt = done.endsAt + SHIPS[next.type].duration * 1000 * SPEED * fShip;
+    }
+  }
+  // Recrutement — chaque entrée est un lot, les unités sortent une par une
+  {
+    let guard = 0;
+    while (s.troopQueue.length > 0 && guard < 600) {
+      const head = s.troopQueue[0];
+      if (!head.nextAt || now < head.nextAt) break;
+      guard += 1;
+      s.troops[head.type] += 1;
+      head.remaining -= 1;
+      if (head.remaining <= 0) {
+        const finishedAt = head.nextAt;
+        s.troopQueue.shift();
+        const next = s.troopQueue[0];
+        if (next) next.nextAt = finishedAt + TROOPS[next.type].duration * 1000 * SPEED * fTroop;
+      } else {
+        head.nextAt += TROOPS[head.type].duration * 1000 * SPEED * fTroop;
+      }
     }
   }
   // Explorations
@@ -50,7 +91,7 @@ export function applyElapsed(state, now) {
     const key = s.colonizingTile.key;
     const [pxs, pys] = key.split("|")[1].split(",").map(Number);
     const region = s.colonizingTile.region || { gx: 0, gy: 0 };
-    s.islands.push({ id: s.nextIslandId, name: `Colonie ${s.islands.length}`, region, pos: { px: pxs, py: pys }, buildings: freshBuildings(false), queue: null, esclaves: 0 });
+    s.islands.push({ id: s.nextIslandId, name: `Colonie ${s.islands.length}`, region, pos: { px: pxs, py: pys }, buildings: freshBuildings(false), queue: [], esclaves: 0 });
     s.colonized[key] = s.nextIslandId;
     s.nextIslandId += 1;
     s.colonizingTile = null;

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { RES, SPEED } from "../game/constants.js";
-import { BUILDINGS, upgradeCost, buildDuration } from "../game/buildings.js";
-import { SHIPS } from "../game/ships.js";
-import { TROOPS } from "../game/troops.js";
+import { BUILDINGS, upgradeCost, buildDuration, buildSlots } from "../game/buildings.js";
+import { SHIPS, shipSlots } from "../game/ships.js";
+import { TROOPS, troopSlots } from "../game/troops.js";
 import { FACTIONS } from "../game/factions.js";
 import { MISSIONS } from "../game/missions.js";
 import { rk, tileState, absDist } from "../game/world.js";
@@ -21,19 +21,27 @@ function reportTitle(rep) {
 
 // Compare l'état avant/après un tick et notifie les chantiers/flottes qui
 // viennent de se terminer, ainsi que tout nouveau rapport (combat ou événement).
+// Une entrée de file est terminée quand la file raccourcit : les entrées ne
+// sont retirées que par le moteur, à l'achèvement. Après une longue absence
+// plusieurs peuvent tomber d'un coup — on ne prévient qu'une fois, pour ne pas
+// noyer le joueur sous les notifications au retour.
+function headCompleted(beforeQueue, afterQueue) {
+  const before = beforeQueue || [], after = afterQueue || [];
+  return after.length < before.length ? before[0] : null;
+}
+
 function notifyCompletions(before, after) {
   before.islands.forEach((isl, i) => {
     const nextIsl = after.islands[i];
-    if (isl.queue && nextIsl && !nextIsl.queue) {
-      notify("Chantier terminé", `${BUILDINGS[isl.queue.key].label} — niveau ${isl.queue.targetLevel} atteint sur ${isl.name}.`);
-    }
+    if (!nextIsl) return;
+    const done = headCompleted(isl.queue, nextIsl.queue);
+    if (done) notify("Chantier terminé", `${BUILDINGS[done.key].label} — niveau ${done.targetLevel} atteint sur ${isl.name}.`);
   });
-  if (before.shipQueue && !after.shipQueue) {
-    notify("Navire prêt", `${SHIPS[before.shipQueue.type].label} a rejoint ta flotte.`);
-  }
-  if (before.troopQueue && !after.troopQueue) {
-    notify("Troupes recrutées", `${TROOPS[before.troopQueue.type].label} — recrutement terminé.`);
-  }
+  const ship = headCompleted(before.shipQueue, after.shipQueue);
+  if (ship) notify("Navire prêt", `${SHIPS[ship.type].label} a rejoint ta flotte.`);
+
+  const troop = headCompleted(before.troopQueue, after.troopQueue);
+  if (troop) notify("Troupes recrutées", `${TROOPS[troop.type].label} — recrutement terminé.`);
   if (after.reports.length > 0 && JSON.stringify(after.reports[0]) !== JSON.stringify(before.reports[0])) {
     notify(reportTitle(after.reports[0]), "Nouveau rapport disponible dans l'onglet Rapports.");
   }
@@ -102,8 +110,12 @@ export function useGame() {
     setGame((g) => {
       if (!g) return g;
       const isl = g.islands[g.activeIsland];
-      if (isl.queue) return g;
-      const level = isl.buildings[key];
+      const queue = isl.queue || [];
+      if (queue.length >= buildSlots(isl.buildings.senat)) return g;
+      // Niveau visé en tenant compte des améliorations déjà en file sur ce
+      // même bâtiment (le coût suit donc la progression, pas le niveau actuel).
+      const pending = queue.filter((q) => q.key === key).length;
+      const level = isl.buildings[key] + pending;
       if (BUILDINGS[key].maxLevel && level >= BUILDINGS[key].maxLevel) return g;
       const req = BUILDINGS[key].requires;
       if (req && Object.keys(req).some((rq) => isl.buildings[rq] < req[rq])) return g;
@@ -111,32 +123,44 @@ export function useGame() {
       if (!RES.every((r) => g.resources[r] >= cost[r])) return g;
       const s = JSON.parse(JSON.stringify(g));
       RES.forEach((r) => (s.resources[r] -= cost[r]));
-      const dur = buildDuration(key, level, isl.buildings.senat);
-      s.islands[s.activeIsland].queue = { key, targetLevel: level + 1, endsAt: Date.now() + dur * 1000 };
+      const q = s.islands[s.activeIsland].queue;
+      const entry = { key, targetLevel: level + 1, endsAt: null };
+      // Le premier de la file démarre tout de suite ; les suivants attendent
+      // leur tour (le moteur leur donnera un endsAt à ce moment-là).
+      if (q.length === 0) {
+        entry.endsAt = Date.now() + buildDuration(key, level, isl.buildings.senat) * 1000;
+      }
+      q.push(entry);
       return s;
     });
   }, []);
 
   const buildShip = useCallback((type) => {
     setGame((g) => {
-      if (!g || g.shipQueue) return g;
-      const ship = SHIPS[type];
+      if (!g) return g;
       const bestPort = Math.max(...g.islands.map((i) => i.buildings.port));
+      if ((g.shipQueue || []).length >= shipSlots(bestPort)) return g;
+      const ship = SHIPS[type];
       if (bestPort < ship.requiresPort) return g;
       if (!RES.every((r) => g.resources[r] >= ship.cost[r])) return g;
       const s = JSON.parse(JSON.stringify(g));
       RES.forEach((r) => (s.resources[r] -= ship.cost[r]));
       const fShip = (g.faction && FACTIONS[g.faction].shipSpeed) || 1;
-      s.shipQueue = { type, endsAt: Date.now() + ship.duration * 1000 * SPEED * fShip };
+      const entry = { type, endsAt: null };
+      if (s.shipQueue.length === 0) {
+        entry.endsAt = Date.now() + ship.duration * 1000 * SPEED * fShip;
+      }
+      s.shipQueue.push(entry);
       return s;
     });
   }, []);
 
   const recruitTroop = useCallback((type, count) => {
     setGame((g) => {
-      if (!g || g.troopQueue) return g;
-      const t = TROOPS[type];
+      if (!g) return g;
       const bestCaserne = Math.max(...g.islands.map((i) => i.buildings.caserne));
+      if ((g.troopQueue || []).length >= troopSlots(bestCaserne)) return g;
+      const t = TROOPS[type];
       if (bestCaserne < t.requiresCaserne) return g;
       const totalCost = {};
       RES.forEach((r) => (totalCost[r] = t.cost[r] * count));
@@ -144,7 +168,11 @@ export function useGame() {
       const s = JSON.parse(JSON.stringify(g));
       RES.forEach((r) => (s.resources[r] -= totalCost[r]));
       const fTroop = (g.faction && FACTIONS[g.faction].troopSpeed) || 1;
-      s.troopQueue = { type, remaining: count, nextAt: Date.now() + t.duration * 1000 * SPEED * fTroop };
+      const entry = { type, remaining: count, nextAt: null };
+      if (s.troopQueue.length === 0) {
+        entry.nextAt = Date.now() + t.duration * 1000 * SPEED * fTroop;
+      }
+      s.troopQueue.push(entry);
       return s;
     });
   }, []);

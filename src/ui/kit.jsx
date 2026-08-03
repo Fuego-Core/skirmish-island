@@ -103,6 +103,35 @@ export const QueueCard = ({ icon, label, remaining }) => (
   </Card>
 );
 
+// File d'attente visible : la première ligne décompte, les suivantes affichent
+// leur rang. `items` = [{ icon, label, remaining }] — `remaining` absent = en attente.
+export const QueueList = ({ title, slots, used, items }) => (
+  <Card style={{ borderColor: `${C.goldDim}88`, marginBottom: 8, padding: "11px 14px" }}>
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: items.length ? 9 : 0 }}>
+      <span style={{ ...fd, fontSize: 10, fontWeight: 600, letterSpacing: 1.6, textTransform: "uppercase", color: C.gold }}>{title}</span>
+      <span style={{ ...fmono, fontSize: 10.5, fontWeight: 700, color: used >= slots ? C.bad : C.textFaint }}>{used}/{slots}</span>
+    </div>
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      {items.map((it, i) => (
+        <div key={i} style={{
+          display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8,
+          padding: "7px 10px", borderRadius: 8,
+          background: i === 0 ? "rgba(184,132,31,0.10)" : C.inset,
+          border: `1px solid ${i === 0 ? `${C.gold}66` : "transparent"}`,
+        }}>
+          <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, minWidth: 0 }}>
+            <I name={it.icon} size={14} color={i === 0 ? C.gold : C.textFaint} />
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: i === 0 ? C.text : C.textDim }}>{it.label}</span>
+          </span>
+          <span style={{ ...fmono, fontSize: 11.5, fontWeight: 700, color: i === 0 ? C.gold : C.textFaint, flexShrink: 0 }}>
+            {i === 0 && it.remaining ? it.remaining : `#${i + 1}`}
+          </span>
+        </div>
+      ))}
+    </div>
+  </Card>
+);
+
 export const fmtTime = (ms) => {
   const sec = Math.max(0, Math.ceil(ms / 1000));
   const m = Math.floor(sec / 60);

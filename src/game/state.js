@@ -33,15 +33,15 @@ export function newGameState() {
     resources: DEV
       ? { bois: 80000, pierre: 80000, fer: 80000, or: 50000, ble: 60000 }
       : { bois: 300, pierre: 300, fer: 220, or: 100, ble: 250 },
-    islands: [{ id: 1, name: "Cité mère", region: r0, pos: { px: center, py: center }, buildings: freshBuildings(true), queue: null, esclaves: 0 }],
+    islands: [{ id: 1, name: "Cité mère", region: r0, pos: { px: center, py: center }, buildings: freshBuildings(true), queue: [], esclaves: 0 }],
     activeIsland: 0,
     ships: DEV ? { explorateur: 5, colonisation: 3, transport: 5, peche: 2, siege: 2 }
                : { explorateur: 0, colonisation: 0, transport: 0, peche: 0, siege: 0 },
     troops: DEV ? { hoplite: 60, archer: 60, cavalier: 25, catapulte: 6, belier: 8 }
                 : { hoplite: 0, archer: 0, cavalier: 0, catapulte: 0, belier: 0 },
     esclaves: DEV ? 6 : 0,
-    shipQueue: null,
-    troopQueue: null, // { type, remaining, nextAt }
+    shipQueue: [],    // [{ type, endsAt }] — séquentiel, seul le premier a un endsAt
+    troopQueue: [],   // [{ type, remaining, nextAt }] — un lot par entrée
     explored,
     colonized: { [rk(r0, center, center)]: 1 },
     conquered: {},

@@ -1,7 +1,7 @@
 import { C, RES } from "../game/constants.js";
-import { SHIPS, PECHE_BLE_H } from "../game/ships.js";
+import { SHIPS, PECHE_BLE_H, shipSlots } from "../game/ships.js";
 import { SPEED } from "../game/constants.js";
-import { Card, SectionTitle, QueueCard, Btn, CostRow, fmtTime } from "../ui/kit.jsx";
+import { Card, SectionTitle, QueueList, Btn, CostRow, fmtTime } from "../ui/kit.jsx";
 import shipExplorateur from "../assets/images/ships/ship-explorateur.webp";
 import shipPeche from "../assets/images/ships/ship-peche.webp";
 import shipTransport from "../assets/images/ships/ship-transport.webp";
@@ -29,8 +29,17 @@ function ShipPortrait({ type, dim }) {
 export function PortTab({ game, nowTick, bestPort, buildShip }) {
   return (
     <>
-      {game.shipQueue && (
-        <QueueCard icon={game.shipQueue.type} label={`${SHIPS[game.shipQueue.type].label} en chantier`} remaining={fmtTime(game.shipQueue.endsAt - nowTick)} />
+      {(game.shipQueue || []).length > 0 && (
+        <QueueList
+          title="Chantier naval"
+          slots={shipSlots(bestPort)}
+          used={game.shipQueue.length}
+          items={game.shipQueue.map((q) => ({
+            icon: q.type,
+            label: SHIPS[q.type].label,
+            remaining: q.endsAt ? fmtTime(q.endsAt - nowTick) : null,
+          }))}
+        />
       )}
       {bestPort === 0 && (
         <Card style={{ borderColor: C.bad, textAlign: "center", marginBottom: 8 }}>
@@ -42,7 +51,7 @@ export function PortTab({ game, nowTick, bestPort, buildShip }) {
         {Object.keys(SHIPS).map((type) => {
           const ship = SHIPS[type];
           const portOk = bestPort >= ship.requiresPort;
-          const busy = !!game.shipQueue;
+          const busy = (game.shipQueue || []).length >= shipSlots(bestPort);
           return (
             <Card key={type}>
               <div style={{ display: "flex", gap: 12, marginBottom: 10 }}>

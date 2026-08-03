@@ -1,8 +1,8 @@
 import { C, RES } from "../game/constants.js";
-import { TROOPS } from "../game/troops.js";
+import { TROOPS, troopSlots } from "../game/troops.js";
 import { SPEED } from "../game/constants.js";
 import { I } from "../ui/Icon.jsx";
-import { Card, SectionTitle, QueueCard, Btn, CostRow, fmtTime } from "../ui/kit.jsx";
+import { Card, SectionTitle, QueueList, Btn, CostRow, fmtTime } from "../ui/kit.jsx";
 import troopHoplite from "../assets/images/troops/troop-hoplite.webp";
 import troopArcher from "../assets/images/troops/troop-archer.webp";
 import troopCavalier from "../assets/images/troops/troop-cavalier.webp";
@@ -36,9 +36,18 @@ export function ArmyTab({ game, nowTick, bestCaserne, armyPower, upkeep, recruit
           <span style={{ fontFamily: "monospace", color: upkeep > 0 ? C.bad : C.textDim }}>−{upkeep}/h</span>
         </span>
       </Card>
-      {game.troopQueue && (
+      {(game.troopQueue || []).length > 0 && (
         <div style={{ marginTop: 8 }}>
-          <QueueCard icon={game.troopQueue.type} label={`${TROOPS[game.troopQueue.type].label} — reste ×${game.troopQueue.remaining}`} remaining={fmtTime(game.troopQueue.nextAt - nowTick)} />
+          <QueueList
+            title="Caserne"
+            slots={troopSlots(bestCaserne)}
+            used={game.troopQueue.length}
+            items={game.troopQueue.map((q) => ({
+              icon: q.type,
+              label: `${TROOPS[q.type].label} — reste ×${q.remaining}`,
+              remaining: q.nextAt ? fmtTime(q.nextAt - nowTick) : null,
+            }))}
+          />
         </div>
       )}
       {bestCaserne === 0 && (
@@ -51,7 +60,7 @@ export function ArmyTab({ game, nowTick, bestCaserne, armyPower, upkeep, recruit
         {Object.keys(TROOPS).map((type) => {
           const t = TROOPS[type];
           const caserneOk = bestCaserne >= t.requiresCaserne;
-          const busy = !!game.troopQueue;
+          const busy = (game.troopQueue || []).length >= troopSlots(bestCaserne);
           return (
             <Card key={type}>
               <div style={{ display: "flex", gap: 12, marginBottom: 10 }}>

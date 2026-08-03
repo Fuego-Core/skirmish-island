@@ -1,5 +1,5 @@
 import { C, RES, RES_ICONN, RES_COLOR, GROUP_COLOR } from "../../game/constants.js";
-import { BUILDINGS, B_ICON, upgradeCost, buildDuration, prodPerHour, storageCap } from "../../game/buildings.js";
+import { BUILDINGS, B_ICON, upgradeCost, buildDuration, prodPerHour, storageCap, buildSlots } from "../../game/buildings.js";
 import { I } from "../Icon.jsx";
 import { Sheet, Btn, fmtNum, fmtTime } from "../kit.jsx";
 import { BUILDING_PORTRAITS } from "../buildingPortraits.js";
@@ -12,15 +12,21 @@ export function BuildingSheet({
   const key = buildingKey;
   const b = BUILDINGS[key];
   const col = GROUP_COLOR[b.group];
-  const level = isl.buildings[key];
+  const queue = isl.queue || [];
+  const slots = buildSlots(isl.buildings.senat);
+  // Niveau atteint une fois la file écoulée : coût et durée affichés suivent
+  // les améliorations déjà en attente sur ce bâtiment.
+  const pending = queue.filter((q) => q.key === key).length;
+  const level = isl.buildings[key] + pending;
   const cost = upgradeCost(key, level);
   const req = b.requires;
   const reqOk = !req || Object.keys(req).every((rq) => isl.buildings[rq] >= req[rq]);
   const canAfford = RES.every((r) => resources[r] >= cost[r]);
   const maxed = b.maxLevel && level >= b.maxLevel;
-  const busy = !!isl.queue;
+  const busy = queue.length >= slots;
   const dur = buildDuration(key, level, isl.buildings.senat);
-  const inProgress = isl.queue && isl.queue.key === key;
+  const active = queue[0] && queue[0].key === key ? queue[0] : null;
+  const inProgress = pending > 0;
 
   return (
     <Sheet open onClose={onClose} title={b.label.toUpperCase()} icon={B_ICON[key]} accent={col}>
@@ -76,8 +82,8 @@ export function BuildingSheet({
       )}
       {inProgress && (
         <div style={{ background: "rgba(201,161,59,0.10)", border: `1px solid ${C.gold}`, borderRadius: 9, padding: "11px 13px", marginBottom: 12, fontSize: 12, color: C.goldHi, display: "flex", justifyContent: "space-between" }}>
-          <span>Chantier en cours</span>
-          <span style={{ fontFamily: "monospace" }}>{fmtTime(isl.queue.endsAt - nowTick)}</span>
+          <span>{active ? "Chantier en cours" : `En file (${pending})`}</span>
+          <span style={{ fontFamily: "monospace" }}>{active ? fmtTime(active.endsAt - nowTick) : "en attente"}</span>
         </div>
       )}
 
@@ -124,7 +130,7 @@ export function BuildingSheet({
             })}
           </div>
           <div style={{ display: "flex", justifyContent: "center" }}>
-            <Btn primary label={`${level > 0 ? "Améliorer" : "Construire"} · ${fmtTime(dur * 1000)}`}
+            <Btn primary label={`${busy ? "File pleine" : level > 0 ? "Améliorer" : "Construire"} · ${fmtTime(dur * 1000)}`}
               disabled={busy || !canAfford || !reqOk}
               onClick={() => { onUpgrade(key); onClose(); }} />
           </div>

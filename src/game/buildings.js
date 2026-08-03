@@ -20,6 +20,17 @@ export const GROUPS = [["prod", "Production"], ["infra", "Infrastructure"], ["mi
 
 export const B_ICON = { senat: "senat", scierie: "scierie", carriere: "carriere", mine_fer: "mine_fer", mine_or: "mine_or", ferme: "ferme", entrepot: "entrepot", grenier: "grenier", marche: "marche", port: "port", caserne: "caserne", muraille: "muraille", colosse: "colosse" };
 
+// ---- Files d'attente ----
+// Nombre de chantiers qu'on peut mettre en file sur une île. Ils se
+// construisent l'un après l'autre : plus d'emplacements ne fait pas construire
+// plus vite, ça évite juste d'avoir à relancer à chaque fin de chantier.
+export const BUILD_SLOTS_MAX = 3;
+export function buildSlots(senatLevel) {
+  if (senatLevel >= 10) return 3;
+  if (senatLevel >= 5) return 2;
+  return 1;
+}
+
 // ---- Formules ----
 export function prodPerHour(level) { return level <= 0 ? 0 : Math.round(30 * level * Math.pow(1.16, level - 1)); }
 export function storageCap(level) { return Math.round(600 * Math.pow(1.35, level)) * DEV_CAP_MULT; }
