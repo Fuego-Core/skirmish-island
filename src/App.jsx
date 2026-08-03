@@ -13,6 +13,7 @@ import { BuildingSheet } from "./ui/sheets/BuildingSheet.jsx";
 import { TileSheet } from "./ui/sheets/TileSheet.jsx";
 import { MissionsSheet } from "./ui/sheets/MissionsSheet.jsx";
 import { OnboardingSheet } from "./ui/sheets/OnboardingSheet.jsx";
+import { MarketSheet } from "./ui/sheets/MarketSheet.jsx";
 import { TitleScreen } from "./screens/TitleScreen.jsx";
 import { CityTab } from "./screens/CityTab.jsx";
 import { MapTab } from "./screens/MapTab.jsx";
@@ -29,7 +30,7 @@ export default function App() {
   const {
     game, setGame, nowTick,
     startUpgrade, buildShip, recruitTroop, startExplore, startColonize, startAttack,
-    tradeMarket, assignEsclave, startSpy, tradeEvent, claimMission, renameIsland,
+    acceptMarketOffer, postMarketOffer, cancelMarketOffer, assignEsclave, startSpy, tradeEvent, claimMission, renameIsland,
     exportSave, importSave, resetGame, chooseFaction,
   } = useGame();
 
@@ -37,9 +38,8 @@ export default function App() {
   const [openBuilding, setOpenBuilding] = useState(null);
   const [selectedTileKey, setSelectedTileKey] = useState(null);
   const [attackForm, setAttackForm] = useState({ hoplite: 0, archer: 0, cavalier: 0, catapulte: 0, belier: 0 });
-  const [marketFrom, setMarketFrom] = useState("bois");
-  const [marketTo, setMarketTo] = useState("fer");
   const [showMissions, setShowMissions] = useState(false);
+  const [showMarket, setShowMarket] = useState(false);
 
   const colosseDoneNow = game && game.faction
     ? Math.max(...game.islands.map((i) => i.buildings.colosse || 0)) >= 5
@@ -231,13 +231,20 @@ export default function App() {
       {openBuilding && (
         <BuildingSheet
           buildingKey={openBuilding} isl={isl} resources={game.resources} nowTick={nowTick}
-          marketFrom={marketFrom} setMarketFrom={setMarketFrom} marketTo={marketTo} setMarketTo={setMarketTo}
-          onClose={() => setOpenBuilding(null)} onUpgrade={startUpgrade} onTradeMarket={tradeMarket}
+          onClose={() => setOpenBuilding(null)} onUpgrade={startUpgrade}
+          onOpenMarket={() => { setOpenBuilding(null); setShowMarket(true); }}
         />
       )}
 
       {/* ═══ Sheet Missions ═══ */}
       <MissionsSheet open={showMissions} onClose={() => setShowMissions(false)} visibleMissions={visibleMissions} claimMission={claimMission} />
+
+      {/* ═══ Sheet Marché ═══ */}
+      <MarketSheet
+        open={showMarket} onClose={() => setShowMarket(false)}
+        resources={game.resources} marketOffers={game.marketOffers} nowTick={nowTick}
+        onAccept={acceptMarketOffer} onPost={postMarketOffer} onCancel={cancelMarketOffer}
+      />
 
       {/* ═══ Accueil — première ouverture après le choix de faction ═══ */}
       <OnboardingSheet open={!game.onboardingSeen} onClose={() => setGame((g) => ({ ...g, onboardingSeen: true }))} />

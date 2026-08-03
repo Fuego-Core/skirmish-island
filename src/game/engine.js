@@ -1,10 +1,11 @@
-import { RES, SPEED, REGEN_MS, RAID_INTERVAL_MS, BOT_RAID_INTERVAL_MS, EVENT_INTERVAL_MS, MARCHAND_DUREE_MS } from "./constants.js";
+import { RES, SPEED, REGEN_MS, RAID_INTERVAL_MS, BOT_RAID_INTERVAL_MS, EVENT_INTERVAL_MS, MARCHAND_DUREE_MS, MARKET_OFFER_INTERVAL_MS, MARKET_OFFERS_MAX } from "./constants.js";
 import { BUILDINGS, prodPerHour, storageCap, buildDuration } from "./buildings.js";
 import { TROOPS } from "./troops.js";
 import { SHIPS, PECHE_BLE_H } from "./ships.js";
 import { FACTIONS } from "./factions.js";
 import { tileState, regionDist } from "./world.js";
 import { tilePower, botRaidPower, botName, knownBots } from "./bots.js";
+import { generateBotOffer } from "./market.js";
 import { freshBuildings } from "./state.js";
 
 // ---- Migration des sauvegardes ----
@@ -272,6 +273,30 @@ export function applyElapsed(state, now) {
     });
     s.reports = s.reports.slice(0, 8);
     s.nextBotRaidAt += Math.round(BOT_RAID_INTERVAL_MS * (0.75 + Math.random() * 0.5));
+  }
+
+  // ---- Marché de l'Égée ----
+  // Offres postées par les cités rivales connues et par le joueur — plus
+  // d'échange automatique : chaque offre a un taux propre, se remplit après
+  // un délai (côté joueur) ou expire (côté rival) si personne ne l'accepte.
+  if (!s.marketOffers) s.marketOffers = [];
+  if (!s.nextMarketOfferAt) s.nextMarketOfferAt = now + MARKET_OFFER_INTERVAL_MS;
+  s.marketOffers = s.marketOffers.filter((o) => !(o.author === "bot" && o.expiresAt && now >= o.expiresAt));
+  s.marketOffers = s.marketOffers.filter((o) => {
+    if (o.author === "player" && o.fillAt && now >= o.fillAt) {
+      s.resources[o.wantRes] += o.wantAmt;
+      s.reports.unshift({ kind: "marche", giveRes: o.giveRes, giveAmt: o.giveAmt, wantRes: o.wantRes, wantAmt: o.wantAmt, at: o.fillAt });
+      s.reports = s.reports.slice(0, 8);
+      return false;
+    }
+    return true;
+  });
+  let marketGuard = 0;
+  while (now >= s.nextMarketOfferAt && marketGuard < 3) {
+    marketGuard += 1;
+    const offer = generateBotOffer(s, s.nextMarketOfferAt);
+    if (offer && s.marketOffers.length < MARKET_OFFERS_MAX) s.marketOffers.push(offer);
+    s.nextMarketOfferAt += Math.round(MARKET_OFFER_INTERVAL_MS * (0.7 + Math.random() * 0.6));
   }
 
   // ---- Économie ----

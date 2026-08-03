@@ -7,6 +7,8 @@ import { SHIPS, shipSlots } from "../ships.js";
 import { rk, tileState, enemyDefense, regionDist } from "../world.js";
 import { SPEED, REGEN_MS, BOT_GROWTH_MAX } from "../constants.js";
 import { botName, botGrowth, tilePower, knownBots, playerScore } from "../bots.js";
+import { MARKET_OFFERS_MAX, MARKET_OFFER_LIFETIME_MS } from "../constants.js";
+import { generateBotOffer } from "../market.js";
 
 // Construit un état de base isolé (raids/événements désactivés par défaut,
 // pour ne pas interférer avec les assertions du test en cours).
@@ -15,6 +17,7 @@ function baseState(now) {
   s.nextRaidAt = now + 1e9;
   s.nextBotRaidAt = now + 1e9;
   s.nextEventAt = now + 1e9;
+  s.nextMarketOfferAt = now + 1e9;
   s.lastSeen = now;
   return s;
 }
@@ -381,5 +384,52 @@ describe("files d'attente séquentielles", () => {
     expect(after.islands[0].queue).toEqual([]);
     expect(after.shipQueue).toEqual([]);
     expect(after.troopQueue).toEqual([]);
+  });
+});
+
+describe("marché de l'Égée", () => {
+  it("génère une offre rivale une fois des cités rivales connues", () => {
+    const now = Date.now();
+    const s = baseState(now);
+    const offer = generateBotOffer(s, now);
+    expect(offer).toBeTruthy();
+    expect(offer.author).toBe("bot");
+    expect(offer.giveRes).not.toBe(offer.wantRes);
+    expect(offer.giveAmt).toBeGreaterThan(0);
+    expect(offer.wantAmt).toBeGreaterThan(0);
+  });
+
+  it("respecte le plafond d'offres actives simultanées", () => {
+    const now = Date.now();
+    const s = baseState(now);
+    s.nextMarketOfferAt = now + 1000;
+    const after = applyElapsed(s, now + 1000 + MARKET_OFFERS_MAX * 200000);
+    expect(after.marketOffers.length).toBeLessThanOrEqual(MARKET_OFFERS_MAX);
+  });
+
+  it("une offre rivale expirée disparaît", () => {
+    const now = Date.now();
+    const s = baseState(now);
+    s.marketOffers = [{
+      id: "bot-x", author: "bot", botName: "Test",
+      giveRes: "bois", giveAmt: 100, wantRes: "fer", wantAmt: 150,
+      postedAt: now, expiresAt: now + 1000, fillAt: null,
+    }];
+    const after = applyElapsed(s, now + MARKET_OFFER_LIFETIME_MS + 2000);
+    expect(after.marketOffers.find((o) => o.id === "bot-x")).toBeUndefined();
+  });
+
+  it("une offre du joueur se remplit et crédite les ressources demandées", () => {
+    const now = Date.now();
+    const s = baseState(now);
+    const bleAvant = s.resources.ble;
+    s.marketOffers = [{
+      id: "player-x", author: "player", botName: null,
+      giveRes: "bois", giveAmt: 100, wantRes: "ble", wantAmt: 150,
+      postedAt: now, expiresAt: null, fillAt: now + 1000,
+    }];
+    const after = applyElapsed(s, now + 2000);
+    expect(after.marketOffers.find((o) => o.id === "player-x")).toBeUndefined();
+    expect(after.resources.ble).toBeCloseTo(bleAvant + 150, 0);
   });
 });

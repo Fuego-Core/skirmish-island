@@ -49,3 +49,9 @@ export const BOT_GROWTH_MAX = 1.5;                            // au plus × 2,5 
 export const REGEN_MS = DEV ? 180000 : 8 * 3600000;           // îles pillées : repeuplées après ce délai
 export const EVENT_INTERVAL_MS = DEV ? 150000 : 3 * 3600000;  // événements aléatoires
 export const MARCHAND_DUREE_MS = DEV ? 90000 : 45 * 60000;    // durée de l'offre du marchand
+
+// ---- Marché de l'Égée (offres postées par les cités rivales et le joueur) ----
+export const MARKET_OFFER_INTERVAL_MS = DEV ? 60000 : 45 * 60000;   // nouvelle offre rivale
+export const MARKET_OFFER_LIFETIME_MS = DEV ? 200000 : 6 * 3600000; // une offre rivale expire si pas acceptée
+export const MARKET_PLAYER_FILL_MS = DEV ? 100000 : 2 * 3600000;    // délai moyen avant qu'une offre postée soit remplie
+export const MARKET_OFFERS_MAX = 8;                                 // offres actives simultanées, tous auteurs confondus

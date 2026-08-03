@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { RES, SPEED } from "../game/constants.js";
+import { RES, SPEED, MARKET_PLAYER_FILL_MS, MARKET_OFFERS_MAX } from "../game/constants.js";
 import { BUILDINGS, upgradeCost, buildDuration, buildSlots } from "../game/buildings.js";
 import { SHIPS, shipSlots } from "../game/ships.js";
 import { TROOPS, troopSlots } from "../game/troops.js";
@@ -232,14 +232,47 @@ export function useGame() {
     });
   }, []);
 
-  const tradeMarket = useCallback((from, to, amount) => {
+  const acceptMarketOffer = useCallback((offerId) => {
     setGame((g) => {
-      if (!g || from === to) return g;
-      const bestMarche = Math.max(...g.islands.map((i) => i.buildings.marche));
-      if (bestMarche < 1 || g.resources[from] < amount) return g;
+      if (!g) return g;
+      const offer = (g.marketOffers || []).find((o) => o.id === offerId);
+      if (!offer || offer.author !== "bot" || g.resources[offer.wantRes] < offer.wantAmt) return g;
       const s = JSON.parse(JSON.stringify(g));
-      s.resources[from] -= amount;
-      s.resources[to] += Math.floor(amount / 1.5);
+      s.resources[offer.wantRes] -= offer.wantAmt;
+      s.resources[offer.giveRes] += offer.giveAmt;
+      s.marketOffers = s.marketOffers.filter((o) => o.id !== offerId);
+      return s;
+    });
+  }, []);
+
+  const postMarketOffer = useCallback((giveRes, giveAmt, wantRes, wantAmt) => {
+    setGame((g) => {
+      if (!g || giveRes === wantRes || giveAmt <= 0 || wantAmt <= 0) return g;
+      const bestMarche = Math.max(...g.islands.map((i) => i.buildings.marche));
+      if (bestMarche < 1 || g.resources[giveRes] < giveAmt) return g;
+      if ((g.marketOffers || []).length >= MARKET_OFFERS_MAX) return g;
+      const s = JSON.parse(JSON.stringify(g));
+      s.resources[giveRes] -= giveAmt;
+      const now = Date.now();
+      s.marketOffers.push({
+        id: `player-${now}-${Math.floor(Math.random() * 1e6)}`,
+        author: "player", botName: null,
+        giveRes, giveAmt, wantRes, wantAmt,
+        postedAt: now, expiresAt: null,
+        fillAt: now + Math.round(MARKET_PLAYER_FILL_MS * (0.7 + Math.random() * 0.6)),
+      });
+      return s;
+    });
+  }, []);
+
+  const cancelMarketOffer = useCallback((offerId) => {
+    setGame((g) => {
+      if (!g) return g;
+      const offer = (g.marketOffers || []).find((o) => o.id === offerId);
+      if (!offer || offer.author !== "player") return g;
+      const s = JSON.parse(JSON.stringify(g));
+      s.resources[offer.giveRes] += offer.giveAmt;
+      s.marketOffers = s.marketOffers.filter((o) => o.id !== offerId);
       return s;
     });
   }, []);
@@ -347,7 +380,7 @@ export function useGame() {
   return {
     game, setGame, nowTick,
     startUpgrade, buildShip, recruitTroop, startExplore, startColonize, startAttack,
-    tradeMarket, assignEsclave, startSpy, tradeEvent, claimMission, renameIsland,
+    acceptMarketOffer, postMarketOffer, cancelMarketOffer, assignEsclave, startSpy, tradeEvent, claimMission, renameIsland,
     exportSave, importSave, resetGame, chooseFaction,
   };
 }

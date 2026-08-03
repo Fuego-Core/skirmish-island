@@ -1,4 +1,4 @@
-import { C, RES, RES_ICONN, RES_COLOR, GROUP_COLOR } from "../../game/constants.js";
+import { C, RES, GROUP_COLOR } from "../../game/constants.js";
 import { BUILDINGS, B_ICON, upgradeCost, buildDuration, prodPerHour, storageCap, buildSlots } from "../../game/buildings.js";
 import { I } from "../Icon.jsx";
 import { Sheet, Btn, ResIcon, fmtNum, fmtTime } from "../kit.jsx";
@@ -6,8 +6,7 @@ import { BUILDING_PORTRAITS } from "../buildingPortraits.js";
 
 export function BuildingSheet({
   buildingKey, isl, resources, nowTick,
-  marketFrom, setMarketFrom, marketTo, setMarketTo,
-  onClose, onUpgrade, onTradeMarket,
+  onClose, onUpgrade, onOpenMarket,
 }) {
   const key = buildingKey;
   const b = BUILDINGS[key];
@@ -88,30 +87,11 @@ export function BuildingSheet({
       )}
 
       {key === "marche" && level > 0 && (
-        <div style={{ background: C.inset, borderRadius: 10, padding: "13px 14px", marginBottom: 13, border: `1px solid ${C.borderSoft}` }}>
-          <div style={{ fontSize: 11, color: C.textDim, marginBottom: 9 }}>Échange — 3 donnés contre 2 reçus</div>
-          <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap", marginBottom: 9 }}>
-            {RES.map((r) => (
-              <button key={"f" + r} onClick={() => setMarketFrom(r)}
-                style={{ padding: 5, borderRadius: 7, background: marketFrom === r ? `${RES_COLOR[r]}25` : "transparent", border: `1px solid ${marketFrom === r ? RES_COLOR[r] : C.border}`, cursor: "pointer", lineHeight: 0 }}>
-                <ResIcon r={r} size={19} dim={marketFrom !== r} />
-              </button>
-            ))}
-            <span style={{ fontSize: 13, color: C.gold, padding: "0 3px" }}>→</span>
-            {RES.map((r) => (
-              <button key={"t" + r} onClick={() => setMarketTo(r)}
-                style={{ padding: 5, borderRadius: 7, background: marketTo === r ? `${RES_COLOR[r]}25` : "transparent", border: `1px solid ${marketTo === r ? RES_COLOR[r] : C.border}`, cursor: "pointer", lineHeight: 0 }}>
-                <ResIcon r={r} size={19} dim={marketTo !== r} />
-              </button>
-            ))}
+        <div style={{ background: C.inset, borderRadius: 10, padding: "13px 14px", marginBottom: 13, border: `1px solid ${C.borderSoft}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+          <div style={{ fontSize: 12, color: C.textDim, lineHeight: 1.4 }}>
+            Offres réelles des cités rivales et des joueurs — taux variables, à repérer.
           </div>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {[300, 1500, 6000].map((amt) => (
-              <Btn key={amt} small label={`${fmtNum(amt)} → ${fmtNum(Math.floor(amt / 1.5))}`}
-                disabled={marketFrom === marketTo || resources[marketFrom] < amt}
-                onClick={() => onTradeMarket(marketFrom, marketTo, amt)} />
-            ))}
-          </div>
+          <Btn primary small label="Ouvrir le marché" onClick={onOpenMarket} />
         </div>
       )}
 
