@@ -51,9 +51,9 @@ export default function App() {
       <div style={{ minHeight: "100vh", position: "relative", display: "flex", alignItems: "center", justifyContent: "center", ...fb }}>
         <div style={{
           position: "fixed", inset: 0, zIndex: -1,
-          background: `radial-gradient(ellipse 60% 40% at 15% 8%, rgba(255,255,255,0.65) 0%, transparent 60%),
-            radial-gradient(ellipse 50% 35% at 88% 14%, rgba(216,196,150,0.35) 0%, transparent 65%),
-            linear-gradient(165deg, #fffdf7 0%, ${C.bg} 55%, ${C.bgDeep} 100%)`,
+          background: `radial-gradient(ellipse 60% 40% at 15% 8%, rgba(224,176,74,0.16) 0%, transparent 60%),
+            radial-gradient(ellipse 50% 35% at 88% 14%, rgba(169,123,58,0.14) 0%, transparent 65%),
+            linear-gradient(165deg, ${C.panel} 0%, ${C.bg} 55%, ${C.bgDeep} 100%)`,
         }} />
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
           <div style={{
@@ -116,16 +116,16 @@ export default function App() {
 
   return (
     <div style={{ minHeight: "100vh", position: "relative", color: C.text, ...fb }}>
-      {/* Fond "marbre ivoire" — dégradés superposés, aucune photo nécessaire */}
+      {/* Fond "bronze au crépuscule" — dégradés superposés, aucune photo nécessaire */}
       <div style={{
         position: "fixed", inset: 0, zIndex: -2,
-        background: `radial-gradient(ellipse 60% 40% at 15% 8%, rgba(255,255,255,0.65) 0%, transparent 60%),
-          radial-gradient(ellipse 50% 35% at 88% 14%, rgba(216,196,150,0.35) 0%, transparent 65%),
-          radial-gradient(ellipse 70% 50% at 28% 92%, rgba(200,175,120,0.22) 0%, transparent 60%),
-          radial-gradient(ellipse 55% 42% at 92% 88%, rgba(255,255,255,0.4) 0%, transparent 55%),
-          linear-gradient(165deg, #fffdf7 0%, ${C.bg} 55%, ${C.bgDeep} 100%)`,
+        background: `radial-gradient(ellipse 60% 40% at 15% 8%, rgba(224,176,74,0.14) 0%, transparent 60%),
+          radial-gradient(ellipse 50% 35% at 88% 14%, rgba(169,123,58,0.12) 0%, transparent 65%),
+          radial-gradient(ellipse 70% 50% at 28% 92%, rgba(120,85,40,0.16) 0%, transparent 60%),
+          radial-gradient(ellipse 55% 42% at 92% 88%, rgba(224,176,74,0.10) 0%, transparent 55%),
+          linear-gradient(165deg, ${C.panel} 0%, ${C.bg} 55%, ${C.bgDeep} 100%)`,
       }} />
-      <div style={{ position: "fixed", inset: 0, zIndex: -1, background: `radial-gradient(ellipse 130% 55% at 50% -10%, rgba(255,255,255,0.5) 0%, transparent 42%), radial-gradient(ellipse 140% 65% at 50% 112%, rgba(110,80,40,0.12) 0%, transparent 55%)` }} />
+      <div style={{ position: "fixed", inset: 0, zIndex: -1, background: `radial-gradient(ellipse 130% 55% at 50% -10%, rgba(224,176,74,0.10) 0%, transparent 42%), radial-gradient(ellipse 140% 65% at 50% 112%, rgba(0,0,0,0.25) 0%, transparent 55%)` }} />
       {colosseDone && !game.victoryShown && (
         <div style={{ position: "fixed", inset: 0, zIndex: 50, background: "rgba(3,5,8,0.78)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, animation: "fadeIn 0.25s ease-out" }}>
           <div style={{
