@@ -11,24 +11,26 @@ export const SPEED = DEV ? 0.15 : 1;
 export const DEV_CAP_MULT = DEV ? 300 : 1;
 
 // ---- Design tokens ----
-// Palette "marbre et bronze en plein jour" — ivoire chaud et bronze profond,
-// pensée pour une lecture premium et lumineuse sur mobile.
+// Palette "marbre et bronze en plein jour" — parchemin dense et bronze
+// profond. Voulue moins blanche/éblouissante que la première version claire :
+// fonds plus riches, cartes en parchemin plutôt que blanc pur, contraste
+// renforcé — un entre-deux entre le clair et le sombre.
 export const C = {
-  bg: "#f4ecd9", bgDeep: "#e7d9b8", panel: "#fffdf7", panelUp: "#ffffff",
-  border: "#d8c69c", borderSoft: "#e8dcb9",
-  text: "#2b2013", textDim: "#6d5c42", textFaint: "#998a6c",
-  gold: "#9c6f1f", goldHi: "#b8841f", goldDim: "#cfae76", bronze: "#7a5220",
-  copper: "#9c5f2e", ink: "#20160a",
-  ok: "#3f7a4c", okBg: "rgba(63,122,76,0.10)",
-  bad: "#b23b30", badBg: "rgba(178,59,48,0.10)",
+  bg: "#e8d9b7", bgDeep: "#d3bd8b", panel: "#f5ecd8", panelUp: "#faf2df",
+  border: "#c2a565", borderSoft: "#d9c493",
+  text: "#241a0d", textDim: "#5c4a2e", textFaint: "#8a7550",
+  gold: "#9c6f1f", goldHi: "#b8841f", goldDim: "#cfae76", bronze: "#6e4a1c",
+  copper: "#8f562a", ink: "#20160a",
+  ok: "#3f7a4c", okBg: "rgba(63,122,76,0.12)",
+  bad: "#b23b30", badBg: "rgba(178,59,48,0.12)",
   water: "#2f6b8a", empty: "#4d8a5f", inactive: "#b17a34", enemy: "#a94237", fog: "#a49879",
   // Surfaces "verre" (glassmorphism) et ombrage — utilisées par le kit UI et les scènes.
-  glass: "rgba(255,253,246,0.68)", glassHi: "rgba(255,255,255,0.82)", glassBorder: "rgba(120,90,40,0.14)",
-  shadowSoft: "0 10px 26px rgba(120,90,45,0.16)", shadowLift: "0 3px 10px rgba(120,90,45,0.13)",
-  glow: "0 0 20px rgba(160,120,30,0.22)",
+  glass: "rgba(245,236,216,0.72)", glassHi: "rgba(250,242,223,0.88)", glassBorder: "rgba(100,72,30,0.20)",
+  shadowSoft: "0 10px 26px rgba(90,65,30,0.22)", shadowLift: "0 3px 10px rgba(90,65,30,0.18)",
+  glow: "0 0 20px rgba(160,120,30,0.26)",
   // Surfaces "en creux" (encarts stats/coûts) et états inactifs — remplacent les
   // noirs semi-transparents qui supposaient un fond sombre.
-  inset: "rgba(120,90,40,0.06)", ghost: "rgba(90,65,30,0.045)",
+  inset: "rgba(100,72,30,0.09)", ghost: "rgba(80,58,25,0.07)",
 };
 
 export const RES = ["bois", "pierre", "fer", "or", "ble"];
