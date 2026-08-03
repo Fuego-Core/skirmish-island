@@ -1,9 +1,9 @@
 import { C, RES, RES_ICONN, GROUP_COLOR } from "../game/constants.js";
-import { BUILDINGS, GROUPS, B_ICON, buildSlots } from "../game/buildings.js";
+import { BUILDINGS, GROUPS, B_ICON, buildSlots, buildDuration } from "../game/buildings.js";
 import { upgradeCost } from "../game/buildings.js";
 import { I } from "../ui/Icon.jsx";
 import { CityScene } from "../ui/CityScene.jsx";
-import { Card, QueueList, Btn, fmtTime, fmtNum } from "../ui/kit.jsx";
+import { Card, SlotQueue, Btn, fmtTime, fmtNum } from "../ui/kit.jsx";
 import { haptic } from "../ui/haptics.js";
 import { BUILDING_PORTRAITS } from "../ui/buildingPortraits.js";
 
@@ -94,18 +94,14 @@ export function CityTab({
           onTap={(key) => { haptic(9); setOpenBuilding(key); }} />
       </div>
 
-      {(isl.queue || []).length > 0 && (
-        <QueueList
-          title="Chantiers"
-          slots={buildSlots(isl.buildings.senat)}
-          used={isl.queue.length}
-          items={isl.queue.map((q) => ({
-            icon: B_ICON[q.key],
-            label: `${BUILDINGS[q.key].label} → niv. ${q.targetLevel}`,
-            remaining: q.endsAt ? fmtTime(q.endsAt - nowTick) : null,
-          }))}
-        />
-      )}
+      {(isl.queue || []).length > 0 && (() => {
+        let cumulEnds = nowTick;
+        const items = isl.queue.map((q, i) => {
+          cumulEnds = i === 0 ? q.endsAt : cumulEnds + buildDuration(q.key, q.targetLevel - 1, isl.buildings.senat) * 1000;
+          return { portrait: BUILDING_PORTRAITS[q.key], icon: B_ICON[q.key], remaining: fmtTime(cumulEnds - nowTick) };
+        });
+        return <SlotQueue title="Chantiers" slots={buildSlots(isl.buildings.senat)} items={items} />;
+      })()}
 
       <Card style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "9px 14px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12 }}>

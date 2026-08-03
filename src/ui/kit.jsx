@@ -103,31 +103,42 @@ export const QueueCard = ({ icon, label, remaining }) => (
   </Card>
 );
 
-// File d'attente visible : la première ligne décompte, les suivantes affichent
-// leur rang. `items` = [{ icon, label, remaining }] — `remaining` absent = en attente.
-export const QueueList = ({ title, slots, used, items }) => (
-  <Card style={{ borderColor: `${C.goldDim}88`, marginBottom: 8, padding: "11px 14px" }}>
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: items.length ? 9 : 0 }}>
+// File d'attente en cases prédéfinies — tous les emplacements sont visibles
+// dès le départ (vides, pointillés) ; chaque commande occupe une case avec
+// son portrait et un décompte, la première en cours mise en avant.
+// `items` = [{ portrait, icon, remaining }], remaining = temps estimé avant
+// que CETTE case soit terminée (cumul des files en attente devant elle).
+export const SlotQueue = ({ title, slots, items }) => (
+  <Card style={{ borderColor: `${C.goldDim}88`, marginBottom: 8, padding: "12px 14px" }}>
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
       <span style={{ ...fd, fontSize: 10, fontWeight: 600, letterSpacing: 1.6, textTransform: "uppercase", color: C.gold }}>{title}</span>
-      <span style={{ ...fmono, fontSize: 10.5, fontWeight: 700, color: used >= slots ? C.bad : C.textFaint }}>{used}/{slots}</span>
+      <span style={{ ...fmono, fontSize: 10.5, fontWeight: 700, color: items.length >= slots ? C.bad : C.textFaint }}>{items.length}/{slots}</span>
     </div>
-    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-      {items.map((it, i) => (
-        <div key={i} style={{
-          display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8,
-          padding: "7px 10px", borderRadius: 8,
-          background: i === 0 ? "rgba(184,132,31,0.10)" : C.inset,
-          border: `1px solid ${i === 0 ? `${C.gold}66` : "transparent"}`,
-        }}>
-          <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, minWidth: 0 }}>
-            <I name={it.icon} size={14} color={i === 0 ? C.gold : C.textFaint} />
-            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: i === 0 ? C.text : C.textDim }}>{it.label}</span>
-          </span>
-          <span style={{ ...fmono, fontSize: 11.5, fontWeight: 700, color: i === 0 ? C.gold : C.textFaint, flexShrink: 0 }}>
-            {i === 0 && it.remaining ? it.remaining : `#${i + 1}`}
-          </span>
-        </div>
-      ))}
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
+      {Array.from({ length: slots }).map((_, i) => {
+        const it = items[i];
+        if (!it) {
+          return <div key={i} style={{ width: 50, height: 50, borderRadius: 10, flexShrink: 0, background: C.ghost, border: `1px dashed ${C.borderSoft}` }} />;
+        }
+        const active = i === 0;
+        return (
+          <div key={i} style={{ width: 50, display: "flex", flexDirection: "column", alignItems: "center", gap: 3, flexShrink: 0 }}>
+            <div style={{
+              width: 50, height: 50, borderRadius: 10, overflow: "hidden", position: "relative",
+              border: `1.5px solid ${active ? C.gold : C.borderSoft}`,
+              boxShadow: active ? `0 0 0 1px ${C.goldHi}55, 0 2px 6px rgba(0,0,0,0.35)` : "0 2px 5px rgba(0,0,0,0.22)",
+              opacity: active ? 1 : 0.8,
+            }}>
+              {it.portrait
+                ? <img src={it.portrait} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: C.inset }}>
+                    <I name={it.icon} size={20} color={active ? C.gold : C.textFaint} />
+                  </div>}
+            </div>
+            <span style={{ ...fmono, fontSize: 9, fontWeight: 700, color: active ? C.gold : C.textFaint }}>{it.remaining}</span>
+          </div>
+        );
+      })}
     </div>
   </Card>
 );

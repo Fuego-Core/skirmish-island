@@ -1,18 +1,9 @@
 import { C, RES } from "../game/constants.js";
 import { SHIPS, PECHE_BLE_H, shipSlots } from "../game/ships.js";
 import { SPEED } from "../game/constants.js";
-import { Card, SectionTitle, QueueList, Btn, CostRow, fmtTime } from "../ui/kit.jsx";
-import shipExplorateur from "../assets/images/ships/ship-explorateur.webp";
-import shipPeche from "../assets/images/ships/ship-peche.webp";
-import shipTransport from "../assets/images/ships/ship-transport.webp";
-import shipColonisation from "../assets/images/ships/ship-colonisation.webp";
-import shipSiege from "../assets/images/ships/ship-siege.webp";
-import shipEclaireur from "../assets/images/ships/ship-eclaireur.webp";
-
-const SHIP_PORTRAITS = {
-  explorateur: shipExplorateur, peche: shipPeche, transport: shipTransport,
-  colonisation: shipColonisation, siege: shipSiege, eclaireur: shipEclaireur,
-};
+import { FACTIONS } from "../game/factions.js";
+import { Card, SectionTitle, SlotQueue, Btn, CostRow, fmtTime } from "../ui/kit.jsx";
+import { SHIP_PORTRAITS } from "../ui/shipPortraits.js";
 
 function ShipPortrait({ type, dim }) {
   return (
@@ -27,19 +18,18 @@ function ShipPortrait({ type, dim }) {
 }
 
 export function PortTab({ game, nowTick, bestPort, buildShip }) {
+  const shipQueue = game.shipQueue || [];
+  const fShip = (game.faction && FACTIONS[game.faction].shipSpeed) || 1;
+  let cumulEnds = nowTick;
+  const shipQueueItems = shipQueue.map((q, i) => {
+    cumulEnds = i === 0 ? q.endsAt : cumulEnds + SHIPS[q.type].duration * 1000 * SPEED * fShip;
+    return { portrait: SHIP_PORTRAITS[q.type], icon: q.type, remaining: fmtTime(cumulEnds - nowTick) };
+  });
+
   return (
     <>
-      {(game.shipQueue || []).length > 0 && (
-        <QueueList
-          title="Chantier naval"
-          slots={shipSlots(bestPort)}
-          used={game.shipQueue.length}
-          items={game.shipQueue.map((q) => ({
-            icon: q.type,
-            label: SHIPS[q.type].label,
-            remaining: q.endsAt ? fmtTime(q.endsAt - nowTick) : null,
-          }))}
-        />
+      {shipQueue.length > 0 && (
+        <SlotQueue title="Chantier naval" slots={shipSlots(bestPort)} items={shipQueueItems} />
       )}
       {bestPort === 0 && (
         <Card style={{ borderColor: C.bad, textAlign: "center", marginBottom: 8 }}>

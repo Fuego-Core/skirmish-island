@@ -1,15 +1,10 @@
 import { C, RES } from "../game/constants.js";
 import { TROOPS, troopSlots } from "../game/troops.js";
 import { SPEED } from "../game/constants.js";
+import { FACTIONS } from "../game/factions.js";
 import { I } from "../ui/Icon.jsx";
-import { Card, SectionTitle, QueueList, Btn, CostRow, fmtTime } from "../ui/kit.jsx";
-import troopHoplite from "../assets/images/troops/troop-hoplite.webp";
-import troopArcher from "../assets/images/troops/troop-archer.webp";
-import troopCavalier from "../assets/images/troops/troop-cavalier.webp";
-import troopBelier from "../assets/images/troops/troop-belier.webp";
-import troopCatapulte from "../assets/images/troops/troop-catapulte.webp";
-
-const TROOP_PORTRAITS = { hoplite: troopHoplite, archer: troopArcher, cavalier: troopCavalier, belier: troopBelier, catapulte: troopCatapulte };
+import { Card, SectionTitle, SlotQueue, Btn, CostRow, fmtTime } from "../ui/kit.jsx";
+import { TROOP_PORTRAITS } from "../ui/troopPortraits.js";
 
 function TroopPortrait({ type, dim }) {
   return (
@@ -24,6 +19,17 @@ function TroopPortrait({ type, dim }) {
 }
 
 export function ArmyTab({ game, nowTick, bestCaserne, armyPower, upkeep, recruitTroop }) {
+  const troopQueue = game.troopQueue || [];
+  const fTroop = (game.faction && FACTIONS[game.faction].troopSpeed) || 1;
+  // Décompte par case = temps avant que TOUT le lot de cette case soit levé
+  // (cumul des lots devant elle + le reste du sien).
+  let cumulEnds = nowTick;
+  const troopQueueItems = troopQueue.map((q, i) => {
+    const unitDur = TROOPS[q.type].duration * 1000 * SPEED * fTroop;
+    cumulEnds = i === 0 ? q.nextAt + (q.remaining - 1) * unitDur : cumulEnds + q.remaining * unitDur;
+    return { portrait: TROOP_PORTRAITS[q.type], icon: q.type, remaining: fmtTime(cumulEnds - nowTick) };
+  });
+
   return (
     <>
       <Card style={{ display: "flex", justifyContent: "space-between", padding: "10px 14px" }}>
@@ -36,18 +42,9 @@ export function ArmyTab({ game, nowTick, bestCaserne, armyPower, upkeep, recruit
           <span style={{ fontFamily: "monospace", color: upkeep > 0 ? C.bad : C.textDim }}>−{upkeep}/h</span>
         </span>
       </Card>
-      {(game.troopQueue || []).length > 0 && (
+      {troopQueue.length > 0 && (
         <div style={{ marginTop: 8 }}>
-          <QueueList
-            title="Caserne"
-            slots={troopSlots(bestCaserne)}
-            used={game.troopQueue.length}
-            items={game.troopQueue.map((q) => ({
-              icon: q.type,
-              label: `${TROOPS[q.type].label} — reste ×${q.remaining}`,
-              remaining: q.nextAt ? fmtTime(q.nextAt - nowTick) : null,
-            }))}
-          />
+          <SlotQueue title="Caserne" slots={troopSlots(bestCaserne)} items={troopQueueItems} />
         </div>
       )}
       {bestCaserne === 0 && (
