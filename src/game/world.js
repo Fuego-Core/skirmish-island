@@ -28,5 +28,5 @@ export const TILE_LABELS = {
   ile_inactive: "Île inactive", ma_ville: "Une de tes cités", fog: "Non explorée",
 };
 export function tileColor(s) {
-  return { eau: C.water, ile_vide: C.empty, ile_inactive: C.inactive, ile_joueur: C.enemy, ma_ville: C.gold, fog: C.fog }[s] || C.fog;
+  return { eau: C.water, ile_vide: C.empty, ile_inactive: C.inactive, ile_joueur: C.enemy, ma_ville: C.playerBlue, fog: C.fog }[s] || C.fog;
 }

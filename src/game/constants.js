@@ -22,7 +22,8 @@ export const C = {
   copper: "#b97a42", ink: "#1a1006",
   ok: "#5fae70", okBg: "rgba(95,174,112,0.14)",
   bad: "#d3564a", badBg: "rgba(211,86,74,0.16)",
-  water: "#3a7fa0", empty: "#5a9c6c", inactive: "#c68d3f", enemy: "#c1584a", fog: "#6b5d43",
+  water: "#3a7fa0", empty: "#5a9c6c", inactive: "#8c7a55", enemy: "#c1584a", fog: "#6b5d43",
+  playerBlue: "#3f7fc4",
   // Surfaces "verre" (glassmorphism) et ombrage — utilisées par le kit UI et les scènes.
   glass: "rgba(47,35,20,0.72)", glassHi: "rgba(58,44,25,0.88)", glassBorder: "rgba(230,190,120,0.16)",
   shadowSoft: "0 10px 26px rgba(0,0,0,0.45)", shadowLift: "0 3px 10px rgba(0,0,0,0.35)",

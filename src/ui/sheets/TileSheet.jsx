@@ -1,6 +1,6 @@
 import { C } from "../../game/constants.js";
 import { TROOPS } from "../../game/troops.js";
-import { ISLAND_GRID, TILE_LABELS } from "../../game/world.js";
+import { ISLAND_GRID, TILE_LABELS, tileColor } from "../../game/world.js";
 import { botName, tilePower } from "../../game/bots.js";
 import { REGEN_MS } from "../../game/constants.js";
 import { I } from "../Icon.jsx";
@@ -22,7 +22,7 @@ export function TileSheet({
           ? botName(game.region.gx, game.region.gy, selectedTile.px, selectedTile.py).toUpperCase()
           : TILE_LABELS[selectedTile.st].toUpperCase()}
       icon={selectedTile.st === "ma_ville" ? "senat" : selectedTile.st === "fog" ? "explorateur" : selectedTile.st === "eau" ? "peche" : "ile"}
-      accent={selectedTile.st === "ma_ville" ? C.goldHi : selectedTile.st === "ile_vide" ? "#4f9160" : selectedTile.st === "ile_joueur" ? "#b04343" : selectedTile.st === "ile_inactive" ? "#b0722f" : C.gold}>
+      accent={selectedTile.st === "fog" || selectedTile.st === "eau" ? C.gold : tileColor(selectedTile.st)}>
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: 12, marginBottom: 8 }}>
           <span style={{ fontFamily: "monospace", color: C.goldHi }}>
