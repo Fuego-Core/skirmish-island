@@ -4,21 +4,14 @@ import { ISLAND_GRID, REGION_LIMIT, rk, tileState, tileColor } from "../game/wor
 import { I } from "../ui/Icon.jsx";
 import { QueueCard, fmtTime } from "../ui/kit.jsx";
 import { haptic } from "../ui/haptics.js";
+import tileIslandImg from "../assets/images/tile-island.webp";
 
-// Petite île au palmier — glyphe générique pour toute case terrestre non
-// couverte par une icône d'action (exploration/colonisation/attaque/drapeau).
-// La couleur de possession (bleu/rouge/vert/frise) vient du fond de la case,
-// le palmier reste constant pour rester identifiable partout sur la carte.
-function IslandGlyph({ size = 19 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <ellipse cx="12" cy="18" rx="7.5" ry="2.4" fill="#e3d3a4" opacity="0.92" />
-      <path d="M12 18V9.5c0-1.2.4-2.1 1.3-2.9" stroke="#6e4a1c" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M13 9c-1.4-1.9-3.8-2.3-5.6-1.3.9 1.8 2.8 2.7 5.6 1.8" fill="#4d8a5f" />
-      <path d="M13 9c1.7-1.6 4.2-1.8 5.8-.6-1.1 1.8-3.1 2.5-5.8 1.4" fill="#5a9c6c" />
-      <path d="M13 8.8c-.2-2 .5-3.6 1.9-4.6-.2 2.1-.8 3.6-2.3 4.8" fill="#5a9c6c" />
-    </svg>
-  );
+// Petite île au palmier (illustration générée, fond détouré) — badge générique
+// pour toute case terrestre non couverte par une icône d'action (exploration/
+// colonisation/attaque/drapeau). La couleur de possession (bleu/rouge/vert/
+// frise) vient du fond de la case, l'île reste la même partout sur la carte.
+function IslandGlyph({ size = 24 }) {
+  return <img src={tileIslandImg} alt="" style={{ width: size, height: size, objectFit: "contain", display: "block" }} />;
 }
 
 export function MapTab({ game, nowTick, selectedTileKey, setSelectedTileKey, onChangeRegion }) {
@@ -139,7 +132,7 @@ export function MapTab({ game, nowTick, selectedTileKey, setSelectedTileKey, onC
                     ) : st === "ma_ville" ? (
                       <I name="senat" size={17} color={C.ink} sw={2} />
                     ) : isLand ? (
-                      <IslandGlyph size={19} />
+                      <IslandGlyph size={26} />
                     ) : null}
                   </button>
                 );

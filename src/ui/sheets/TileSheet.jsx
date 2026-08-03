@@ -5,6 +5,7 @@ import { botName, tilePower } from "../../game/bots.js";
 import { REGEN_MS } from "../../game/constants.js";
 import { I } from "../Icon.jsx";
 import { Sheet, Btn, Stepper, fmtTime, fmtNum } from "../kit.jsx";
+import tileIslandImg from "../../assets/images/tile-island.webp";
 
 export function TileSheet({
   game, selectedTile, selectedTileKey, nowTick, attackForm, setAttackForm,
@@ -24,6 +25,16 @@ export function TileSheet({
       icon={selectedTile.st === "ma_ville" ? "senat" : selectedTile.st === "fog" ? "explorateur" : selectedTile.st === "eau" ? "peche" : "ile"}
       accent={selectedTile.st === "fog" || selectedTile.st === "eau" ? C.gold : tileColor(selectedTile.st)}>
       <div style={{ textAlign: "center" }}>
+        {(selectedTile.st === "ma_ville" || selectedTile.st === "ile_joueur" || selectedTile.st === "ile_inactive" || selectedTile.st === "ile_vide") && (
+          <div style={{
+            borderRadius: 12, overflow: "hidden", marginBottom: 12, height: 110,
+            background: `linear-gradient(160deg, ${tileColor(selectedTile.st)}, ${tileColor(selectedTile.st)}88)`,
+            border: `1px solid ${tileColor(selectedTile.st)}`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <img src={tileIslandImg} alt="" style={{ width: "78%", height: "78%", objectFit: "contain", display: "block" }} />
+          </div>
+        )}
         <div style={{ fontSize: 12, marginBottom: 8 }}>
           <span style={{ fontFamily: "monospace", color: C.goldHi }}>
             {game.region.gx * ISLAND_GRID + selectedTile.px - (game.islands[0].region.gx * ISLAND_GRID + game.islands[0].pos.px)}:
