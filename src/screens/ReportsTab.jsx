@@ -1,6 +1,7 @@
-import { C, RES, RES_ICONN } from "../game/constants.js";
+import { useState } from "react";
+import { C, RES } from "../game/constants.js";
 import { I } from "../ui/Icon.jsx";
-import { Card, SectionTitle, ResIcon, fmtNum } from "../ui/kit.jsx";
+import { Card, SectionTitle, Sheet, ResIcon, fmtNum, fmtAgo } from "../ui/kit.jsx";
 import eventMarchand from "../assets/images/event-marchand.webp";
 import eventTempete from "../assets/images/event-tempete.webp";
 import eventEpave from "../assets/images/event-epave.webp";
@@ -23,10 +24,35 @@ function battleCrestKey(rep) {
   return rep.win ? "victoire" : "defaite";
 }
 
-function Crest({ src }) {
+function crestFor(rep) {
+  if (rep.kind === "evenement") return EVENT_CRESTS[rep.icone];
+  if (rep.kind === "marche") return eventMarchand;
+  return BATTLE_CRESTS[battleCrestKey(rep)];
+}
+
+function titleFor(rep) {
+  if (rep.kind === "evenement") return rep.titre;
+  if (rep.kind === "marche") return "OFFRE DU MARCHÉ REMPLIE";
+  if (rep.kind === "defense") return rep.win ? "RAID REPOUSSÉ" : "RAID PIRATE SUBI";
+  return rep.win ? "VICTOIRE" : "DÉFAITE";
+}
+
+function subtitleFor(rep) {
+  if (rep.kind === "evenement") return rep.texte;
+  if (rep.kind === "marche") return `${fmtNum(rep.giveAmt)} donné contre ${fmtNum(rep.wantAmt)} reçu`;
+  if (rep.kind === "defense") return rep.attaquant || "pirates égéens";
+  return rep.cible || (rep.targetType === "ile_joueur" ? "cité rivale" : "île inactive");
+}
+
+function outcomeColor(rep) {
+  if (rep.kind === "evenement" || rep.kind === "marche") return C.goldHi;
+  return rep.win ? C.ok : C.bad;
+}
+
+function Crest({ src, size = 34 }) {
   return (
     <div style={{
-      width: 34, height: 34, flexShrink: 0, borderRadius: "50%", overflow: "hidden",
+      width: size, height: size, flexShrink: 0, borderRadius: "50%", overflow: "hidden",
       border: `1px solid ${C.goldHi}77`, boxShadow: "0 2px 6px rgba(0,0,0,0.5)",
     }}>
       <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
@@ -34,7 +60,100 @@ function Crest({ src }) {
   );
 }
 
-export function ReportsTab({ game }) {
+function ReportDetail({ rep }) {
+  return (
+    <>
+      <div style={{ display: "flex", alignItems: "center", gap: 13, marginBottom: 16 }}>
+        <Crest src={crestFor(rep)} size={52} />
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: 14, fontFamily: "'Cinzel', Georgia, serif", letterSpacing: 1, color: outcomeColor(rep) }}>{titleFor(rep)}</div>
+          <div style={{ fontSize: 11.5, color: C.textDim, marginTop: 3 }}>{subtitleFor(rep)}</div>
+        </div>
+      </div>
+
+      {rep.kind === "evenement" && rep.gains && (
+        <div style={{ background: C.inset, borderRadius: 9, padding: "11px 13px", marginBottom: 8 }}>
+          <div style={{ fontSize: 10.5, color: C.textFaint, marginBottom: 7 }}>Cargaison récupérée</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            {RES.map((r) => (
+              <span key={r} style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 12, fontFamily: "monospace", color: C.ok }}>
+                <ResIcon r={r} size={16} />+{fmtNum(rep.gains[r])}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {rep.kind === "marche" && (
+        <div style={{ background: C.inset, borderRadius: 9, padding: "11px 13px", marginBottom: 8, display: "flex", alignItems: "center", gap: 10, fontSize: 13, fontFamily: "monospace" }}>
+          <ResIcon r={rep.giveRes} size={18} /> −{fmtNum(rep.giveAmt)}
+          <span style={{ color: C.gold }}>→</span>
+          <ResIcon r={rep.wantRes} size={18} /> +{fmtNum(rep.wantAmt)}
+        </div>
+      )}
+
+      {rep.kind !== "evenement" && rep.kind !== "marche" && (<>
+        <div style={{ background: C.inset, borderRadius: 9, padding: "11px 13px", marginBottom: 8 }}>
+          <div style={{ fontSize: 10.5, color: C.textFaint, marginBottom: 7 }}>Forces en présence</div>
+          <div style={{ fontSize: 12, fontFamily: "monospace", color: C.text }}>
+            {rep.kind === "defense" ? `Garnison ${rep.atkPower}` : `Ton armée ${rep.atkPower}`} contre {rep.defPower}
+            {rep.kind === "defense" && rep.wall > 0 ? ` (muraille niv. ${rep.wall})` : ""}
+          </div>
+        </div>
+
+        <div style={{ background: C.inset, borderRadius: 9, padding: "11px 13px", marginBottom: 8 }}>
+          <div style={{ fontSize: 10.5, color: C.textFaint, marginBottom: 7 }}>Pertes</div>
+          <div style={{ display: "flex", gap: 14, flexWrap: "wrap", fontSize: 11.5, fontFamily: "monospace", color: C.bad }}>
+            <span>Hoplites {rep.losses.hoplite || 0}</span>
+            <span>Archers {rep.losses.archer || 0}</span>
+            <span>Cavaliers {rep.losses.cavalier || 0}</span>
+            <span>Catapultes {rep.losses.catapulte || 0}</span>
+            <span>Béliers {rep.losses.belier || 0}</span>
+          </div>
+        </div>
+
+        {rep.vol && (
+          <div style={{ background: C.inset, borderRadius: 9, padding: "11px 13px", marginBottom: 8 }}>
+            <div style={{ fontSize: 10.5, color: C.textFaint, marginBottom: 7 }}>Pillé par les pirates</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              {RES.map((r) => (
+                <span key={r} style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 12, fontFamily: "monospace", color: C.bad }}>
+                  <ResIcon r={r} size={16} />−{fmtNum(rep.vol[r])}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {rep.butin && (
+          <div style={{ background: C.inset, borderRadius: 9, padding: "11px 13px", marginBottom: 8 }}>
+            <div style={{ fontSize: 10.5, color: C.textFaint, marginBottom: 7 }}>Butin ramené</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              {RES.map((r) => (
+                <span key={r} style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 12, fontFamily: "monospace", color: C.ok }}>
+                  <ResIcon r={r} size={16} />+{fmtNum(rep.butin[r])}
+                </span>
+              ))}
+              {rep.esclavesGagnes > 0 && (
+                <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 12, fontFamily: "monospace", color: C.ok }}>
+                  <I name="esclaves" size={14} color={C.ok} />+{rep.esclavesGagnes}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+      </>)}
+
+      <div style={{ fontSize: 10, color: C.textFaint, fontFamily: "monospace", marginTop: 4 }}>
+        {new Date(rep.at).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+      </div>
+    </>
+  );
+}
+
+export function ReportsTab({ game, nowTick }) {
+  const [openReport, setOpenReport] = useState(null);
+
   return (
     <>
       <SectionTitle>Rapports de bataille</SectionTitle>
@@ -43,72 +162,35 @@ export function ReportsTab({ game }) {
           <span style={{ fontSize: 12, color: C.textDim, fontStyle: "italic" }}>Aucune bataille livrée pour l'instant.</span>
         </Card>
       )}
-      <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
         {game.reports.map((rep, i) => (
-          <Card key={i} style={{ borderColor: rep.win ? C.ok : C.bad, animation: "riseIn 0.32s ease-out both", animationDelay: `${Math.min(i, 8) * 0.045}s` }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 12, color: rep.kind === "evenement" ? C.goldHi : rep.win ? C.ok : C.bad, marginBottom: 5, fontFamily: "'Cinzel', Georgia, serif", letterSpacing: 1 }}>
-              {rep.kind === "evenement" ? (
-                <Crest src={EVENT_CRESTS[rep.icone]} />
-              ) : (
-                <Crest src={BATTLE_CRESTS[battleCrestKey(rep)]} />
-              )}
-              {rep.kind === "evenement" ? rep.titre : rep.kind === "defense" ? (rep.win ? "RAID REPOUSSÉ" : "RAID PIRATE SUBI") : rep.win ? "VICTOIRE" : "DÉFAITE"}
-              {rep.kind !== "evenement" && (
-                <span style={{ color: C.textFaint, fontSize: 9, fontFamily: "monospace", letterSpacing: 0 }}>
-                  · {rep.kind === "defense"
-                    ? (rep.attaquant || "pirates égéens")
-                    : (rep.cible || (rep.targetType === "ile_joueur" ? "cité rivale" : "île inactive"))}
-                </span>
-              )}
+          <button key={i} onClick={() => setOpenReport(rep)}
+            style={{
+              display: "flex", alignItems: "center", gap: 11, textAlign: "left", cursor: "pointer",
+              background: `linear-gradient(180deg, ${C.panelUp}, ${C.panel})`, border: `1px solid ${C.borderSoft}`, borderLeft: `3px solid ${outcomeColor(rep)}`,
+              borderRadius: 11, padding: "10px 12px", color: C.text,
+              animation: "riseIn 0.32s ease-out both", animationDelay: `${Math.min(i, 8) * 0.04}s`,
+            }}>
+            <Crest src={crestFor(rep)} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 12, fontFamily: "'Cinzel', Georgia, serif", letterSpacing: 0.6, color: outcomeColor(rep), overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {titleFor(rep)}
+              </div>
+              <div style={{ fontSize: 10.5, color: C.textFaint, marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {subtitleFor(rep)}
+              </div>
             </div>
-            {rep.kind === "evenement" && (
-              <div style={{ fontSize: 11, color: C.textDim, fontStyle: "italic" }}>{rep.texte}</div>
-            )}
-            {rep.kind === "evenement" && rep.gains && (
-              <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 10, fontFamily: "monospace", color: C.ok, marginTop: 4, flexWrap: "wrap" }}>
-                Cargaison :
-                {RES.map((r) => (
-                  <span key={r} style={{ display: "flex", alignItems: "center", gap: 2 }}>
-                    <ResIcon r={r} size={13} />+{fmtNum(rep.gains[r])}
-                  </span>
-                ))}
-              </div>
-            )}
-            {rep.kind !== "evenement" && (<>
-              <div style={{ fontSize: 10, fontFamily: "monospace", color: C.textDim }}>
-                {rep.kind === "defense" ? `Garnison ${rep.atkPower}` : `Toi ${rep.atkPower}`} contre {rep.defPower}
-                {rep.kind === "defense" && rep.wall > 0 ? ` (muraille niv. ${rep.wall})` : ""}
-                {" "}· pertes : hop.{rep.losses.hoplite || 0} arc.{rep.losses.archer || 0} cav.{rep.losses.cavalier || 0} cat.{rep.losses.catapulte || 0} bél.{rep.losses.belier || 0}
-              </div>
-              {rep.vol && (
-                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 10, fontFamily: "monospace", color: C.bad, marginTop: 4, flexWrap: "wrap" }}>
-                  Pillé par les pirates :
-                  {RES.map((r) => (
-                    <span key={r} style={{ display: "flex", alignItems: "center", gap: 2 }}>
-                      <ResIcon r={r} size={13} />−{fmtNum(rep.vol[r])}
-                    </span>
-                  ))}
-                </div>
-              )}
-              {rep.butin && (
-                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 10, fontFamily: "monospace", color: C.ok, marginTop: 4, flexWrap: "wrap" }}>
-                  Butin :
-                  {RES.map((r) => (
-                    <span key={r} style={{ display: "flex", alignItems: "center", gap: 2 }}>
-                      <ResIcon r={r} size={13} />{fmtNum(rep.butin[r])}
-                    </span>
-                  ))}
-                  {rep.esclavesGagnes > 0 && (
-                    <span style={{ display: "flex", alignItems: "center", gap: 2 }}>
-                      <I name="esclaves" size={11} color={C.ok} />+{rep.esclavesGagnes}
-                    </span>
-                  )}
-                </div>
-              )}
-            </>)}
-          </Card>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, flexShrink: 0 }}>
+              <span style={{ fontSize: 9.5, fontFamily: "monospace", color: C.textFaint }}>{fmtAgo(nowTick - rep.at)}</span>
+              <I name="drapeau" size={11} color={C.textFaint} sw={1.4} />
+            </div>
+          </button>
         ))}
       </div>
+
+      <Sheet open={!!openReport} onClose={() => setOpenReport(null)} title="RAPPORT" icon="rapports">
+        {openReport && <ReportDetail rep={openReport} />}
+      </Sheet>
     </>
   );
 }

@@ -216,7 +216,7 @@ export default function App() {
         {tab === "port" && (
           <PortTab game={game} nowTick={nowTick} bestPort={bestPort} buildShip={buildShip} />
         )}
-        {tab === "rapports" && <ReportsTab game={game} />}
+        {tab === "rapports" && <ReportsTab game={game} nowTick={nowTick} />}
         {tab === "marche" && (
           <MarketTab game={game} nowTick={nowTick} onAccept={acceptMarketOffer} onPost={postMarketOffer} onCancel={cancelMarketOffer} />
         )}

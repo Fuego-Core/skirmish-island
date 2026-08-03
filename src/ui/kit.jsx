@@ -161,3 +161,15 @@ export const fmtTime = (ms) => {
   return m > 0 ? `${m}m ${sec % 60}s` : `${sec}s`;
 };
 export const fmtNum = (n) => (n >= 10000 ? `${Math.floor(n / 1000)}k` : Math.floor(n));
+
+// Horodatage relatif ("il y a 5 min") pour le journal des rapports.
+export const fmtAgo = (deltaMs) => {
+  const s = Math.max(0, Math.floor(deltaMs / 1000));
+  if (s < 60) return "à l'instant";
+  const m = Math.floor(s / 60);
+  if (m < 60) return `il y a ${m} min`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `il y a ${h} h`;
+  const d = Math.floor(h / 24);
+  return `il y a ${d} j`;
+};
