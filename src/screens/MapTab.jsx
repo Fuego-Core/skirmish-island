@@ -112,7 +112,7 @@ export function MapTab({ game, nowTick, selectedTileKey, setSelectedTileKey, onC
                 const st = isMine ? "ma_ville" : isExplored ? tileState(game.region.gx, game.region.gy, px, py) : "fog";
                 const isSelected = selectedTileKey === key;
                 const actionIcon = isExploring ? "explorateur" : isColonizing ? "colonisation" : isAttacking ? "transport" : isConquered ? "drapeau" : null;
-                const isLand = st === "ile_joueur" || st === "ile_inactive" || st === "ile_vide";
+                const isLand = st === "ile_joueur" || st === "ile_inactive" || st === "ile_vide" || st === "ma_ville";
                 const isInactive = st === "ile_inactive";
                 return (
                   <button key={key} onClick={() => { haptic(6); setSelectedTileKey(key); }}
@@ -129,8 +129,6 @@ export function MapTab({ game, nowTick, selectedTileKey, setSelectedTileKey, onC
                     }}>
                     {actionIcon ? (
                       <I name={actionIcon} size={17} color="#f0ead6" sw={2} />
-                    ) : st === "ma_ville" ? (
-                      <I name="senat" size={17} color={C.ink} sw={2} />
                     ) : isLand ? (
                       <IslandGlyph size={26} />
                     ) : null}
