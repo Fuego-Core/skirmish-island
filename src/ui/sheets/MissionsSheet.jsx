@@ -1,6 +1,6 @@
 import { C, RES, RES_ICONN, RES_COLOR } from "../../game/constants.js";
 import { I } from "../Icon.jsx";
-import { Sheet, Btn, fmtNum } from "../kit.jsx";
+import { Sheet, Btn, ResIcon, fmtNum } from "../kit.jsx";
 
 export function MissionsSheet({ open, onClose, visibleMissions, claimMission }) {
   return (
@@ -14,7 +14,7 @@ export function MissionsSheet({ open, onClose, visibleMissions, claimMission }) 
               <div style={{ display: "flex", gap: 8, marginTop: 3, flexWrap: "wrap" }}>
                 {RES.filter((r) => m.reward[r]).map((r) => (
                   <span key={r} style={{ display: "flex", alignItems: "center", gap: 2, fontSize: 9, fontFamily: "monospace", color: C.ok }}>
-                    <I name={RES_ICONN[r]} size={10} color={RES_COLOR[r]} />{fmtNum(m.reward[r])}
+                    <ResIcon r={r} size={13} />{fmtNum(m.reward[r])}
                   </span>
                 ))}
               </div>

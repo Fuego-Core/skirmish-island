@@ -3,7 +3,7 @@ import { BUILDINGS, GROUPS, B_ICON, buildSlots, buildDuration } from "../game/bu
 import { upgradeCost } from "../game/buildings.js";
 import { I } from "../ui/Icon.jsx";
 import { CityScene } from "../ui/CityScene.jsx";
-import { Card, SlotQueue, Btn, fmtTime, fmtNum } from "../ui/kit.jsx";
+import { Card, SlotQueue, Btn, ResIcon, fmtTime, fmtNum } from "../ui/kit.jsx";
 import { haptic } from "../ui/haptics.js";
 import { BUILDING_PORTRAITS } from "../ui/buildingPortraits.js";
 
@@ -55,8 +55,8 @@ export function CityTab({
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 11, color: C.textDim }}>
-              <I name={RES_ICONN[game.activeEvent.from]} size={13} color={C.textDim} /> →
-              <I name={RES_ICONN[game.activeEvent.to]} size={13} color={C.goldHi} />
+              <ResIcon r={game.activeEvent.from} size={15} /> →
+              <ResIcon r={game.activeEvent.to} size={15} />
             </span>
             {[500, 2000, 8000].map((amt) => (
               <Btn key={amt} small label={fmtNum(amt)}

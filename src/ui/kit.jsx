@@ -1,6 +1,15 @@
 import { C, RES, RES_ICONN, RES_COLOR } from "../game/constants.js";
 import { I } from "./Icon.jsx";
 import { haptic } from "./haptics.js";
+import { RES_PORTRAITS } from "./resourcePortraits.js";
+
+// Icône de ressource — image générée (bois/pierre/fer/or/blé), remplace la
+// petite icône trait partout où une ressource est affichée.
+export const ResIcon = ({ r, size = 13, dim }) => (
+  RES_PORTRAITS[r]
+    ? <img src={RES_PORTRAITS[r]} alt="" style={{ width: size, height: size, objectFit: "contain", flexShrink: 0, display: "inline-block", opacity: dim ? 0.55 : 1, filter: dim ? "grayscale(0.4)" : "none" }} />
+    : <I name={RES_ICONN[r]} size={size} color={dim ? C.bad : RES_COLOR[r]} />
+);
 
 // ---- Polices ----
 // Cinzel : titres, empreinte "gravé dans le marbre" — réservé aux headers/CTA.
@@ -32,12 +41,15 @@ export const SectionTitle = ({ children }) => (
 
 export const CostRow = ({ cost, resources, mult = 1 }) => (
   <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-    {RES.map((r) => (
-      <span key={r} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, ...fmono, fontWeight: 600, color: resources[r] >= cost[r] * mult ? C.textDim : C.bad }}>
-        <I name={RES_ICONN[r]} size={13} color={resources[r] >= cost[r] * mult ? RES_COLOR[r] : C.bad} />
-        {fmtNum(cost[r] * mult)}
-      </span>
-    ))}
+    {RES.map((r) => {
+      const enough = resources[r] >= cost[r] * mult;
+      return (
+        <span key={r} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, ...fmono, fontWeight: 600, color: enough ? C.textDim : C.bad }}>
+          <ResIcon r={r} size={15} dim={!enough} />
+          {fmtNum(cost[r] * mult)}
+        </span>
+      );
+    })}
   </div>
 );
 

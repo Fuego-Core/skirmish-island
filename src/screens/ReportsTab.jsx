@@ -1,6 +1,6 @@
 import { C, RES, RES_ICONN } from "../game/constants.js";
 import { I } from "../ui/Icon.jsx";
-import { Card, SectionTitle, fmtNum } from "../ui/kit.jsx";
+import { Card, SectionTitle, ResIcon, fmtNum } from "../ui/kit.jsx";
 import eventMarchand from "../assets/images/event-marchand.webp";
 import eventTempete from "../assets/images/event-tempete.webp";
 import eventEpave from "../assets/images/event-epave.webp";
@@ -69,7 +69,7 @@ export function ReportsTab({ game }) {
                 Cargaison :
                 {RES.map((r) => (
                   <span key={r} style={{ display: "flex", alignItems: "center", gap: 2 }}>
-                    <I name={RES_ICONN[r]} size={11} color={C.ok} />+{fmtNum(rep.gains[r])}
+                    <ResIcon r={r} size={13} />+{fmtNum(rep.gains[r])}
                   </span>
                 ))}
               </div>
@@ -85,7 +85,7 @@ export function ReportsTab({ game }) {
                   Pillé par les pirates :
                   {RES.map((r) => (
                     <span key={r} style={{ display: "flex", alignItems: "center", gap: 2 }}>
-                      <I name={RES_ICONN[r]} size={11} color={C.bad} />−{fmtNum(rep.vol[r])}
+                      <ResIcon r={r} size={13} />−{fmtNum(rep.vol[r])}
                     </span>
                   ))}
                 </div>
@@ -95,7 +95,7 @@ export function ReportsTab({ game }) {
                   Butin :
                   {RES.map((r) => (
                     <span key={r} style={{ display: "flex", alignItems: "center", gap: 2 }}>
-                      <I name={RES_ICONN[r]} size={11} color={C.ok} />{fmtNum(rep.butin[r])}
+                      <ResIcon r={r} size={13} />{fmtNum(rep.butin[r])}
                     </span>
                   ))}
                   {rep.esclavesGagnes > 0 && (

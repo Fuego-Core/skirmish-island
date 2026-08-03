@@ -1,7 +1,7 @@
 import { C, RES, RES_ICONN, RES_COLOR, GROUP_COLOR } from "../../game/constants.js";
 import { BUILDINGS, B_ICON, upgradeCost, buildDuration, prodPerHour, storageCap, buildSlots } from "../../game/buildings.js";
 import { I } from "../Icon.jsx";
-import { Sheet, Btn, fmtNum, fmtTime } from "../kit.jsx";
+import { Sheet, Btn, ResIcon, fmtNum, fmtTime } from "../kit.jsx";
 import { BUILDING_PORTRAITS } from "../buildingPortraits.js";
 
 export function BuildingSheet({
@@ -49,7 +49,7 @@ export function BuildingSheet({
 
       {b.produces && (
         <div style={{ display: "flex", alignItems: "center", gap: 8, background: C.inset, borderRadius: 9, padding: "11px 13px", marginBottom: 12 }}>
-          <I name={RES_ICONN[b.produces]} size={16} color={RES_COLOR[b.produces]} />
+          <ResIcon r={b.produces} size={20} />
           <span style={{ fontSize: 12, fontFamily: "monospace", color: C.textDim }}>
             +{prodPerHour(level)}/h <span style={{ color: C.ok }}>→ +{prodPerHour(level + 1)}/h</span>
           </span>
@@ -93,15 +93,15 @@ export function BuildingSheet({
           <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap", marginBottom: 9 }}>
             {RES.map((r) => (
               <button key={"f" + r} onClick={() => setMarketFrom(r)}
-                style={{ padding: 6, borderRadius: 7, background: marketFrom === r ? `${RES_COLOR[r]}25` : "transparent", border: `1px solid ${marketFrom === r ? RES_COLOR[r] : C.border}`, cursor: "pointer", lineHeight: 0 }}>
-                <I name={RES_ICONN[r]} size={15} color={marketFrom === r ? RES_COLOR[r] : C.textFaint} />
+                style={{ padding: 5, borderRadius: 7, background: marketFrom === r ? `${RES_COLOR[r]}25` : "transparent", border: `1px solid ${marketFrom === r ? RES_COLOR[r] : C.border}`, cursor: "pointer", lineHeight: 0 }}>
+                <ResIcon r={r} size={19} dim={marketFrom !== r} />
               </button>
             ))}
             <span style={{ fontSize: 13, color: C.gold, padding: "0 3px" }}>→</span>
             {RES.map((r) => (
               <button key={"t" + r} onClick={() => setMarketTo(r)}
-                style={{ padding: 6, borderRadius: 7, background: marketTo === r ? `${RES_COLOR[r]}25` : "transparent", border: `1px solid ${marketTo === r ? RES_COLOR[r] : C.border}`, cursor: "pointer", lineHeight: 0 }}>
-                <I name={RES_ICONN[r]} size={15} color={marketTo === r ? RES_COLOR[r] : C.textFaint} />
+                style={{ padding: 5, borderRadius: 7, background: marketTo === r ? `${RES_COLOR[r]}25` : "transparent", border: `1px solid ${marketTo === r ? RES_COLOR[r] : C.border}`, cursor: "pointer", lineHeight: 0 }}>
+                <ResIcon r={r} size={19} dim={marketTo !== r} />
               </button>
             ))}
           </div>
@@ -123,7 +123,7 @@ export function BuildingSheet({
               const enough = resources[r] >= cost[r];
               return (
                 <div key={r} style={{ textAlign: "center", background: C.inset, borderRadius: 8, padding: "7px 2px", border: `1px solid ${enough ? "transparent" : C.bad + "55"}` }}>
-                  <I name={RES_ICONN[r]} size={14} color={enough ? RES_COLOR[r] : C.bad} />
+                  <ResIcon r={r} size={18} dim={!enough} />
                   <div style={{ fontSize: 10, fontFamily: "monospace", color: enough ? C.textDim : C.bad, marginTop: 2 }}>{fmtNum(cost[r])}</div>
                 </div>
               );

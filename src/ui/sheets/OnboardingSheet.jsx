@@ -1,6 +1,6 @@
 import { C, RES, RES_ICONN } from "../../game/constants.js";
 import { I } from "../Icon.jsx";
-import { Sheet, Btn } from "../kit.jsx";
+import { Sheet, Btn, ResIcon } from "../kit.jsx";
 
 const STEPS = [
   { icon: null, text: "Bois, pierre, fer, or et blé s'accumulent seuls avec le temps — surveille tes réserves dans le bandeau du haut." },
@@ -21,7 +21,7 @@ export function OnboardingSheet({ open, onClose }) {
             }}>
               {s.icon ? <I name={s.icon} size={15} color={C.gold} /> : (
                 <div style={{ display: "flex", gap: 1 }}>
-                  {RES.map((r) => <I key={r} name={RES_ICONN[r]} size={7} color={C.gold} />)}
+                  {RES.map((r) => <ResIcon key={r} r={r} size={13} />)}
                 </div>
               )}
             </div>

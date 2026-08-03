@@ -7,7 +7,7 @@ import { MISSIONS } from "./game/missions.js";
 import { tileState } from "./game/world.js";
 import { useGame } from "./hooks/useGame.js";
 import { I, Meander } from "./ui/Icon.jsx";
-import { fd, fb, Btn } from "./ui/kit.jsx";
+import { fd, fb, Btn, ResIcon } from "./ui/kit.jsx";
 import { haptic } from "./ui/haptics.js";
 import { BuildingSheet } from "./ui/sheets/BuildingSheet.jsx";
 import { TileSheet } from "./ui/sheets/TileSheet.jsx";
@@ -172,7 +172,7 @@ export default function App() {
               return (
                 <div key={r} style={{ textAlign: "center", background: C.glass, border: `1px solid ${C.glassBorder}`, borderRadius: 10, padding: "6px 2px 5px" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}>
-                    <I name={RES_ICONN[r]} size={13} color={RES_COLOR[r]} sw={1.9} />
+                    <ResIcon r={r} size={15} />
                     <span style={{ fontVariantNumeric: "tabular-nums", fontSize: 11.5, fontWeight: 700 }}>{fmtNum(val)}</span>
                   </div>
                   <div style={{ height: 3, background: C.border, borderRadius: 2, margin: "4px 3px 3px", overflow: "hidden" }}>
