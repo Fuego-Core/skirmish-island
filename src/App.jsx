@@ -16,6 +16,7 @@ import { MarketTab } from "./screens/MarketTab.jsx";
 import { TitleScreen } from "./screens/TitleScreen.jsx";
 import { CityTab } from "./screens/CityTab.jsx";
 import { ConstructionTab } from "./screens/ConstructionTab.jsx";
+import { ClassementTab } from "./screens/ClassementTab.jsx";
 import { MapTab } from "./screens/MapTab.jsx";
 import { ArmyTab } from "./screens/ArmyTab.jsx";
 import { PortTab } from "./screens/PortTab.jsx";
@@ -219,6 +220,7 @@ export default function App() {
         {tab === "marche" && (
           <MarketTab game={game} nowTick={nowTick} onAccept={acceptMarketOffer} onPost={postMarketOffer} onCancel={cancelMarketOffer} />
         )}
+        {tab === "classement" && <ClassementTab game={game} nowTick={nowTick} />}
       </div>
 
       {/* ═══ Sheet Case de carte ═══ */}
@@ -247,8 +249,8 @@ export default function App() {
       {/* ═══ Navigation basse ═══ */}
       <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: `${C.bgDeep}f2`, backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", borderTop: `1px solid ${C.borderSoft}`, zIndex: 30, paddingBottom: "env(safe-area-inset-bottom)" }}>
         <Meander color={C.goldDim} />
-        <div style={{ maxWidth: 480, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(7, 1fr)", padding: "4px 4px 0" }}>
-          {[["cite", "couronne", "Cité"], ["construction", "senat", "Bâtir"], ["carte", "carte", "Carte"], ["armee", "epees", "Armée"], ["port", "port", "Port"], ["marche", "marche", "Marché"], ["rapports", "rapports", "Rapports"]].map(([k, icon, label]) => {
+        <div style={{ maxWidth: 480, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(8, 1fr)", padding: "4px 4px 0" }}>
+          {[["cite", "couronne", "Cité"], ["construction", "senat", "Bâtir"], ["carte", "carte", "Carte"], ["armee", "epees", "Armée"], ["port", "port", "Port"], ["marche", "marche", "Marché"], ["classement", "laurier", "Rang"], ["rapports", "rapports", "Rapports"]].map(([k, icon, label]) => {
             const activeTab = tab === k;
             return (
               <button key={k}

@@ -1,7 +1,6 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { C, DEV } from "../game/constants.js";
 import { FACTIONS } from "../game/factions.js";
-import { knownBots, playerScore } from "../game/bots.js";
 import { I } from "../ui/Icon.jsx";
 import { Card, SectionTitle, QueueCard, Btn, ResIcon, fmtTime, fmtNum } from "../ui/kit.jsx";
 import { notificationsSupported, notificationsEnabled, enableNotifications, disableNotifications } from "../ui/notifications.js";
@@ -37,13 +36,6 @@ export function CityTab({
       setNotifMsg(ok ? "" : "Autorisation refusée par le navigateur.");
     }
   };
-
-  const minuteTick = Math.floor(nowTick / 60000);
-  const ranking = useMemo(() => {
-    const me = { key: "__me", name: "Toi", power: playerScore(game), isMe: true };
-    return [...knownBots(game, nowTick), me].sort((a, b) => b.power - a.power).slice(0, 8);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [minuteTick, game.islands, game.troops, game.explored, game.conquered]);
 
   const handleExport = () => setExportCode(exportSave());
   const handleImport = () => {
@@ -166,33 +158,6 @@ export function CityTab({
           <span>Raids repoussés : <span style={{ color: C.ok }}>{game.stats.raidsRepousses}</span></span>
           <span>Explorations : <span style={{ color: C.goldHi }}>{game.stats.explorations}</span></span>
           <span>Esclaves : <span style={{ color: C.goldHi }}>{game.esclaves}</span></span>
-        </div>
-      </Card>
-
-      <SectionTitle>Classement de l'Égée</SectionTitle>
-      <Card>
-        <div style={{ fontSize: 10.5, color: C.textFaint, marginBottom: 10, fontStyle: "italic" }}>
-          Les cités rivales gagnent en puissance au fil de la partie. Explore pour en découvrir d'autres.
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-          {ranking.map((b, i) => (
-            <div key={b.key} style={{
-              display: "flex", alignItems: "center", gap: 10, padding: "7px 10px", borderRadius: 8,
-              background: b.isMe ? "rgba(184,132,31,0.10)" : C.inset,
-              border: `1px solid ${b.isMe ? C.gold : "transparent"}`,
-            }}>
-              <span style={{ width: 18, fontSize: 11, fontFamily: "monospace", color: i === 0 ? C.goldHi : C.textFaint, fontWeight: 700 }}>
-                {i + 1}
-              </span>
-              <span style={{ flex: 1, minWidth: 0, fontSize: 12.5, color: b.isMe ? C.goldHi : C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {b.name}
-                {b.pillee && <span style={{ fontSize: 9, color: C.textFaint, fontStyle: "italic" }}> · pillée</span>}
-              </span>
-              <span style={{ fontSize: 11.5, fontFamily: "monospace", fontWeight: 700, color: b.isMe ? C.goldHi : C.textDim }}>
-                {b.power}
-              </span>
-            </div>
-          ))}
         </div>
       </Card>
 
