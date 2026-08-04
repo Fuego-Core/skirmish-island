@@ -1,20 +1,25 @@
 import { RES, DEV_CAP_MULT, SPEED } from "./constants.js";
 
 // ---- Bâtiments ----
+// Plafonds de niveau : le jeu ne doit jamais s'arrêter, mais un grind infini
+// (coût ×1.28/niveau composé à l'infini) finit par produire des nombres
+// absurdes. Chaque bâtiment plafonne quand son utilité mécanique plafonne
+// elle aussi (files d'attente cap à 10, bonus de Sénat cap à 50%...), avec
+// quelques niveaux de marge en plus pour le prestige.
 export const BUILDINGS = {
-  senat:    { label: "Sénat", group: "infra", desc: "Cœur de la cité — débloque les autres bâtiments et accélère les chantiers." },
-  scierie:  { label: "Scierie", group: "prod", produces: "bois", desc: "Produit du bois." },
-  carriere: { label: "Carrière", group: "prod", produces: "pierre", desc: "Produit de la pierre." },
-  mine_fer: { label: "Mine de fer", group: "prod", produces: "fer", desc: "Produit du fer." },
-  mine_or:  { label: "Mine d'or", group: "prod", produces: "or", requires: { senat: 3 }, desc: "Produit de l'or." },
-  ferme:    { label: "Ferme", group: "prod", produces: "ble", desc: "Produit du blé — nourrit ton armée." },
-  entrepot: { label: "Entrepôt", group: "infra", desc: "Stocke bois, pierre, fer et or." },
-  grenier:  { label: "Grenier", group: "infra", desc: "Stocke le blé." },
-  marche:   { label: "Marché", group: "infra", requires: { senat: 3 }, desc: "Échange tes ressources excédentaires (3 contre 2)." },
-  port:     { label: "Port", group: "mil", requires: { senat: 2 }, desc: "Chantier naval — permet de construire des bateaux." },
-  muraille: { label: "Muraille", group: "mil", requires: { senat: 2 }, desc: "Protège la cité — chaque niveau renforce ta garnison de 6% contre les raids." },
+  senat:    { label: "Sénat", group: "infra", maxLevel: 15, desc: "Cœur de la cité — débloque les autres bâtiments et accélère les chantiers." },
+  scierie:  { label: "Scierie", group: "prod", produces: "bois", maxLevel: 30, desc: "Produit du bois." },
+  carriere: { label: "Carrière", group: "prod", produces: "pierre", maxLevel: 30, desc: "Produit de la pierre." },
+  mine_fer: { label: "Mine de fer", group: "prod", produces: "fer", maxLevel: 30, desc: "Produit du fer." },
+  mine_or:  { label: "Mine d'or", group: "prod", produces: "or", requires: { senat: 3 }, maxLevel: 30, desc: "Produit de l'or." },
+  ferme:    { label: "Ferme", group: "prod", produces: "ble", maxLevel: 30, desc: "Produit du blé — nourrit ton armée." },
+  entrepot: { label: "Entrepôt", group: "infra", maxLevel: 25, desc: "Stocke bois, pierre, fer et or." },
+  grenier:  { label: "Grenier", group: "infra", maxLevel: 25, desc: "Stocke le blé." },
+  marche:   { label: "Marché", group: "infra", requires: { senat: 3 }, maxLevel: 20, desc: "Échange tes ressources excédentaires (3 contre 2)." },
+  port:     { label: "Port", group: "mil", requires: { senat: 2 }, maxLevel: 12, desc: "Chantier naval — permet de construire des bateaux." },
+  muraille: { label: "Muraille", group: "mil", requires: { senat: 2 }, maxLevel: 20, desc: "Protège la cité — chaque niveau renforce ta garnison de 6% contre les raids." },
   colosse:  { label: "Le Colosse", group: "merveille", requires: { senat: 5 }, maxLevel: 5, desc: "Merveille de l'Égée. Achève ses 5 étapes pour graver ton nom dans l'histoire — et remporter la partie." },
-  caserne:  { label: "Caserne", group: "mil", requires: { senat: 2 }, desc: "Permet de recruter troupes et engins de siège." },
+  caserne:  { label: "Caserne", group: "mil", requires: { senat: 2 }, maxLevel: 12, desc: "Permet de recruter troupes et engins de siège." },
 };
 export const GROUPS = [["prod", "Production"], ["infra", "Infrastructure"], ["mil", "Militaire & naval"], ["merveille", "Merveille"]];
 

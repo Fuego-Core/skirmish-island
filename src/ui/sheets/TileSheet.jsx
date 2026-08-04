@@ -1,5 +1,5 @@
 import { C } from "../../game/constants.js";
-import { TROOPS } from "../../game/troops.js";
+import { TROOPS, compositionBonus } from "../../game/troops.js";
 import { ISLAND_GRID, TILE_LABELS, tileColor } from "../../game/world.js";
 import { botName, tilePower } from "../../game/bots.js";
 import { REGEN_MS } from "../../game/constants.js";
@@ -83,7 +83,12 @@ export function TileSheet({
                 onClick={() => { startAttack(selectedTile.px, selectedTile.py, { ...attackForm }); setAttackForm({ hoplite: 0, archer: 0, cavalier: 0, catapulte: 0, belier: 0 }); }} />
             </div>
             <div style={{ fontSize: 9, color: C.textDim, marginTop: 6, fontStyle: "italic" }}>
-              Puissance : {Object.keys(attackForm).reduce((a, t) => a + attackForm[t] * TROOPS[t].atk * (TROOPS[t].siege ? 1.5 : 1), 0)}
+              Puissance : {Math.round(Object.keys(attackForm).reduce((a, t) => a + attackForm[t] * TROOPS[t].atk * (TROOPS[t].siege ? 1.5 : 1), 0) * compositionBonus(attackForm))}
+              {(() => {
+                const b = compositionBonus(attackForm);
+                const pct = Math.round((b - 1) * 100);
+                return Object.values(attackForm).reduce((a, n) => a + n, 0) > 0 ? ` (mix ${pct >= 0 ? "+" : ""}${pct}%)` : "";
+              })()}
               {(attackForm.catapulte > 0 || attackForm.belier > 0) && (game.ships.siege >= 1 ? " · nef de siège mobilisée" : " · nef de siège requise !")}
             </div>
           </div>

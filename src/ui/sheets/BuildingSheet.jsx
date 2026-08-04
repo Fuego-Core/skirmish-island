@@ -50,18 +50,18 @@ export function BuildingSheet({
         <div style={{ display: "flex", alignItems: "center", gap: 8, background: C.inset, borderRadius: 9, padding: "11px 13px", marginBottom: 12 }}>
           <ResIcon r={b.produces} size={20} />
           <span style={{ fontSize: 12, fontFamily: "monospace", color: C.textDim }}>
-            +{prodPerHour(level)}/h <span style={{ color: C.ok }}>→ +{prodPerHour(level + 1)}/h</span>
+            +{prodPerHour(level)}/h {!maxed && <span style={{ color: C.ok }}>→ +{prodPerHour(level + 1)}/h</span>}
           </span>
         </div>
       )}
       {(key === "entrepot" || key === "grenier") && (
         <div style={{ background: C.inset, borderRadius: 9, padding: "11px 13px", marginBottom: 12, fontSize: 12, fontFamily: "monospace", color: C.textDim }}>
-          Capacité {fmtNum(storageCap(level))} <span style={{ color: C.ok }}>→ {fmtNum(storageCap(level + 1))}</span>
+          Capacité {fmtNum(storageCap(level))} {!maxed && <span style={{ color: C.ok }}>→ {fmtNum(storageCap(level + 1))}</span>}
         </div>
       )}
       {key === "muraille" && (
         <div style={{ background: C.inset, borderRadius: 9, padding: "11px 13px", marginBottom: 12, fontSize: 12, fontFamily: "monospace", color: C.textDim }}>
-          Garnison +{level * 6}% <span style={{ color: C.ok }}>→ +{(level + 1) * 6}%</span>
+          Garnison +{level * 6}% {!maxed && <span style={{ color: C.ok }}>→ +{(level + 1) * 6}%</span>}
         </div>
       )}
       {key === "colosse" && (

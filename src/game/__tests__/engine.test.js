@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { applyElapsed } from "../engine.js";
 import { newGameState, freshBuildings } from "../state.js";
 import { prodPerHour, storageCap, upgradeCost, buildDuration, BUILDINGS, buildSlots } from "../buildings.js";
-import { TROOPS, troopSlots } from "../troops.js";
+import { TROOPS, troopSlots, compositionBonus } from "../troops.js";
 import { SHIPS, shipSlots } from "../ships.js";
 import { rk, tileState, enemyDefense, regionDist } from "../world.js";
 import { SPEED, REGEN_MS, BOT_GROWTH_MAX } from "../constants.js";
@@ -481,5 +481,59 @@ describe("marché de l'Égée", () => {
     s.marketOffers = [{ id: "legacy", author: "bot", botName: "Test", giveRes: "bois", giveAmt: 10, wantRes: "fer", wantAmt: 10, postedAt: now, expiresAt: now + 1e9, fillAt: null }];
     const after = applyElapsed(s, now + 10);
     expect(after.marketOffers.find((o) => o.id === "legacy")).toBeUndefined();
+  });
+});
+
+describe("équilibre de composition d'armée", () => {
+  it("une armée parfaitement équilibrée obtient le bonus maximal", () => {
+    // atk hoplite=6, archer=8, cavalier=14 — équilibrer les parts de puissance,
+    // pas les effectifs bruts.
+    const troops = { hoplite: 100, archer: 75, cavalier: 300 / 7 };
+    const bonus = compositionBonus(troops);
+    expect(bonus).toBeCloseTo(1.12, 1);
+  });
+
+  it("une armée mono-unité subit le malus maximal", () => {
+    const bonus = compositionBonus({ hoplite: 100, archer: 0, cavalier: 0, belier: 0, catapulte: 0 });
+    expect(bonus).toBeCloseTo(0.88, 5);
+  });
+
+  it("une armée uniquement de siège (sans troupe de mêlée) reste neutre", () => {
+    const bonus = compositionBonus({ hoplite: 0, archer: 0, cavalier: 0, belier: 5, catapulte: 5 });
+    expect(bonus).toBe(1);
+  });
+
+  it("le bonus de composition influence la résolution d'une attaque", () => {
+    const now = Date.now();
+    const s = baseState(now);
+    s.troops = { hoplite: 0, archer: 0, cavalier: 0, catapulte: 0, belier: 0 };
+    s.ships.transport = 1;
+    const region = { gx: 5, gy: 5 };
+    const px = 4, py = 4;
+    const key = rk(region, px, py);
+    const oneWay = 5000;
+    s.region = region;
+    s.attack = {
+      key, troops: { hoplite: 50, archer: 0, cavalier: 0, catapulte: 0, belier: 0 },
+      withSiege: false, resolved: false, report: null, arriveAt: now + oneWay, endsAt: now + oneWay * 2,
+    };
+    const afterMono = applyElapsed(s, now + oneWay * 2 + 10);
+    const monoAtk = afterMono.reports[0].atkPower;
+
+    const s2 = baseState(now);
+    s2.troops = { hoplite: 0, archer: 0, cavalier: 0, catapulte: 0, belier: 0 };
+    s2.ships.transport = 1;
+    s2.region = region;
+    s2.attack = {
+      key, troops: { hoplite: 17, archer: 13, cavalier: 7, catapulte: 0, belier: 0 },
+      withSiege: false, resolved: false, report: null, arriveAt: now + oneWay, endsAt: now + oneWay * 2,
+    };
+    const afterMix = applyElapsed(s2, now + oneWay * 2 + 10);
+    const mixAtk = afterMix.reports[0].atkPower;
+
+    // Puissance brute similaire (mono ~300, mix ~(17*6+13*8+7*14)=304) mais le
+    // mix équilibré doit ressortir avec un atkPower relatif plus élevé grâce
+    // au bonus de composition.
+    expect(mixAtk / 304).toBeGreaterThan(monoAtk / 300);
   });
 });

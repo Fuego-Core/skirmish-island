@@ -1,6 +1,6 @@
 import { RES, SPEED, REGEN_MS, RAID_INTERVAL_MS, BOT_RAID_INTERVAL_MS, EVENT_INTERVAL_MS, MARCHAND_DUREE_MS, MARKET_OFFER_INTERVAL_MS, MARKET_OFFERS_MAX } from "./constants.js";
 import { BUILDINGS, prodPerHour, storageCap, buildDuration } from "./buildings.js";
-import { TROOPS } from "./troops.js";
+import { TROOPS, compositionBonus } from "./troops.js";
 import { SHIPS, PECHE_BLE_H } from "./ships.js";
 import { FACTIONS } from "./factions.js";
 import { tileState, regionDist } from "./world.js";
@@ -106,7 +106,7 @@ export function applyElapsed(state, now) {
       const type = tileState(agx, agy, px, py);
       const defPower = s.conquered[s.attack.key] ? 0 : tilePower(agx, agy, px, py, type, now - (s.startedAt || now));
       const factionAtk = (s.faction && FACTIONS[s.faction] && FACTIONS[s.faction].atkBonus) || 1;
-      const atkPower = Math.round(Object.keys(s.attack.troops).reduce((a, t) => a + s.attack.troops[t] * TROOPS[t].atk, 0) * factionAtk);
+      const atkPower = Math.round(Object.keys(s.attack.troops).reduce((a, t) => a + s.attack.troops[t] * TROOPS[t].atk, 0) * factionAtk * compositionBonus(s.attack.troops));
       const siegeBonus = Object.keys(s.attack.troops).reduce((a, t) => a + (TROOPS[t].siege ? s.attack.troops[t] * TROOPS[t].atk * 0.5 : 0), 0);
       const win = atkPower + siegeBonus > defPower;
       const losses = {}, survivors = {};
@@ -205,7 +205,7 @@ export function applyElapsed(state, now) {
     const pirate = Math.round((40 + totalSenat * 15 + troopAtk * 0.25) * (0.8 + Math.random() * 0.4));
     const wall = Math.max(...s.islands.map((i) => i.buildings.muraille || 0));
     const garrison = Math.round(
-      Object.keys(TROOPS).reduce((a, t) => a + s.troops[t] * TROOPS[t].def, 0) * (1 + wall * 0.06)
+      Object.keys(TROOPS).reduce((a, t) => a + s.troops[t] * TROOPS[t].def, 0) * (1 + wall * 0.06) * compositionBonus(s.troops)
     );
     const held = garrison >= pirate;
     const losses = {};
@@ -248,7 +248,7 @@ export function applyElapsed(state, now) {
     const assault = Math.round(botRaidPower(pick.gx, pick.gy, pick.px, pick.py, elapsed) * (0.85 + Math.random() * 0.3));
     const wall = Math.max(...s.islands.map((i) => i.buildings.muraille || 0));
     const garrison = Math.round(
-      Object.keys(TROOPS).reduce((a, t) => a + s.troops[t] * TROOPS[t].def, 0) * (1 + wall * 0.06)
+      Object.keys(TROOPS).reduce((a, t) => a + s.troops[t] * TROOPS[t].def, 0) * (1 + wall * 0.06) * compositionBonus(s.troops)
     );
     const held = garrison >= assault;
     const losses = {};
