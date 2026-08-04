@@ -48,13 +48,13 @@ function OfferRow({ offer, nowTick, game, onAccept, onCancel }) {
     <div style={{ background: C.inset, borderRadius: 10, padding: "13px 14px", border: `1px solid ${C.borderSoft}` }}>
       <div style={{ fontSize: 11, color: C.textFaint, marginBottom: 8 }}>{isPlayer ? "Ton offre" : offer.botName}</div>
       <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 9 }}>
-        <AmountTag kind={offer.give.kind} keyName={offer.give.key} amt={offer.give.amt} color={C.bad} />
+        <AmountTag kind={offer.give.kind} keyName={offer.give.key} amt={offer.give.amt} color={C.ok} />
         <I name="marche" size={14} color={C.gold} />
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
           {offer.want.map((w, i) => (
             <span key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
               {i > 0 && <span style={{ color: C.textFaint, fontSize: 11 }}>+</span>}
-              <AmountTag kind={w.kind} keyName={w.key} amt={w.amt} color={C.ok} />
+              <AmountTag kind={w.kind} keyName={w.key} amt={w.amt} color={C.bad} />
             </span>
           ))}
         </div>
