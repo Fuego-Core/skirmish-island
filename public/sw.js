@@ -1,4 +1,4 @@
-const CACHE_NAME = "skirmish-island-v1";
+const CACHE_NAME = "skirmish-island-v2";
 // Chemins relatifs à sw.js : fonctionnent aussi bien à la racine du domaine
 // (Vercel) que sous un sous-chemin (GitHub Pages, /<repo>/).
 const APP_SHELL = ["./", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];

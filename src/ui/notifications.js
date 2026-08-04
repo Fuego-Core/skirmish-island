@@ -2,6 +2,13 @@
 // (premier plan ou arrière-plan proche). Le jeu est 100% statique (pas de
 // serveur), donc impossible de réveiller l'app après une fermeture complète :
 // ceci n'est pas du "vrai" push, juste un rappel pendant que l'app tourne.
+//
+// L'icône est importée (pas servie depuis public/) pour que Vite lui donne un
+// nom de fichier haché : sans ça, l'URL reste identique d'un déploiement à
+// l'autre et les téléphones qui l'ont déjà en cache HTTP ne revoient jamais
+// la version à jour, même après un hard-refresh de l'app.
+import notifIcon from "../assets/images/notif-icon-192.png";
+
 const PREF_KEY = "skirmish-notifications-enabled";
 
 export function notificationsSupported() {
@@ -28,9 +35,7 @@ export function disableNotifications() {
 
 export async function notify(title, body) {
   if (!notificationsEnabled()) return;
-  // Fond transparent (pas le carré plein utilisé pour l'icône d'app/manifest) :
-  // sur fond de notification sombre, un carré quasi-noir se fondait dedans.
-  const icon = `${import.meta.env.BASE_URL}icons/notif-icon-192.png`;
+  const icon = notifIcon;
   try {
     if (navigator.serviceWorker) {
       const reg = await navigator.serviceWorker.getRegistration();
