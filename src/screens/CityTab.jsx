@@ -1,8 +1,14 @@
 import { useState } from "react";
-import { C, DEV } from "../game/constants.js";
+import { C, DEV, SPEED } from "../game/constants.js";
 import { FACTIONS } from "../game/factions.js";
+import { B_ICON, buildSlots, buildDuration } from "../game/buildings.js";
+import { TROOPS, troopSlots } from "../game/troops.js";
+import { SHIPS, shipSlots } from "../game/ships.js";
 import { I } from "../ui/Icon.jsx";
-import { Card, SectionTitle, QueueCard, Btn, ResIcon, fmtTime, fmtNum } from "../ui/kit.jsx";
+import { Card, SectionTitle, QueueCard, SlotQueue, Btn, ResIcon, fmtTime, fmtNum } from "../ui/kit.jsx";
+import { BUILDING_PORTRAITS } from "../ui/buildingPortraits.js";
+import { TROOP_PORTRAITS } from "../ui/troopPortraits.js";
+import { SHIP_PORTRAITS } from "../ui/shipPortraits.js";
 import { notificationsSupported, notificationsEnabled, enableNotifications, disableNotifications } from "../ui/notifications.js";
 
 function ClickableQueue({ onClick, ...props }) {
@@ -44,23 +50,31 @@ export function CityTab({
     if (res.ok) setImportCode("");
   };
 
-  const chantiers = game.islands.reduce((a, i) => a + (i.queue || []).length, 0);
-  const nextChantierEnds = Math.min(
-    ...game.islands.flatMap((i) => (i.queue || []).filter((q) => q.endsAt).map((q) => q.endsAt)),
-    Infinity
-  );
-  const shipQueue = game.shipQueue || [];
-  const troopQueue = game.troopQueue || [];
+  const fShip = (game.faction && FACTIONS[game.faction].shipSpeed) || 1;
+  const fTroop = (game.faction && FACTIONS[game.faction].troopSpeed) || 1;
+  const bestPort = Math.max(...game.islands.map((i) => i.buildings.port));
+  const bestCaserne = Math.max(...game.islands.map((i) => i.buildings.caserne));
+
+  // Détail case par case (portrait + décompte) des trois files de
+  // production — vue d'ensemble directe, sans avoir à changer d'onglet.
+  let cumulBuild = nowTick;
+  const buildItems = (isl.queue || []).map((q, i) => {
+    cumulBuild = i === 0 ? q.endsAt : cumulBuild + buildDuration(q.key, q.targetLevel - 1, isl.buildings.senat) * 1000;
+    return { portrait: BUILDING_PORTRAITS[q.key], icon: B_ICON[q.key], remaining: fmtTime(cumulBuild - nowTick) };
+  });
+  let cumulShip = nowTick;
+  const shipItems = (game.shipQueue || []).map((q, i) => {
+    cumulShip = i === 0 ? q.endsAt : cumulShip + SHIPS[q.type].duration * 1000 * SPEED * fShip;
+    return { portrait: SHIP_PORTRAITS[q.type], icon: q.type, remaining: fmtTime(cumulShip - nowTick) };
+  });
+  let cumulTroop = nowTick;
+  const troopItems = (game.troopQueue || []).map((q, i) => {
+    const unitDur = TROOPS[q.type].duration * 1000 * SPEED * fTroop;
+    cumulTroop = i === 0 ? q.nextAt + (q.remaining - 1) * unitDur : cumulTroop + q.remaining * unitDur;
+    return { portrait: TROOP_PORTRAITS[q.type], icon: q.type, remaining: fmtTime(cumulTroop - nowTick) };
+  });
+
   const enCours = [];
-  if (chantiers > 0 && Number.isFinite(nextChantierEnds)) {
-    enCours.push({ key: "chantiers", icon: "senat", label: `${chantiers} chantier${chantiers > 1 ? "s" : ""} en cours`, remaining: fmtTime(nextChantierEnds - nowTick), tab: "construction" });
-  }
-  if (shipQueue.length > 0 && shipQueue[0].endsAt) {
-    enCours.push({ key: "flotte", icon: "port", label: `${shipQueue.length} navire${shipQueue.length > 1 ? "s" : ""} en chantier`, remaining: fmtTime(shipQueue[0].endsAt - nowTick), tab: "port" });
-  }
-  if (troopQueue.length > 0 && troopQueue[0].nextAt) {
-    enCours.push({ key: "troupes", icon: "epees", label: `${troopQueue.length} lot${troopQueue.length > 1 ? "s" : ""} de recrues`, remaining: fmtTime(troopQueue[0].nextAt - nowTick), tab: "armee" });
-  }
   if (game.exploringTiles.length > 0) {
     enCours.push({ key: "explos", icon: "explorateur", label: `${game.exploringTiles.length} exploration${game.exploringTiles.length > 1 ? "s" : ""} en mer`, remaining: fmtTime(Math.min(...game.exploringTiles.map((e) => e.endsAt)) - nowTick), tab: "carte" });
   }
@@ -136,9 +150,24 @@ export function CityTab({
         );
       })()}
 
-      {enCours.length > 0 ? (
+      {(buildItems.length > 0 || shipItems.length > 0 || troopItems.length > 0 || enCours.length > 0) ? (
         <>
           <SectionTitle>En cours</SectionTitle>
+          {buildItems.length > 0 && (
+            <div onClick={() => setTab("construction")} style={{ cursor: "pointer" }}>
+              <SlotQueue title="Chantiers" slots={buildSlots(isl.buildings.senat)} items={buildItems} />
+            </div>
+          )}
+          {shipItems.length > 0 && (
+            <div onClick={() => setTab("port")} style={{ cursor: "pointer" }}>
+              <SlotQueue title="Chantier naval" slots={shipSlots(bestPort)} items={shipItems} />
+            </div>
+          )}
+          {troopItems.length > 0 && (
+            <div onClick={() => setTab("armee")} style={{ cursor: "pointer" }}>
+              <SlotQueue title="Caserne" slots={troopSlots(bestCaserne)} items={troopItems} />
+            </div>
+          )}
           {enCours.map((e) => (
             <ClickableQueue key={e.key} icon={e.icon} label={e.label} remaining={e.remaining} onClick={() => setTab(e.tab)} />
           ))}
