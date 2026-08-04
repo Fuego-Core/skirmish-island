@@ -40,23 +40,39 @@ function AmountTag({ kind, keyName, amt, size = 22, color }) {
   );
 }
 
+// Le sens de "give"/"want" s'inverse selon le point de vue : pour l'offre
+// d'un rival que TU regardes, give = ce qu'il te donne (tu reçois), want =
+// ce qu'il te demande (tu payes). Pour TON offre postée, c'est l'inverse :
+// give a déjà été débité au moment du post (tu l'as donné), want arrivera
+// quand un rival la remplit (tu recevras). D'où les libellés + couleurs
+// conditionnés par isPlayer plutôt que fixes.
 function OfferRow({ offer, nowTick, game, onAccept, onCancel }) {
   const isPlayer = offer.author === "player";
   const countdown = isPlayer ? offer.fillAt - nowTick : offer.expiresAt - nowTick;
   const canAccept = !isPlayer && ownsWantBasket(game, offer.want);
+  const giveLabel = isPlayer ? "Tu as donné" : "Tu reçois";
+  const wantLabel = isPlayer ? "Tu recevras" : "Tu payes";
+  const giveColor = isPlayer ? C.bad : C.ok;
+  const wantColor = isPlayer ? C.ok : C.bad;
   return (
     <div style={{ background: C.inset, borderRadius: 10, padding: "13px 14px", border: `1px solid ${C.borderSoft}` }}>
       <div style={{ fontSize: 11, color: C.textFaint, marginBottom: 8 }}>{isPlayer ? "Ton offre" : offer.botName}</div>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 9 }}>
-        <AmountTag kind={offer.give.kind} keyName={offer.give.key} amt={offer.give.amt} color={C.ok} />
-        <I name="marche" size={14} color={C.gold} />
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          {offer.want.map((w, i) => (
-            <span key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              {i > 0 && <span style={{ color: C.textFaint, fontSize: 11 }}>+</span>}
-              <AmountTag kind={w.kind} keyName={w.key} amt={w.amt} color={C.bad} />
-            </span>
-          ))}
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 10, flexWrap: "wrap", marginBottom: 9 }}>
+        <div>
+          <div style={{ fontSize: 9, color: giveColor, letterSpacing: 0.4, marginBottom: 3 }}>{giveLabel}</div>
+          <AmountTag kind={offer.give.kind} keyName={offer.give.key} amt={offer.give.amt} color={giveColor} />
+        </div>
+        <I name="marche" size={14} color={C.gold} style={{ marginTop: 14 }} />
+        <div>
+          <div style={{ fontSize: 9, color: wantColor, letterSpacing: 0.4, marginBottom: 3 }}>{wantLabel}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            {offer.want.map((w, i) => (
+              <span key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                {i > 0 && <span style={{ color: C.textFaint, fontSize: 11 }}>+</span>}
+                <AmountTag kind={w.kind} keyName={w.key} amt={w.amt} color={wantColor} />
+              </span>
+            ))}
+          </div>
         </div>
       </div>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>

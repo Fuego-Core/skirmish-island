@@ -247,6 +247,11 @@ export function useGame() {
       creditOffer(s, offer.give.kind, offer.give.key, offer.give.amt);
       s.marketOffers = s.marketOffers.filter((o) => o.id !== offerId);
       s.stats.tradesDone = (s.stats.tradesDone || 0) + 1;
+      // Rapport immédiat : sans ça, accepter une offre est silencieux (l'offre
+      // disparaît juste de la liste) et donne l'impression que rien ne s'est
+      // passé, surtout si le gain se noie dans un gros stock déjà affiché arrondi.
+      s.reports.unshift({ kind: "marche_achat", paid: offer.want, received: offer.give, at: Date.now() });
+      s.reports = s.reports.slice(0, 8);
       return s;
     });
   }, []);

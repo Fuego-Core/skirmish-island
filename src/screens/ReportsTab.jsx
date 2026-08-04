@@ -28,13 +28,14 @@ function battleCrestKey(rep) {
 
 function crestFor(rep) {
   if (rep.kind === "evenement") return EVENT_CRESTS[rep.icone];
-  if (rep.kind === "marche") return eventMarchand;
+  if (rep.kind === "marche" || rep.kind === "marche_achat") return eventMarchand;
   return BATTLE_CRESTS[battleCrestKey(rep)];
 }
 
 function titleFor(rep) {
   if (rep.kind === "evenement") return rep.titre;
   if (rep.kind === "marche") return "OFFRE DU MARCHÉ REMPLIE";
+  if (rep.kind === "marche_achat") return "ÉCHANGE CONCLU";
   if (rep.kind === "defense") return rep.win ? "RAID REPOUSSÉ" : "RAID PIRATE SUBI";
   return rep.win ? "VICTOIRE" : "DÉFAITE";
 }
@@ -42,12 +43,13 @@ function titleFor(rep) {
 function subtitleFor(rep) {
   if (rep.kind === "evenement") return rep.texte;
   if (rep.kind === "marche") return `${fmtNum(rep.give.amt)} donné contre ${rep.want.map((w) => fmtNum(w.amt)).join(" + ")} reçu`;
+  if (rep.kind === "marche_achat") return `${rep.paid.map((w) => fmtNum(w.amt)).join(" + ")} payé contre ${fmtNum(rep.received.amt)} reçu`;
   if (rep.kind === "defense") return rep.attaquant || "pirates égéens";
   return rep.cible || (rep.targetType === "ile_joueur" ? "cité rivale" : "île inactive");
 }
 
 function outcomeColor(rep) {
-  if (rep.kind === "evenement" || rep.kind === "marche") return C.goldHi;
+  if (rep.kind === "evenement" || rep.kind === "marche" || rep.kind === "marche_achat") return C.goldHi;
   return rep.win ? C.ok : C.bad;
 }
 
@@ -109,7 +111,20 @@ function ReportDetail({ rep }) {
         </div>
       )}
 
-      {rep.kind !== "evenement" && rep.kind !== "marche" && (<>
+      {rep.kind === "marche_achat" && (
+        <div style={{ background: C.inset, borderRadius: 9, padding: "11px 13px", marginBottom: 8, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", fontSize: 13, fontFamily: "monospace" }}>
+          {rep.paid.map((w, i) => (
+            <span key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              {i > 0 && <span style={{ color: C.textFaint }}>+</span>}
+              <TradeIcon kind={w.kind} keyName={w.key} size={18} /> −{fmtNum(w.amt)}
+            </span>
+          ))}
+          <span style={{ color: C.gold }}>→</span>
+          <TradeIcon kind={rep.received.kind} keyName={rep.received.key} size={18} /> +{fmtNum(rep.received.amt)}
+        </div>
+      )}
+
+      {rep.kind !== "evenement" && rep.kind !== "marche" && rep.kind !== "marche_achat" && (<>
         <div style={{ borderRadius: 9, marginBottom: 8, border: `1px solid ${C.borderSoft}`, overflow: "hidden" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
             <div style={{ padding: "10px 13px", borderRight: `1px solid ${C.borderSoft}`, background: rep.win ? `${C.ok}14` : "transparent" }}>
