@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { C, RES } from "../game/constants.js";
 import { TROOPS, troopSlots, compositionBonus } from "../game/troops.js";
 import { SPEED } from "../game/constants.js";
@@ -5,6 +6,7 @@ import { FACTIONS } from "../game/factions.js";
 import { I } from "../ui/Icon.jsx";
 import { Card, SectionTitle, SlotQueue, Btn, CostRow, fmtTime } from "../ui/kit.jsx";
 import { TROOP_PORTRAITS } from "../ui/troopPortraits.js";
+import { SimulatorSheet } from "../ui/sheets/SimulatorSheet.jsx";
 
 const FAMILY_LABEL = { infantry: "Infanterie", ranged: "Tir", cavalry: "Cavalerie" };
 const FAMILY_COLOR = { infantry: C.water, ranged: C.gold, cavalry: C.copper };
@@ -72,6 +74,7 @@ function TroopPortrait({ type, dim }) {
 }
 
 export function ArmyTab({ game, nowTick, bestCaserne, armyPower, upkeep, recruitTroop }) {
+  const [showSimulator, setShowSimulator] = useState(false);
   const troopQueue = game.troopQueue || [];
   const fTroop = (game.faction && FACTIONS[game.faction].troopSpeed) || 1;
   // Décompte par case = temps avant que TOUT le lot de cette case soit levé
@@ -85,7 +88,7 @@ export function ArmyTab({ game, nowTick, bestCaserne, armyPower, upkeep, recruit
 
   return (
     <>
-      <Card style={{ display: "flex", justifyContent: "space-between", padding: "10px 14px" }}>
+      <Card style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px" }}>
         <span style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 12 }}>
           <I name="epees" size={15} color={C.gold} />
           Puissance : <span style={{ fontFamily: "monospace", color: C.goldHi }}>{armyPower}</span>
@@ -94,7 +97,9 @@ export function ArmyTab({ game, nowTick, bestCaserne, armyPower, upkeep, recruit
           <I name="ble" size={15} color={upkeep > 0 ? C.bad : C.textDim} />
           <span style={{ fontFamily: "monospace", color: upkeep > 0 ? C.bad : C.textDim }}>−{upkeep}/h</span>
         </span>
+        <Btn small label="Simulateur" onClick={() => setShowSimulator(true)} />
       </Card>
+      <SimulatorSheet open={showSimulator} onClose={() => setShowSimulator(false)} game={game} />
       <div style={{ marginTop: 8 }}>
         <CompositionBar troops={game.troops} />
       </div>
