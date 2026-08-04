@@ -6,6 +6,7 @@ import { REGEN_MS } from "../../game/constants.js";
 import { I } from "../Icon.jsx";
 import { Sheet, Btn, Stepper, fmtTime, fmtNum } from "../kit.jsx";
 import tileIslandImg from "../../assets/images/tile-island.webp";
+import { TROOP_PORTRAITS } from "../troopPortraits.js";
 
 const FAMILY_LABEL = { infantry: "Infanterie", ranged: "Tir", cavalry: "Cavalerie" };
 const FAMILY_COLOR = { infantry: C.water, ranged: C.gold, cavalry: C.copper };
@@ -94,7 +95,10 @@ export function TileSheet({
             )}
             {Object.keys(TROOPS).map((t) => (
               <div key={t} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 5 }}>
-                <I name={t} size={16} color={C.textDim} />
+                <div style={{ width: 26, height: 26, borderRadius: "50%", overflow: "hidden", flexShrink: 0, border: `1px solid ${C.borderSoft}` }}>
+                  <img src={TROOP_PORTRAITS[t]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                </div>
+                <span style={{ fontSize: 10, color: C.textDim, width: 60, textAlign: "left" }}>{TROOPS[t].label}</span>
                 <Stepper value={attackForm[t]} max={game.troops[t]} onChange={(v) => setAttackForm((f) => ({ ...f, [t]: v }))} />
               </div>
             ))}
