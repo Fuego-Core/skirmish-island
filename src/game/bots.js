@@ -53,6 +53,19 @@ export function botRaidPower(gx, gy, px, py, elapsedMs) {
   return Math.round(tilePower(gx, gy, px, py, "ile_joueur", elapsedMs) * 0.55);
 }
 
+// Répartition (infanterie/tir/cavalerie) de la garnison d'une case, stable
+// pour des coordonnées données (même principe que botName/tilePower — dérivé
+// des coordonnées, jamais stocké). Utilisée pour le bonus de contre d'unités
+// à l'attaque : une case révélée par espionnage montre sa vraie composition,
+// pas seulement sa force totale.
+export function tileFamilyMix(gx, gy, px, py) {
+  const infantry = hash(gx, gy, px, py, 4133, 971) + 1;
+  const cavalry = hash(gx, gy, px, py, 6229, 1553) + 1;
+  const ranged = hash(gx, gy, px, py, 2917, 733) + 1;
+  const total = infantry + cavalry + ranged;
+  return { infantry: infantry / total, cavalry: cavalry / total, ranged: ranged / total };
+}
+
 // Score du joueur, sur la même échelle que la puissance des rivaux.
 export function playerScore(state) {
   const garrison = Object.keys(TROOPS).reduce((a, t) => a + (state.troops[t] || 0) * TROOPS[t].def, 0);

@@ -17,11 +17,10 @@ export const TROOPS = {
     cost: { bois: 320, pierre: 180, fer: 260, or: 80, ble: 90 }, desc: "Dévastatrice — nécessite un bateau de siège." },
 };
 
-// Bonus/malus selon l'équilibre de l'armée (hors unités de siège, qui ont
-// déjà leur propre bonus dédié) : de +12% (mix parfaitement équilibré entre
-// les 3 familles) à −12% (empilement d'une seule famille). Calculé sur la
-// puissance d'attaque pondérée, pas le nombre d'unités brut.
-export function compositionBonus(troops) {
+// Répartition (infanterie/tir/cavalerie) de la puissance d'attaque d'une
+// armée (hors unités de siège), en parts de 0 à 1. Base commune à
+// compositionBonus et matchupBonus.
+export function troopFamilyShares(troops) {
   const families = { infantry: 0, ranged: 0, cavalry: 0 };
   let total = 0;
   Object.keys(TROOPS).forEach((t) => {
@@ -31,10 +30,41 @@ export function compositionBonus(troops) {
     families[def.family] += power;
     total += power;
   });
+  if (total <= 0) return families;
+  Object.keys(families).forEach((f) => (families[f] /= total));
+  return families;
+}
+
+// Bonus/malus selon l'équilibre de l'armée (hors unités de siège, qui ont
+// déjà leur propre bonus dédié) : de +12% (mix parfaitement équilibré entre
+// les 3 familles) à −12% (empilement d'une seule famille). Utilisé quand
+// l'adversaire n'a pas de composition connue (raids pirates/bots, défense
+// du joueur) — récompense un mix polyvalent plutôt qu'un contre ciblé.
+export function compositionBonus(troops) {
+  const shares = troopFamilyShares(troops);
+  const total = shares.infantry + shares.ranged + shares.cavalry;
   if (total <= 0) return 1;
-  const maxShare = Math.max(families.infantry, families.ranged, families.cavalry) / total;
+  const maxShare = Math.max(shares.infantry, shares.ranged, shares.cavalry);
   const t = Math.min(1, Math.max(0, (maxShare - 1 / 3) / (1 - 1 / 3)));
   return 1.12 - t * 0.24;
+}
+
+// Contre d'unités (infanterie > cavalerie > tir > infanterie), de -30% à
+// +30% selon à quel point l'armée envoyée contre est bien choisie face à LA
+// COMPOSITION RÉELLE de la cible. Ne s'utilise que quand cette composition
+// est connue (cité rivale attaquée — voir tileFamilyMix dans bots.js) :
+// l'espionnage devient un vrai outil tactique, pas juste un chiffre de
+// défense.
+const BEATS = { infantry: "cavalry", cavalry: "ranged", ranged: "infantry" };
+const BEATEN_BY = { cavalry: "infantry", ranged: "cavalry", infantry: "ranged" };
+export function matchupBonus(attackerTroops, defenderShares) {
+  const attacker = troopFamilyShares(attackerTroops);
+  let net = 0;
+  Object.keys(BEATS).forEach((f) => {
+    net += attacker[f] * defenderShares[BEATS[f]];
+    net -= attacker[f] * defenderShares[BEATEN_BY[f]];
+  });
+  return 1 + net * 0.3;
 }
 
 // Emplacements de file à la caserne : un de plus par niveau de Caserne,

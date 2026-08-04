@@ -115,6 +115,11 @@ function ReportDetail({ rep }) {
           <div style={{ fontSize: 12, fontFamily: "monospace", color: C.text }}>
             {rep.kind === "defense" ? `Garnison ${rep.atkPower}` : `Ton armée ${rep.atkPower}`} contre {rep.defPower}
             {rep.kind === "defense" && rep.wall > 0 ? ` (muraille niv. ${rep.wall})` : ""}
+            {rep.combatBonus !== undefined && (
+              <span style={{ color: rep.combatBonus >= 1 ? C.ok : C.bad }}>
+                {" "}({rep.targetType === "ile_joueur" ? "contre" : "mix"} {rep.combatBonus >= 1 ? "+" : ""}{Math.round((rep.combatBonus - 1) * 100)}%)
+              </span>
+            )}
           </div>
         </div>
 

@@ -1,11 +1,33 @@
 import { C } from "../../game/constants.js";
-import { TROOPS, compositionBonus } from "../../game/troops.js";
+import { TROOPS, compositionBonus, matchupBonus } from "../../game/troops.js";
 import { ISLAND_GRID, TILE_LABELS, tileColor } from "../../game/world.js";
 import { botName, tilePower } from "../../game/bots.js";
 import { REGEN_MS } from "../../game/constants.js";
 import { I } from "../Icon.jsx";
 import { Sheet, Btn, Stepper, fmtTime, fmtNum } from "../kit.jsx";
 import tileIslandImg from "../../assets/images/tile-island.webp";
+
+const FAMILY_LABEL = { infantry: "Infanterie", ranged: "Tir", cavalry: "Cavalerie" };
+const FAMILY_COLOR = { infantry: C.water, ranged: C.gold, cavalry: C.copper };
+
+// Répartition adverse révélée par l'espionnage — donne un vrai repère
+// tactique (contre d'unités) plutôt qu'un simple chiffre de défense.
+function EnemyMixBar({ mix }) {
+  return (
+    <div style={{ marginBottom: 8 }}>
+      <div style={{ display: "flex", height: 6, borderRadius: 3, overflow: "hidden", marginBottom: 4 }}>
+        {["infantry", "ranged", "cavalry"].map((f) => (
+          <div key={f} style={{ width: `${mix[f] * 100}%`, background: FAMILY_COLOR[f] }} />
+        ))}
+      </div>
+      <div style={{ display: "flex", justifyContent: "center", gap: 10, flexWrap: "wrap" }}>
+        {["infantry", "ranged", "cavalry"].map((f) => (
+          <span key={f} style={{ fontSize: 8.5, color: C.textFaint }}>{FAMILY_LABEL[f]} {Math.round(mix[f] * 100)}%</span>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function TileSheet({
   game, selectedTile, selectedTileKey, nowTick, attackForm, setAttackForm,
@@ -60,6 +82,7 @@ export function TileSheet({
                 <span style={{ color: C.goldHi }}>Renseignement d'éclaireur</span> — défense exacte :{" "}
                 <span style={{ color: C.bad, fontFamily: "monospace" }}>{game.spied[selectedTileKey].def}</span>
                 {" "}· butin : <span style={{ color: C.ok, fontFamily: "monospace" }}>{fmtNum(game.spied[selectedTileKey].butinMin)}–{fmtNum(game.spied[selectedTileKey].butinMax)}</span>/ressource
+                {game.spied[selectedTileKey].familyMix && <EnemyMixBar mix={game.spied[selectedTileKey].familyMix} />}
               </div>
             ) : (
               <div style={{ fontSize: 10, color: C.textDim, marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
@@ -83,11 +106,18 @@ export function TileSheet({
                 onClick={() => { startAttack(selectedTile.px, selectedTile.py, { ...attackForm }); setAttackForm({ hoplite: 0, archer: 0, cavalier: 0, catapulte: 0, belier: 0 }); }} />
             </div>
             <div style={{ fontSize: 9, color: C.textDim, marginTop: 6, fontStyle: "italic" }}>
-              Puissance : {Math.round(Object.keys(attackForm).reduce((a, t) => a + attackForm[t] * TROOPS[t].atk * (TROOPS[t].siege ? 1.5 : 1), 0) * compositionBonus(attackForm))}
               {(() => {
-                const b = compositionBonus(attackForm);
-                const pct = Math.round((b - 1) * 100);
-                return Object.values(attackForm).reduce((a, n) => a + n, 0) > 0 ? ` (mix ${pct >= 0 ? "+" : ""}${pct}%)` : "";
+                const enemyMix = game.spied[selectedTileKey] && game.spied[selectedTileKey].familyMix;
+                const bonus = enemyMix ? matchupBonus(attackForm, enemyMix) : compositionBonus(attackForm);
+                const power = Math.round(Object.keys(attackForm).reduce((a, t) => a + attackForm[t] * TROOPS[t].atk * (TROOPS[t].siege ? 1.5 : 1), 0) * bonus);
+                const pct = Math.round((bonus - 1) * 100);
+                const hasTroops = Object.values(attackForm).reduce((a, n) => a + n, 0) > 0;
+                return (
+                  <>
+                    Puissance : {power}
+                    {hasTroops && ` (${enemyMix ? "contre" : "mix"} ${pct >= 0 ? "+" : ""}${pct}%)`}
+                  </>
+                );
               })()}
               {(attackForm.catapulte > 0 || attackForm.belier > 0) && (game.ships.siege >= 1 ? " · nef de siège mobilisée" : " · nef de siège requise !")}
             </div>

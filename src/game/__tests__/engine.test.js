@@ -2,11 +2,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { applyElapsed } from "../engine.js";
 import { newGameState, freshBuildings } from "../state.js";
 import { prodPerHour, storageCap, upgradeCost, buildDuration, BUILDINGS, buildSlots } from "../buildings.js";
-import { TROOPS, troopSlots, compositionBonus } from "../troops.js";
+import { TROOPS, troopSlots, compositionBonus, matchupBonus } from "../troops.js";
 import { SHIPS, shipSlots } from "../ships.js";
 import { rk, tileState, enemyDefense, regionDist } from "../world.js";
 import { SPEED, REGEN_MS, BOT_GROWTH_MAX } from "../constants.js";
-import { botName, botGrowth, tilePower, knownBots, playerScore } from "../bots.js";
+import { botName, botGrowth, tilePower, knownBots, playerScore, tileFamilyMix } from "../bots.js";
 import { MARKET_OFFERS_MAX, MARKET_OFFER_LIFETIME_MS } from "../constants.js";
 import { generateBotOffer } from "../market.js";
 
@@ -535,5 +535,42 @@ describe("équilibre de composition d'armée", () => {
     // mix équilibré doit ressortir avec un atkPower relatif plus élevé grâce
     // au bonus de composition.
     expect(mixAtk / 304).toBeGreaterThan(monoAtk / 300);
+  });
+});
+
+describe("contre d'unités contre une cité rivale connue", () => {
+  it("tileFamilyMix est stable pour des coordonnées données et somme à 1", () => {
+    const mix = tileFamilyMix(2, -1, 5, 6);
+    expect(mix).toEqual(tileFamilyMix(2, -1, 5, 6));
+    expect(mix.infantry + mix.ranged + mix.cavalry).toBeCloseTo(1, 5);
+  });
+
+  it("une armée qui contre directement la composition adverse obtient le bonus maximal", () => {
+    const bonus = matchupBonus({ hoplite: 100 }, { infantry: 0, ranged: 0, cavalry: 1 });
+    expect(bonus).toBeCloseTo(1.3, 5);
+  });
+
+  it("une armée contrée par l'adversaire obtient le malus maximal", () => {
+    const bonus = matchupBonus({ hoplite: 100 }, { infantry: 0, ranged: 1, cavalry: 0 });
+    expect(bonus).toBeCloseTo(0.7, 5);
+  });
+
+  it("l'espionnage d'une cité rivale révèle sa composition", () => {
+    const now = Date.now();
+    const s = baseState(now);
+    const region = { gx: 3, gy: -2 };
+    const px = 2, py = 3;
+    const key = rk(region, px, py);
+    s.region = region;
+    s.ships.eclaireur = 1;
+    s.spyMissions = [{ key, arriveAt: now + 500, endsAt: now + 1000 }];
+    const after = applyElapsed(s, now + 600);
+    expect(after.spied[key]).toBeTruthy();
+    if (tileState(region.gx, region.gy, px, py) === "ile_joueur") {
+      expect(after.spied[key].familyMix).toBeTruthy();
+      expect(after.spied[key].familyMix.infantry + after.spied[key].familyMix.ranged + after.spied[key].familyMix.cavalry).toBeCloseTo(1, 5);
+    } else {
+      expect(after.spied[key].familyMix).toBeNull();
+    }
   });
 });

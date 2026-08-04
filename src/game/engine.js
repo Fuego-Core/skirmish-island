@@ -1,10 +1,10 @@
 import { RES, SPEED, REGEN_MS, RAID_INTERVAL_MS, BOT_RAID_INTERVAL_MS, EVENT_INTERVAL_MS, MARCHAND_DUREE_MS, MARKET_OFFER_INTERVAL_MS, MARKET_OFFERS_MAX } from "./constants.js";
 import { BUILDINGS, prodPerHour, storageCap, buildDuration } from "./buildings.js";
-import { TROOPS, compositionBonus } from "./troops.js";
+import { TROOPS, compositionBonus, matchupBonus } from "./troops.js";
 import { SHIPS, PECHE_BLE_H } from "./ships.js";
 import { FACTIONS } from "./factions.js";
 import { tileState, regionDist } from "./world.js";
-import { tilePower, botRaidPower, botName, knownBots } from "./bots.js";
+import { tilePower, botRaidPower, botName, knownBots, tileFamilyMix } from "./bots.js";
 import { generateBotOffer, creditBasket } from "./market.js";
 import { freshBuildings } from "./state.js";
 
@@ -106,7 +106,13 @@ export function applyElapsed(state, now) {
       const type = tileState(agx, agy, px, py);
       const defPower = s.conquered[s.attack.key] ? 0 : tilePower(agx, agy, px, py, type, now - (s.startedAt || now));
       const factionAtk = (s.faction && FACTIONS[s.faction] && FACTIONS[s.faction].atkBonus) || 1;
-      const atkPower = Math.round(Object.keys(s.attack.troops).reduce((a, t) => a + s.attack.troops[t] * TROOPS[t].atk, 0) * factionAtk * compositionBonus(s.attack.troops));
+      // Cité rivale : vraie composition connue (espionnage) → bonus de contre
+      // ciblé. Île vide/inactive/pirates : pas de composition réelle → bonus
+      // d'équilibre générique.
+      const combatBonus = type === "ile_joueur"
+        ? matchupBonus(s.attack.troops, tileFamilyMix(agx, agy, px, py))
+        : compositionBonus(s.attack.troops);
+      const atkPower = Math.round(Object.keys(s.attack.troops).reduce((a, t) => a + s.attack.troops[t] * TROOPS[t].atk, 0) * factionAtk * combatBonus);
       const siegeBonus = Object.keys(s.attack.troops).reduce((a, t) => a + (TROOPS[t].siege ? s.attack.troops[t] * TROOPS[t].atk * 0.5 : 0), 0);
       const win = atkPower + siegeBonus > defPower;
       const losses = {}, survivors = {};
@@ -129,7 +135,7 @@ export function applyElapsed(state, now) {
       s.attack.report = {
         kind: "attaque", win, atkPower: atkPower + siegeBonus, defPower, losses, survivors, butin, esclavesGagnes,
         targetType: type, cible: type === "ile_joueur" ? botName(agx, agy, px, py) : null,
-        key: s.attack.key, at: now,
+        combatBonus, key: s.attack.key, at: now,
       };
     }
     if (now >= s.attack.endsAt) {
@@ -157,7 +163,8 @@ export function applyElapsed(state, now) {
         const type = tileState(agx, agy, px, py);
         const def = tilePower(agx, agy, px, py, type, now - (s.startedAt || now));
         const mult = (type === "ile_joueur" ? 8 : 4) * (1 + regionDist({ gx: agx, gy: agy }) * 0.5);
-        s.spied[m.key] = { def, butinMin: Math.round(def * mult * 0.7), butinMax: Math.round(def * mult * 1.3), at: now };
+        const familyMix = type === "ile_joueur" ? tileFamilyMix(agx, agy, px, py) : null;
+        s.spied[m.key] = { def, butinMin: Math.round(def * mult * 0.7), butinMax: Math.round(def * mult * 1.3), familyMix, at: now };
       }
     });
     const doneSpy = s.spyMissions.filter((m) => now >= m.endsAt).length;
