@@ -51,8 +51,8 @@ export function TitleScreen({ onChooseFaction }) {
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 28, animation: "riseIn 0.6s cubic-bezier(0.16,1,0.3,1) both" }}>
           <div style={{ animation: "floatY 4.5s ease-in-out infinite" }}>
             <img src={logoWordmark} alt="Skirmish Empire" style={{
-              width: "min(78vw, 340px)", height: "auto", display: "block",
-              borderRadius: 10, boxShadow: "0 10px 30px rgba(0,0,0,0.55), 0 0 40px rgba(230,196,105,0.12)",
+              width: "min(84vw, 380px)", height: "auto", display: "block",
+              filter: "drop-shadow(0 6px 18px rgba(0,0,0,0.6)) drop-shadow(0 0 30px rgba(230,196,105,0.18))",
             }} />
           </div>
           <div style={{ width: 170, margin: "14px 0 10px" }}><Meander color={T.goldDim} height={7} /></div>
