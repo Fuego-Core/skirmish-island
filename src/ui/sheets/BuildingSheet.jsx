@@ -46,24 +46,37 @@ export function BuildingSheet({
         </div>
       </div>
 
-      {b.produces && (
-        <div style={{ display: "flex", alignItems: "center", gap: 8, background: C.inset, borderRadius: 9, padding: "11px 13px", marginBottom: 12 }}>
-          <ResIcon r={b.produces} size={20} />
-          <span style={{ fontSize: 12, fontFamily: "monospace", color: C.textDim }}>
-            +{prodPerHour(level)}/h {!maxed && <span style={{ color: C.ok }}>→ +{prodPerHour(level + 1)}/h</span>}
-          </span>
-        </div>
-      )}
-      {(key === "entrepot" || key === "grenier") && (
-        <div style={{ background: C.inset, borderRadius: 9, padding: "11px 13px", marginBottom: 12, fontSize: 12, fontFamily: "monospace", color: C.textDim }}>
-          Capacité {fmtNum(storageCap(level))} {!maxed && <span style={{ color: C.ok }}>→ {fmtNum(storageCap(level + 1))}</span>}
-        </div>
-      )}
-      {key === "muraille" && (
-        <div style={{ background: C.inset, borderRadius: 9, padding: "11px 13px", marginBottom: 12, fontSize: 12, fontFamily: "monospace", color: C.textDim }}>
-          Garnison +{level * 6}% {!maxed && <span style={{ color: C.ok }}>→ +{(level + 1) * 6}%</span>}
-        </div>
-      )}
+      {(() => {
+        const statLabel = b.produces ? "Production/h" : (key === "entrepot" || key === "grenier") ? "Capacité" : key === "muraille" ? "Bonus garnison" : null;
+        if (!statLabel) return null;
+        const fmt = (lvl) => b.produces ? `+${fmtNum(prodPerHour(lvl))}` : key === "muraille" ? `+${lvl * 6}%` : fmtNum(storageCap(lvl));
+        return (
+          <div style={{ borderRadius: 10, marginBottom: 12, border: `1px solid ${C.borderSoft}`, overflow: "hidden" }}>
+            <div style={{ display: "grid", gridTemplateColumns: maxed ? "1fr" : "1fr 1fr" }}>
+              <div style={{ padding: "10px 13px", borderRight: maxed ? "none" : `1px solid ${C.borderSoft}` }}>
+                <div style={{ fontSize: 8.5, fontFamily: "'Cinzel', Georgia, serif", letterSpacing: 1.2, color: C.textFaint, textTransform: "uppercase", marginBottom: 4 }}>
+                  {statLabel} · niv. {level}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontFamily: "monospace", color: C.text }}>
+                  {b.produces && <ResIcon r={b.produces} size={16} />}
+                  {fmt(level)}
+                </div>
+              </div>
+              {!maxed && (
+                <div style={{ padding: "10px 13px", background: `${C.ok}14` }}>
+                  <div style={{ fontSize: 8.5, fontFamily: "'Cinzel', Georgia, serif", letterSpacing: 1.2, color: C.ok, textTransform: "uppercase", marginBottom: 4 }}>
+                    {statLabel} · niv. {level + 1}
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontFamily: "monospace", color: C.ok, fontWeight: 700 }}>
+                    {b.produces && <ResIcon r={b.produces} size={16} />}
+                    {fmt(level + 1)}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
       {key === "colosse" && (
         <div style={{ background: C.inset, borderRadius: 9, padding: "12px 13px", marginBottom: 12 }}>
           <div style={{ fontSize: 11, color: C.textDim, marginBottom: 8 }}>Étapes de construction</div>

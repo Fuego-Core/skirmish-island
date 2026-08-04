@@ -110,17 +110,31 @@ function ReportDetail({ rep }) {
       )}
 
       {rep.kind !== "evenement" && rep.kind !== "marche" && (<>
-        <div style={{ background: C.inset, borderRadius: 9, padding: "11px 13px", marginBottom: 8 }}>
-          <div style={{ fontSize: 10.5, color: C.textFaint, marginBottom: 7 }}>Forces en présence</div>
-          <div style={{ fontSize: 12, fontFamily: "monospace", color: C.text }}>
-            {rep.kind === "defense" ? `Garnison ${rep.atkPower}` : `Ton armée ${rep.atkPower}`} contre {rep.defPower}
-            {rep.kind === "defense" && rep.wall > 0 ? ` (muraille niv. ${rep.wall})` : ""}
-            {rep.combatBonus !== undefined && (
-              <span style={{ color: rep.combatBonus >= 1 ? C.ok : C.bad }}>
-                {" "}({rep.targetType === "ile_joueur" ? "contre" : "mix"} {rep.combatBonus >= 1 ? "+" : ""}{Math.round((rep.combatBonus - 1) * 100)}%)
-              </span>
-            )}
+        <div style={{ borderRadius: 9, marginBottom: 8, border: `1px solid ${C.borderSoft}`, overflow: "hidden" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+            <div style={{ padding: "10px 13px", borderRight: `1px solid ${C.borderSoft}`, background: rep.win ? `${C.ok}14` : "transparent" }}>
+              <div style={{ fontSize: 8.5, fontFamily: "'Cinzel', Georgia, serif", letterSpacing: 1.2, color: C.textFaint, textTransform: "uppercase", marginBottom: 4 }}>
+                {rep.kind === "defense" ? "Ta garnison" : "Ton armée"}
+              </div>
+              <div style={{ fontSize: 14, fontFamily: "monospace", fontWeight: 700, color: rep.win ? C.ok : C.text }}>{rep.atkPower}</div>
+            </div>
+            <div style={{ padding: "10px 13px", background: !rep.win ? `${C.bad}14` : "transparent" }}>
+              <div style={{ fontSize: 8.5, fontFamily: "'Cinzel', Georgia, serif", letterSpacing: 1.2, color: C.textFaint, textTransform: "uppercase", marginBottom: 4 }}>
+                {rep.kind === "defense" ? "Assaillant" : "Défense adverse"}
+              </div>
+              <div style={{ fontSize: 14, fontFamily: "monospace", fontWeight: 700, color: !rep.win ? C.bad : C.text }}>{rep.defPower}</div>
+            </div>
           </div>
+          {(rep.combatBonus !== undefined || (rep.kind === "defense" && rep.wall > 0)) && (
+            <div style={{ padding: "7px 13px", borderTop: `1px solid ${C.borderSoft}`, fontSize: 10, color: C.textFaint }}>
+              {rep.kind === "defense" && rep.wall > 0 && `Muraille niv. ${rep.wall}`}
+              {rep.combatBonus !== undefined && (
+                <span style={{ color: rep.combatBonus >= 1 ? C.ok : C.bad }}>
+                  {rep.kind === "defense" && rep.wall > 0 ? " · " : ""}bonus {rep.targetType === "ile_joueur" ? "contre" : "mix"} {rep.combatBonus >= 1 ? "+" : ""}{Math.round((rep.combatBonus - 1) * 100)}%
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         <div style={{ background: C.inset, borderRadius: 9, padding: "11px 13px", marginBottom: 8 }}>
