@@ -28,7 +28,9 @@ export function disableNotifications() {
 
 export async function notify(title, body) {
   if (!notificationsEnabled()) return;
-  const icon = `${import.meta.env.BASE_URL}icons/icon-192.png`;
+  // Fond transparent (pas le carré plein utilisé pour l'icône d'app/manifest) :
+  // sur fond de notification sombre, un carré quasi-noir se fondait dedans.
+  const icon = `${import.meta.env.BASE_URL}icons/notif-icon-192.png`;
   try {
     if (navigator.serviceWorker) {
       const reg = await navigator.serviceWorker.getRegistration();
