@@ -55,7 +55,7 @@ export function TitleScreen({ onChooseFaction }) {
             SKIRMISH
           </h1>
           <h1 style={{ ...fd, fontSize: 32, fontWeight: 700, letterSpacing: 7, color: T.gold, margin: "0 0 10px", textAlign: "center", textShadow: `0 4px 26px rgba(230,196,105,0.4), 0 2px 6px rgba(0,0,0,0.7)` }}>
-            ISLAND
+            EMPIRE
           </h1>
           <div style={{ width: 170, marginBottom: 10 }}><Meander color={T.goldDim} height={7} /></div>
           <p style={{ fontSize: 13.5, color: T.text, margin: 0, textAlign: "center", letterSpacing: 0.3, textShadow: "0 2px 6px rgba(0,0,0,0.6)" }}>

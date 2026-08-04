@@ -1,4 +1,4 @@
-# Skirmish Island
+# Skirmish Empire
 
 Jeu de gestion et de stratégie mobile en Grèce antique. Développe ta cité
 insulaire, explore l'archipel, colonise, recrute une armée, pille les îles

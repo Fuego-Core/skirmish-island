@@ -88,7 +88,7 @@ export default function App() {
             <img src={crestLogo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
           </div>
           <div style={{ ...fd, fontSize: 12.5, fontWeight: 600, letterSpacing: 3.5, color: C.goldHi, textTransform: "uppercase" }}>
-            Skirmish Island
+            Skirmish Empire
           </div>
           <div style={{ display: "flex", gap: 6 }}>
             {[0, 1, 2].map((i) => (
