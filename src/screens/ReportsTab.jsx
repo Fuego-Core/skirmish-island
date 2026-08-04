@@ -2,6 +2,8 @@ import { useState } from "react";
 import { C, RES } from "../game/constants.js";
 import { I } from "../ui/Icon.jsx";
 import { Card, SectionTitle, Sheet, ResIcon, fmtNum, fmtAgo } from "../ui/kit.jsx";
+import { TROOP_PORTRAITS } from "../ui/troopPortraits.js";
+import { SHIP_PORTRAITS } from "../ui/shipPortraits.js";
 import eventMarchand from "../assets/images/event-marchand.webp";
 import eventTempete from "../assets/images/event-tempete.webp";
 import eventEpave from "../assets/images/event-epave.webp";
@@ -49,6 +51,16 @@ function outcomeColor(rep) {
   return rep.win ? C.ok : C.bad;
 }
 
+function TradeIcon({ kind, keyName, size = 18 }) {
+  if (kind === "res") return <ResIcon r={keyName} size={size} />;
+  const src = kind === "troop" ? TROOP_PORTRAITS[keyName] : SHIP_PORTRAITS[keyName];
+  return (
+    <div style={{ width: size, height: size, borderRadius: "50%", overflow: "hidden", flexShrink: 0, border: `1px solid ${C.borderSoft}` }}>
+      <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+    </div>
+  );
+}
+
 function Crest({ src, size = 34 }) {
   return (
     <div style={{
@@ -86,9 +98,9 @@ function ReportDetail({ rep }) {
 
       {rep.kind === "marche" && (
         <div style={{ background: C.inset, borderRadius: 9, padding: "11px 13px", marginBottom: 8, display: "flex", alignItems: "center", gap: 10, fontSize: 13, fontFamily: "monospace" }}>
-          <ResIcon r={rep.giveRes} size={18} /> −{fmtNum(rep.giveAmt)}
+          <TradeIcon kind={rep.giveKind} keyName={rep.giveKey} size={18} /> −{fmtNum(rep.giveAmt)}
           <span style={{ color: C.gold }}>→</span>
-          <ResIcon r={rep.wantRes} size={18} /> +{fmtNum(rep.wantAmt)}
+          <TradeIcon kind={rep.wantKind} keyName={rep.wantKey} size={18} /> +{fmtNum(rep.wantAmt)}
         </div>
       )}
 

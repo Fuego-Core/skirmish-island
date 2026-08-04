@@ -5,7 +5,7 @@ import { SHIPS, PECHE_BLE_H } from "./ships.js";
 import { FACTIONS } from "./factions.js";
 import { tileState, regionDist } from "./world.js";
 import { tilePower, botRaidPower, botName, knownBots } from "./bots.js";
-import { generateBotOffer } from "./market.js";
+import { generateBotOffer, creditOffer } from "./market.js";
 import { freshBuildings } from "./state.js";
 
 // ---- Migration des sauvegardes ----
@@ -282,12 +282,14 @@ export function applyElapsed(state, now) {
   if (!s.marketOffers) s.marketOffers = [];
   if (!s.nextMarketOfferAt) s.nextMarketOfferAt = now + MARKET_OFFER_INTERVAL_MS;
   if (s.stats.tradesDone === undefined) s.stats.tradesDone = 0;
+  // Nettoie les offres de l'ancien format (avant troupes/navires échangeables).
+  s.marketOffers = s.marketOffers.filter((o) => o.giveKind && o.wantKind);
   s.marketOffers = s.marketOffers.filter((o) => !(o.author === "bot" && o.expiresAt && now >= o.expiresAt));
   s.marketOffers = s.marketOffers.filter((o) => {
     if (o.author === "player" && o.fillAt && now >= o.fillAt) {
-      s.resources[o.wantRes] += o.wantAmt;
+      creditOffer(s, o.wantKind, o.wantKey, o.wantAmt);
       s.stats.tradesDone += 1;
-      s.reports.unshift({ kind: "marche", giveRes: o.giveRes, giveAmt: o.giveAmt, wantRes: o.wantRes, wantAmt: o.wantAmt, at: o.fillAt });
+      s.reports.unshift({ kind: "marche", giveKind: o.giveKind, giveKey: o.giveKey, giveAmt: o.giveAmt, wantKind: o.wantKind, wantKey: o.wantKey, wantAmt: o.wantAmt, at: o.fillAt });
       s.reports = s.reports.slice(0, 8);
       return false;
     }

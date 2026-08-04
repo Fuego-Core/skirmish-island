@@ -394,7 +394,7 @@ describe("marché de l'Égée", () => {
     const offer = generateBotOffer(s, now);
     expect(offer).toBeTruthy();
     expect(offer.author).toBe("bot");
-    expect(offer.giveRes).not.toBe(offer.wantRes);
+    expect(offer.giveKey).not.toBe(offer.wantKey);
     expect(offer.giveAmt).toBeGreaterThan(0);
     expect(offer.wantAmt).toBeGreaterThan(0);
   });
@@ -412,7 +412,7 @@ describe("marché de l'Égée", () => {
     const s = baseState(now);
     s.marketOffers = [{
       id: "bot-x", author: "bot", botName: "Test",
-      giveRes: "bois", giveAmt: 100, wantRes: "fer", wantAmt: 150,
+      giveKind: "res", giveKey: "bois", giveAmt: 100, wantKind: "res", wantKey: "fer", wantAmt: 150,
       postedAt: now, expiresAt: now + 1000, fillAt: null,
     }];
     const after = applyElapsed(s, now + MARKET_OFFER_LIFETIME_MS + 2000);
@@ -425,7 +425,7 @@ describe("marché de l'Égée", () => {
     const bleAvant = s.resources.ble;
     s.marketOffers = [{
       id: "player-x", author: "player", botName: null,
-      giveRes: "bois", giveAmt: 100, wantRes: "ble", wantAmt: 150,
+      giveKind: "res", giveKey: "bois", giveAmt: 100, wantKind: "res", wantKey: "ble", wantAmt: 150,
       postedAt: now, expiresAt: null, fillAt: now + 1000,
     }];
     const after = applyElapsed(s, now + 2000);
@@ -438,10 +438,32 @@ describe("marché de l'Égée", () => {
     const s = baseState(now);
     s.marketOffers = [{
       id: "player-y", author: "player", botName: null,
-      giveRes: "bois", giveAmt: 50, wantRes: "or", wantAmt: 40,
+      giveKind: "res", giveKey: "bois", giveAmt: 50, wantKind: "res", wantKey: "or", wantAmt: 40,
       postedAt: now, expiresAt: null, fillAt: now + 1000,
     }];
     const after = applyElapsed(s, now + 2000);
     expect(after.stats.tradesDone).toBe(1);
+  });
+
+  it("une offre du joueur peut échanger des troupes contre des ressources", () => {
+    const now = Date.now();
+    const s = baseState(now);
+    const orAvant = s.resources.or;
+    s.marketOffers = [{
+      id: "player-troop", author: "player", botName: null,
+      giveKind: "troop", giveKey: "hoplite", giveAmt: 2, wantKind: "res", wantKey: "or", wantAmt: 30,
+      postedAt: now, expiresAt: null, fillAt: now + 1000,
+    }];
+    const after = applyElapsed(s, now + 2000);
+    expect(after.marketOffers.find((o) => o.id === "player-troop")).toBeUndefined();
+    expect(after.resources.or).toBeCloseTo(orAvant + 30, 0);
+  });
+
+  it("filtre les offres de l'ancien format (sans giveKind/wantKind)", () => {
+    const now = Date.now();
+    const s = baseState(now);
+    s.marketOffers = [{ id: "legacy", author: "bot", botName: "Test", giveRes: "bois", giveAmt: 10, wantRes: "fer", wantAmt: 10, postedAt: now, expiresAt: now + 1e9, fillAt: null }];
+    const after = applyElapsed(s, now + 10);
+    expect(after.marketOffers.find((o) => o.id === "legacy")).toBeUndefined();
   });
 });

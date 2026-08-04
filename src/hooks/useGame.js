@@ -8,6 +8,7 @@ import { MISSIONS } from "../game/missions.js";
 import { rk, tileState, absDist } from "../game/world.js";
 import { newGameState } from "../game/state.js";
 import { applyElapsed } from "../game/engine.js";
+import { creditOffer, debitOffer, ownedAmt } from "../game/market.js";
 import { notify } from "../ui/notifications.js";
 
 const SAVE_KEY = "skirmish-save";
@@ -236,29 +237,33 @@ export function useGame() {
     setGame((g) => {
       if (!g) return g;
       const offer = (g.marketOffers || []).find((o) => o.id === offerId);
-      if (!offer || offer.author !== "bot" || g.resources[offer.wantRes] < offer.wantAmt) return g;
+      if (!offer || offer.author !== "bot" || ownedAmt(g, offer.wantKind, offer.wantKey) < offer.wantAmt) return g;
       const s = JSON.parse(JSON.stringify(g));
-      s.resources[offer.wantRes] -= offer.wantAmt;
-      s.resources[offer.giveRes] += offer.giveAmt;
+      debitOffer(s, offer.wantKind, offer.wantKey, offer.wantAmt);
+      creditOffer(s, offer.giveKind, offer.giveKey, offer.giveAmt);
       s.marketOffers = s.marketOffers.filter((o) => o.id !== offerId);
       s.stats.tradesDone = (s.stats.tradesDone || 0) + 1;
       return s;
     });
   }, []);
 
-  const postMarketOffer = useCallback((giveRes, giveAmt, wantRes, wantAmt) => {
+  // giveKind/wantKind ∈ "res" | "troop" | "ship" — au moins un des deux
+  // côtés doit être une ressource (jamais troupe/navire contre troupe/navire).
+  const postMarketOffer = useCallback((giveKind, giveKey, giveAmt, wantKind, wantKey, wantAmt) => {
     setGame((g) => {
-      if (!g || giveRes === wantRes || giveAmt <= 0 || wantAmt <= 0) return g;
+      if (!g || giveAmt <= 0 || wantAmt <= 0) return g;
+      if (giveKind === wantKind && giveKey === wantKey) return g;
+      if (giveKind !== "res" && wantKind !== "res") return g;
       const bestMarche = Math.max(...g.islands.map((i) => i.buildings.marche));
-      if (bestMarche < 1 || g.resources[giveRes] < giveAmt) return g;
+      if (bestMarche < 1 || ownedAmt(g, giveKind, giveKey) < giveAmt) return g;
       if ((g.marketOffers || []).length >= MARKET_OFFERS_MAX) return g;
       const s = JSON.parse(JSON.stringify(g));
-      s.resources[giveRes] -= giveAmt;
+      debitOffer(s, giveKind, giveKey, giveAmt);
       const now = Date.now();
       s.marketOffers.push({
         id: `player-${now}-${Math.floor(Math.random() * 1e6)}`,
         author: "player", botName: null,
-        giveRes, giveAmt, wantRes, wantAmt,
+        giveKind, giveKey, giveAmt, wantKind, wantKey, wantAmt,
         postedAt: now, expiresAt: null,
         fillAt: now + Math.round(MARKET_PLAYER_FILL_MS * (0.7 + Math.random() * 0.6)),
       });
@@ -272,7 +277,7 @@ export function useGame() {
       const offer = (g.marketOffers || []).find((o) => o.id === offerId);
       if (!offer || offer.author !== "player") return g;
       const s = JSON.parse(JSON.stringify(g));
-      s.resources[offer.giveRes] += offer.giveAmt;
+      creditOffer(s, offer.giveKind, offer.giveKey, offer.giveAmt);
       s.marketOffers = s.marketOffers.filter((o) => o.id !== offerId);
       return s;
     });
