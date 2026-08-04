@@ -9,7 +9,7 @@ import { useGame } from "./hooks/useGame.js";
 import { I, Meander } from "./ui/Icon.jsx";
 import { fd, fb, Btn, ResIcon } from "./ui/kit.jsx";
 import { haptic } from "./ui/haptics.js";
-import { isMuted, setMuted } from "./ui/sound.js";
+import { isMuted, setMuted, startMusic, stopMusic } from "./ui/sound.js";
 import { BuildingSheet } from "./ui/sheets/BuildingSheet.jsx";
 import { TileSheet } from "./ui/sheets/TileSheet.jsx";
 import { MissionsSheet } from "./ui/sheets/MissionsSheet.jsx";
@@ -48,6 +48,15 @@ export default function App() {
   useEffect(() => {
     if (colosseDoneNow && game && !game.victoryShown) haptic([15, 60, 15, 60, 40]);
   }, [colosseDoneNow]);
+
+  // Musique d'ambiance : ne peut démarrer qu'après un geste utilisateur
+  // (politique autoplay des navigateurs) — on l'amorce sur le premier tap/clic.
+  useEffect(() => {
+    if (!game || !game.faction || muted) return;
+    const kick = () => { startMusic(); window.removeEventListener("pointerdown", kick); };
+    window.addEventListener("pointerdown", kick);
+    return () => { window.removeEventListener("pointerdown", kick); stopMusic(); };
+  }, [game && game.faction, muted]);
 
   if (!game) {
     return (
@@ -161,7 +170,7 @@ export default function App() {
       {/* ═══ Bandeau ressources (sticky) ═══ */}
       <div style={{ position: "sticky", top: 0, zIndex: 20, background: `linear-gradient(180deg, ${C.bgDeep}f0 82%, ${C.bgDeep}00)`, backdropFilter: "blur(10px)" }}>
         <div style={{ maxWidth: 480, margin: "0 auto", padding: "10px 10px 7px", position: "relative" }}>
-          <button onClick={() => { setMuted(!muted); setMutedState(!muted); }} aria-label={muted ? "Activer le son" : "Couper le son"}
+          <button onClick={() => { const next = !muted; setMuted(next); setMutedState(next); if (next) stopMusic(); else startMusic(); }} aria-label={muted ? "Activer le son" : "Couper le son"}
             style={{ position: "absolute", right: 10, top: -3, width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", border: "none", cursor: "pointer", opacity: 0.55, zIndex: 1 }}>
             <I name={muted ? "sonCoupe" : "son"} size={13} color={C.textFaint} sw={1.6} />
           </button>
