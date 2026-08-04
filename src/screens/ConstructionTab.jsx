@@ -73,20 +73,33 @@ export function ConstructionTab({ game, nowTick, isl, openBuilding, setOpenBuild
                 const slotsFree = queue.length < buildSlots(isl.buildings.senat);
                 const ready = reqOk && canAfford && slotsFree && !maxed;
                 const inProgress = queue.some((q) => q.key === key);
+                const lockedReqLabel = !reqOk && req
+                  ? Object.keys(req).map((rq) => `${BUILDINGS[rq].label} ${req[rq]}`).join(" · ")
+                  : null;
                 return (
                   <button key={key} onClick={() => { haptic(9); setOpenBuilding(key); }}
                     style={{
                       position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
                       padding: "13px 5px 11px", borderRadius: 11, cursor: "pointer", color: C.text,
-                      background: level > 0 ? `linear-gradient(180deg, ${col}22, ${C.panel})` : C.ghost,
-                      border: `1px solid ${inProgress ? C.goldHi : level > 0 ? col + "66" : C.borderSoft}`,
-                      opacity: reqOk ? 1 : 0.45,
+                      background: maxed ? `linear-gradient(180deg, ${C.goldHi}18, ${C.panel})` : level > 0 ? `linear-gradient(180deg, ${col}22, ${C.panel})` : C.ghost,
+                      border: `1px solid ${maxed ? C.goldHi + "88" : inProgress ? C.goldHi : level > 0 ? col + "66" : C.borderSoft}`,
+                      opacity: reqOk ? 1 : 0.5,
                     }}>
                     <BuildingIcon bKey={key} col={col} active={level > 0} />
                     <span style={{ fontSize: 10, textAlign: "center", lineHeight: 1.2, color: level > 0 ? C.text : C.textFaint }}>{b.label}</span>
-                    <span style={{ fontSize: 9, fontFamily: "monospace", color: level > 0 ? col : C.textFaint }}>
-                      {maxed ? "MAX" : level > 0 ? `niv. ${level}` : "à bâtir"}
-                    </span>
+                    {lockedReqLabel ? (
+                      <span style={{ fontSize: 8, fontFamily: "monospace", color: C.textFaint, textAlign: "center", lineHeight: 1.2 }}>{lockedReqLabel}</span>
+                    ) : (
+                      <span style={{ fontSize: 9, fontFamily: "monospace", color: maxed ? C.goldHi : level > 0 ? col : C.textFaint, display: "flex", alignItems: "center", gap: 3 }}>
+                        {maxed && <I name="laurier" size={10} color={C.goldHi} />}
+                        {maxed ? "MAX" : level > 0 ? `niv. ${level}` : "à bâtir"}
+                      </span>
+                    )}
+                    {!reqOk && (
+                      <span style={{ position: "absolute", top: 6, right: 6, width: 16, height: 16, borderRadius: 8, background: C.ghost, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <I name="cadenas" size={9} color={C.textFaint} sw={2} />
+                      </span>
+                    )}
                     {ready && (
                       <span style={{ position: "absolute", top: 6, right: 6, width: 8, height: 8, borderRadius: 4, background: C.goldHi, boxShadow: `0 0 6px ${C.goldHi}` }} />
                     )}

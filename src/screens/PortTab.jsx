@@ -25,9 +25,21 @@ export function PortTab({ game, nowTick, bestPort, buildShip }) {
     cumulEnds = i === 0 ? q.endsAt : cumulEnds + SHIPS[q.type].duration * 1000 * SPEED * fShip;
     return { portrait: SHIP_PORTRAITS[q.type], icon: q.type, remaining: fmtTime(cumulEnds - nowTick) };
   });
+  const totalShips = Object.values(game.ships).reduce((a, n) => a + n, 0);
 
   return (
     <>
+      {bestPort > 0 && (
+        <Card style={{ marginBottom: 8, textAlign: totalShips === 0 ? "center" : "left" }}>
+          {totalShips === 0 ? (
+            <span style={{ fontSize: 12, color: C.textFaint, fontStyle: "italic" }}>Aucune nef en mer — arme ton premier bateau ci-dessous.</span>
+          ) : (
+            <span style={{ fontSize: 12, color: C.textDim }}>
+              Flotte : <span style={{ fontFamily: "monospace", color: C.goldHi }}>{totalShips}</span> nef{totalShips > 1 ? "s" : ""}
+            </span>
+          )}
+        </Card>
+      )}
       {shipQueue.length > 0 && (
         <SlotQueue title="Chantier naval" slots={shipSlots(bestPort)} items={shipQueueItems} />
       )}
