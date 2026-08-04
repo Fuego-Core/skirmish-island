@@ -6,6 +6,7 @@ import titleBackdrop from "../assets/images/title-backdrop.webp";
 import crestAthenes from "../assets/images/crest-athenes.webp";
 import crestSparte from "../assets/images/crest-sparte.webp";
 import crestLogo from "../assets/images/crest-logo.webp";
+import logoWordmark from "../assets/images/logo-wordmark.webp";
 
 const CREST_IMAGES = { athenes: crestAthenes, sparte: crestSparte, senat: crestLogo };
 
@@ -49,15 +50,12 @@ export function TitleScreen({ onChooseFaction }) {
       <div style={{ position: "relative", zIndex: 2, flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", padding: "30px 18px calc(30px + env(safe-area-inset-bottom))", boxSizing: "border-box" }}>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 28, animation: "riseIn 0.6s cubic-bezier(0.16,1,0.3,1) both" }}>
           <div style={{ animation: "floatY 4.5s ease-in-out infinite" }}>
-            <Crest icon="senat" size={76} />
+            <img src={logoWordmark} alt="Skirmish Empire" style={{
+              width: "min(78vw, 340px)", height: "auto", display: "block",
+              borderRadius: 10, boxShadow: "0 10px 30px rgba(0,0,0,0.55), 0 0 40px rgba(230,196,105,0.12)",
+            }} />
           </div>
-          <h1 style={{ ...fd, fontSize: 32, fontWeight: 700, letterSpacing: 7, color: T.gold, margin: "10px 0 0", textAlign: "center", textShadow: `0 4px 26px rgba(230,196,105,0.4), 0 2px 6px rgba(0,0,0,0.7)` }}>
-            SKIRMISH
-          </h1>
-          <h1 style={{ ...fd, fontSize: 32, fontWeight: 700, letterSpacing: 7, color: T.gold, margin: "0 0 10px", textAlign: "center", textShadow: `0 4px 26px rgba(230,196,105,0.4), 0 2px 6px rgba(0,0,0,0.7)` }}>
-            EMPIRE
-          </h1>
-          <div style={{ width: 170, marginBottom: 10 }}><Meander color={T.goldDim} height={7} /></div>
+          <div style={{ width: 170, margin: "14px 0 10px" }}><Meander color={T.goldDim} height={7} /></div>
           <p style={{ fontSize: 13.5, color: T.text, margin: 0, textAlign: "center", letterSpacing: 0.3, textShadow: "0 2px 6px rgba(0,0,0,0.6)" }}>
             L'Égée t'attend. Choisis ta cité.
           </p>
