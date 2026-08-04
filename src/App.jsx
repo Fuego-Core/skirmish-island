@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { C, RES, RES_ICONN, RES_COLOR } from "./game/constants.js";
 import { BUILDINGS, prodPerHour, storageCap } from "./game/buildings.js";
 import { TROOPS } from "./game/troops.js";
@@ -50,12 +50,24 @@ export default function App() {
   }, [colosseDoneNow]);
 
   // Musique d'ambiance : ne peut démarrer qu'après un geste utilisateur
-  // (politique autoplay des navigateurs) — on l'amorce sur le premier tap/clic.
+  // (politique autoplay des navigateurs) — on l'amorce sur le premier tap/clic,
+  // et on la coupe quand l'onglet/app passe en arrière-plan (sinon elle continue
+  // à jouer alors que le joueur est sur une autre appli).
+  const musicStartedRef = useRef(false);
   useEffect(() => {
     if (!game || !game.faction || muted) return;
-    const kick = () => { startMusic(); window.removeEventListener("pointerdown", kick); };
+    const kick = () => { startMusic(); musicStartedRef.current = true; window.removeEventListener("pointerdown", kick); };
     window.addEventListener("pointerdown", kick);
-    return () => { window.removeEventListener("pointerdown", kick); stopMusic(); };
+    const onVisibility = () => {
+      if (document.hidden) stopMusic();
+      else if (musicStartedRef.current) startMusic();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("pointerdown", kick);
+      document.removeEventListener("visibilitychange", onVisibility);
+      stopMusic();
+    };
   }, [game && game.faction, muted]);
 
   if (!game) {
