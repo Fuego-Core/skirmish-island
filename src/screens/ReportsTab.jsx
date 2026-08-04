@@ -41,7 +41,7 @@ function titleFor(rep) {
 
 function subtitleFor(rep) {
   if (rep.kind === "evenement") return rep.texte;
-  if (rep.kind === "marche") return `${fmtNum(rep.giveAmt)} donné contre ${fmtNum(rep.wantAmt)} reçu`;
+  if (rep.kind === "marche") return `${fmtNum(rep.give.amt)} donné contre ${rep.want.map((w) => fmtNum(w.amt)).join(" + ")} reçu`;
   if (rep.kind === "defense") return rep.attaquant || "pirates égéens";
   return rep.cible || (rep.targetType === "ile_joueur" ? "cité rivale" : "île inactive");
 }
@@ -97,10 +97,15 @@ function ReportDetail({ rep }) {
       )}
 
       {rep.kind === "marche" && (
-        <div style={{ background: C.inset, borderRadius: 9, padding: "11px 13px", marginBottom: 8, display: "flex", alignItems: "center", gap: 10, fontSize: 13, fontFamily: "monospace" }}>
-          <TradeIcon kind={rep.giveKind} keyName={rep.giveKey} size={18} /> −{fmtNum(rep.giveAmt)}
+        <div style={{ background: C.inset, borderRadius: 9, padding: "11px 13px", marginBottom: 8, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", fontSize: 13, fontFamily: "monospace" }}>
+          <TradeIcon kind={rep.give.kind} keyName={rep.give.key} size={18} /> −{fmtNum(rep.give.amt)}
           <span style={{ color: C.gold }}>→</span>
-          <TradeIcon kind={rep.wantKind} keyName={rep.wantKey} size={18} /> +{fmtNum(rep.wantAmt)}
+          {rep.want.map((w, i) => (
+            <span key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              {i > 0 && <span style={{ color: C.textFaint }}>+</span>}
+              <TradeIcon kind={w.kind} keyName={w.key} size={18} /> +{fmtNum(w.amt)}
+            </span>
+          ))}
         </div>
       )}
 

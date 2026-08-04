@@ -9,11 +9,12 @@ import { knownBots, botGrowth } from "./bots.js";
 // 1.5) : parfois meilleur marché, parfois moins bon — de vraies affaires à
 // repérer plutôt qu'un échange automatique.
 //
-// Chaque offre a un côté "give" et un côté "want", chacun { kind, key, amt } :
-// kind = "res" (RES), "troop" (TROOPS) ou "ship" (SHIPS). Les cités rivales ne
-// proposent que des ressources ; le joueur peut aussi mettre en jeu des
-// troupes ou des navires contre des ressources (jamais troupe/navire des deux
-// côtés à la fois).
+// Une offre a un seul côté "give" { kind, key, amt } et un côté "want" qui
+// est un PANIER d'1 ou 2 { kind, key, amt } : kind = "res" (RES), "troop"
+// (TROOPS) ou "ship" (SHIPS). Le panier "want" ne peut contenir plusieurs
+// entrées que si elles sont toutes des ressources (jamais deux troupes/
+// navires, jamais un panier de troupe+ressource) ; les cités rivales ne
+// proposent jamais que ressource contre ressource (panier d'1 seule entrée).
 // ════════════════════════════════════════════════════════════
 
 function pickTwoDistinctResources() {
@@ -49,8 +50,21 @@ export function ownedAmt(g, kind, key) {
   return g.resources[key] || 0;
 }
 
+// Le joueur possède-t-il de quoi honorer tout le panier "want" (côté qu'il
+// doit fournir pour accepter une offre) ?
+export function ownsWantBasket(g, want) {
+  return want.every((w) => ownedAmt(g, w.kind, w.key) >= w.amt);
+}
+
+export function creditBasket(s, items) {
+  items.forEach((it) => creditOffer(s, it.kind, it.key, it.amt));
+}
+export function debitBasket(s, items) {
+  items.forEach((it) => debitOffer(s, it.kind, it.key, it.amt));
+}
+
 // Génère une offre rivale, ou null si aucune cité rivale n'est encore connue
-// (avant toute exploration). Toujours ressource contre ressource.
+// (avant toute exploration). Toujours ressource contre ressource, panier d'1.
 export function generateBotOffer(state, now) {
   const rivals = knownBots(state, now).filter((b) => !b.pillee);
   if (rivals.length === 0) return null;
@@ -63,8 +77,8 @@ export function generateBotOffer(state, now) {
   return {
     id: `bot-${now}-${Math.floor(Math.random() * 1e6)}`,
     author: "bot", botName: bot.name,
-    giveKind: "res", giveKey: giveRes, giveAmt,
-    wantKind: "res", wantKey: wantRes, wantAmt,
+    give: { kind: "res", key: giveRes, amt: giveAmt },
+    want: [{ kind: "res", key: wantRes, amt: wantAmt }],
     postedAt: now, expiresAt: now + MARKET_OFFER_LIFETIME_MS, fillAt: null,
   };
 }
