@@ -281,10 +281,12 @@ export function applyElapsed(state, now) {
   // un délai (côté joueur) ou expire (côté rival) si personne ne l'accepte.
   if (!s.marketOffers) s.marketOffers = [];
   if (!s.nextMarketOfferAt) s.nextMarketOfferAt = now + MARKET_OFFER_INTERVAL_MS;
+  if (s.stats.tradesDone === undefined) s.stats.tradesDone = 0;
   s.marketOffers = s.marketOffers.filter((o) => !(o.author === "bot" && o.expiresAt && now >= o.expiresAt));
   s.marketOffers = s.marketOffers.filter((o) => {
     if (o.author === "player" && o.fillAt && now >= o.fillAt) {
       s.resources[o.wantRes] += o.wantAmt;
+      s.stats.tradesDone += 1;
       s.reports.unshift({ kind: "marche", giveRes: o.giveRes, giveAmt: o.giveAmt, wantRes: o.wantRes, wantAmt: o.wantAmt, at: o.fillAt });
       s.reports = s.reports.slice(0, 8);
       return false;

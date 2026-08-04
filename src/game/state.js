@@ -29,7 +29,7 @@ export function newGameState() {
     spied: {},
     spyMissions: [],
     claimedMissions: {},
-    stats: { wins: 0, explorations: 0, raidsRepousses: 0 },
+    stats: { wins: 0, explorations: 0, raidsRepousses: 0, tradesDone: 0 },
     lastSeen: Date.now(),
     resources: DEV
       ? { bois: 80000, pierre: 80000, fer: 80000, or: 50000, ble: 60000 }

@@ -432,4 +432,16 @@ describe("marché de l'Égée", () => {
     expect(after.marketOffers.find((o) => o.id === "player-x")).toBeUndefined();
     expect(after.resources.ble).toBeCloseTo(bleAvant + 150, 0);
   });
+
+  it("une offre remplie incrémente stats.tradesDone (mission marché)", () => {
+    const now = Date.now();
+    const s = baseState(now);
+    s.marketOffers = [{
+      id: "player-y", author: "player", botName: null,
+      giveRes: "bois", giveAmt: 50, wantRes: "or", wantAmt: 40,
+      postedAt: now, expiresAt: null, fillAt: now + 1000,
+    }];
+    const after = applyElapsed(s, now + 2000);
+    expect(after.stats.tradesDone).toBe(1);
+  });
 });

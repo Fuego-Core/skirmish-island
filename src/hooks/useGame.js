@@ -241,6 +241,7 @@ export function useGame() {
       s.resources[offer.wantRes] -= offer.wantAmt;
       s.resources[offer.giveRes] += offer.giveAmt;
       s.marketOffers = s.marketOffers.filter((o) => o.id !== offerId);
+      s.stats.tradesDone = (s.stats.tradesDone || 0) + 1;
       return s;
     });
   }, []);

@@ -16,5 +16,9 @@ export const MISSIONS = [
   { id: "marche1", label: "Négociant", desc: "Construis le Marché", reward: { bois: 1000, pierre: 1000, fer: 800, or: 600, ble: 700 }, check: (g) => bmax(g, "marche") >= 1 },
   { id: "raid1", label: "Les pirates mordent la poussière", desc: "Repousse un raid pirate", reward: { bois: 1500, pierre: 1500, fer: 1200, or: 700, ble: 1000 }, check: (g) => g.stats.raidsRepousses >= 1 },
   { id: "catapulte1", label: "Ingénieur de guerre", desc: "Construis une catapulte", reward: { bois: 2500, pierre: 2500, fer: 2000, or: 1000, ble: 1500 }, check: (g) => g.troops.catapulte >= 1 },
+  { id: "espion1", label: "Œil sur l'ennemi", desc: "Espionne une île rivale", reward: { bois: 1800, pierre: 1800, fer: 1400, or: 800, ble: 1200 }, check: (g) => Object.keys(g.spied || {}).length >= 1 },
+  { id: "marche_use1", label: "Premier échange", desc: "Conclus une offre au marché", reward: { bois: 1300, pierre: 1300, fer: 1000, or: 900, ble: 900 }, check: (g) => (g.stats.tradesDone || 0) >= 1 },
   { id: "victoire5", label: "Terreur de l'Égée", desc: "Remporte 5 batailles", reward: { bois: 4000, pierre: 4000, fer: 3000, or: 2000, ble: 3000 }, check: (g) => g.stats.wins >= 5 },
+  { id: "colosse1", label: "Les fondations du Colosse", desc: "Colosse à l'étape 1/5", reward: { bois: 3000, pierre: 3000, fer: 2500, or: 1200, ble: 2000 }, check: (g) => bmax(g, "colosse") >= 1 },
+  { id: "colosse3", label: "À mi-hauteur", desc: "Colosse à l'étape 3/5", reward: { bois: 6000, pierre: 6000, fer: 5000, or: 2500, ble: 4000 }, check: (g) => bmax(g, "colosse") >= 3 },
 ];
