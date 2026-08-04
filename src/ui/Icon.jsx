@@ -49,6 +49,8 @@ export const ICON_PATHS = {
   couronne: ["M5 18 3.5 8l4.5 3.5L12 5l4 6.5L20.5 8 19 18z", "M5 18h14", "M4.5 21h15"],
   plume: ["M6 20c0-8 4-13 12-15-1 8-6 12-12 15", "M6 20l-2 1", "M10 16l7-7"],
   cadenas: ["M6 11V8a6 6 0 1112 0v3", "M5 11h14v10H5z", "M12 15v3"],
+  son: ["M4 10v4h4l5 4V6l-5 4z", "M16 9.5a4 4 0 010 5"],
+  sonCoupe: ["M4 10v4h4l5 4V6l-5 4z", "M16.5 9 21 15M21 9l-4.5 6"],
 };
 
 export function I({ name, size = 16, color = "currentColor", sw = 1.7, style }) {

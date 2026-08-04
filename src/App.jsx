@@ -9,6 +9,7 @@ import { useGame } from "./hooks/useGame.js";
 import { I, Meander } from "./ui/Icon.jsx";
 import { fd, fb, Btn, ResIcon } from "./ui/kit.jsx";
 import { haptic } from "./ui/haptics.js";
+import { isMuted, setMuted } from "./ui/sound.js";
 import { BuildingSheet } from "./ui/sheets/BuildingSheet.jsx";
 import { TileSheet } from "./ui/sheets/TileSheet.jsx";
 import { MissionsSheet } from "./ui/sheets/MissionsSheet.jsx";
@@ -39,6 +40,7 @@ export default function App() {
   const [selectedTileKey, setSelectedTileKey] = useState(null);
   const [attackForm, setAttackForm] = useState({ hoplite: 0, archer: 0, cavalier: 0, catapulte: 0, belier: 0 });
   const [showMissions, setShowMissions] = useState(false);
+  const [muted, setMutedState] = useState(isMuted());
 
   const colosseDoneNow = game && game.faction
     ? Math.max(...game.islands.map((i) => i.buildings.colosse || 0)) >= 5
@@ -158,7 +160,11 @@ export default function App() {
 
       {/* ═══ Bandeau ressources (sticky) ═══ */}
       <div style={{ position: "sticky", top: 0, zIndex: 20, background: `linear-gradient(180deg, ${C.bgDeep}f0 82%, ${C.bgDeep}00)`, backdropFilter: "blur(10px)" }}>
-        <div style={{ maxWidth: 480, margin: "0 auto", padding: "10px 10px 7px" }}>
+        <div style={{ maxWidth: 480, margin: "0 auto", padding: "10px 10px 7px", position: "relative" }}>
+          <button onClick={() => { setMuted(!muted); setMutedState(!muted); }} aria-label={muted ? "Activer le son" : "Couper le son"}
+            style={{ position: "absolute", right: 10, top: -3, width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", border: "none", cursor: "pointer", opacity: 0.55, zIndex: 1 }}>
+            <I name={muted ? "sonCoupe" : "son"} size={13} color={C.textFaint} sw={1.6} />
+          </button>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 6 }}>
             {RES.map((r) => {
               const cap = r === "ble" ? capBle : capMain;

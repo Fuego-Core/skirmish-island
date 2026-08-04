@@ -10,6 +10,7 @@ import { newGameState } from "../game/state.js";
 import { applyElapsed } from "../game/engine.js";
 import { creditOffer, debitOffer, ownedAmt, ownsWantBasket, creditBasket, debitBasket } from "../game/market.js";
 import { notify } from "../ui/notifications.js";
+import { sfx } from "../ui/sound.js";
 
 const SAVE_KEY = "skirmish-save";
 
@@ -36,15 +37,18 @@ function notifyCompletions(before, after) {
     const nextIsl = after.islands[i];
     if (!nextIsl) return;
     const done = headCompleted(isl.queue, nextIsl.queue);
-    if (done) notify("Chantier terminé", `${BUILDINGS[done.key].label} — niveau ${done.targetLevel} atteint sur ${isl.name}.`);
+    if (done) { notify("Chantier terminé", `${BUILDINGS[done.key].label} — niveau ${done.targetLevel} atteint sur ${isl.name}.`); sfx("coin"); }
   });
   const ship = headCompleted(before.shipQueue, after.shipQueue);
-  if (ship) notify("Navire prêt", `${SHIPS[ship.type].label} a rejoint ta flotte.`);
+  if (ship) { notify("Navire prêt", `${SHIPS[ship.type].label} a rejoint ta flotte.`); sfx("coin"); }
 
   const troop = headCompleted(before.troopQueue, after.troopQueue);
-  if (troop) notify("Troupes recrutées", `${TROOPS[troop.type].label} — recrutement terminé.`);
+  if (troop) { notify("Troupes recrutées", `${TROOPS[troop.type].label} — recrutement terminé.`); sfx("coin"); }
   if (after.reports.length > 0 && JSON.stringify(after.reports[0]) !== JSON.stringify(before.reports[0])) {
-    notify(reportTitle(after.reports[0]), "Nouveau rapport disponible dans l'onglet Rapports.");
+    const rep = after.reports[0];
+    notify(reportTitle(rep), "Nouveau rapport disponible dans l'onglet Rapports.");
+    if (rep.kind === "evenement") sfx("notify");
+    else sfx(rep.win ? "win" : "lose");
   }
 }
 

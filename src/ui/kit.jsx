@@ -1,6 +1,7 @@
 import { C, RES, RES_ICONN, RES_COLOR } from "../game/constants.js";
 import { I } from "./Icon.jsx";
 import { haptic } from "./haptics.js";
+import { sfx } from "./sound.js";
 import { RES_PORTRAITS } from "./resourcePortraits.js";
 
 // Icône de ressource — image générée (bois/pierre/fer/or/blé), remplace la
@@ -54,7 +55,7 @@ export const CostRow = ({ cost, resources, mult = 1 }) => (
 );
 
 export const Btn = ({ label, disabled, onClick, small, primary }) => (
-  <button onClick={(e) => { haptic(primary ? 12 : 7); onClick?.(e); }} disabled={disabled}
+  <button onClick={(e) => { haptic(primary ? 12 : 7); sfx(primary ? "confirm" : "tap"); onClick?.(e); }} disabled={disabled}
     style={{
       padding: small ? "8px 14px" : "11px 20px", minHeight: small ? 32 : 44, borderRadius: 10,
       fontSize: small ? 11 : 13, ...fd, fontWeight: 600, letterSpacing: 0.6,
