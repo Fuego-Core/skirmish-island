@@ -1,13 +1,16 @@
 import { useState } from "react";
-import { C, DEV, SPEED } from "../game/constants.js";
+import { C, DEV, SPEED, RES } from "../game/constants.js";
 import { FACTIONS } from "../game/factions.js";
-import { B_ICON, buildSlots, buildDuration } from "../game/buildings.js";
+import { B_ICON, buildSlots, buildDuration, prodPerHour } from "../game/buildings.js";
 import { TROOPS, troopSlots } from "../game/troops.js";
 import { SHIPS, shipSlots } from "../game/ships.js";
 import { I } from "../ui/Icon.jsx";
 import { Card, SectionTitle, QueueCard, SlotQueue, Btn, ResIcon, fmtTime, fmtNum } from "../ui/kit.jsx";
 import { BUILDING_PORTRAITS } from "../ui/buildingPortraits.js";
 import { TROOP_PORTRAITS } from "../ui/troopPortraits.js";
+import tileIslandImg from "../assets/images/tile-island.webp";
+
+const PROD_BUILDING = { bois: "scierie", pierre: "carriere", fer: "mine_fer", or: "mine_or", ble: "ferme" };
 import { SHIP_PORTRAITS } from "../ui/shipPortraits.js";
 import { notificationsSupported, notificationsEnabled, enableNotifications, disableNotifications } from "../ui/notifications.js";
 
@@ -191,46 +194,74 @@ export function CityTab({
       </Card>
 
       <SectionTitle>Tes îles ({game.islands.length})</SectionTitle>
-      <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
-        {game.islands.map((i) => (
-          <Card key={i.id}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
-              {editingIsland && editingIsland.id === i.id ? (
-                <div style={{ display: "flex", gap: 6, alignItems: "center", flex: 1 }}>
-                  <input
-                    value={editingIsland.name}
-                    onChange={(e) => setEditingIsland({ id: i.id, name: e.target.value })}
-                    maxLength={22}
-                    style={{ flex: 1, background: C.bgDeep, border: `1px solid ${C.gold}`, borderRadius: 6, color: C.text, padding: "5px 9px", fontSize: 12, fontFamily: "inherit", outline: "none" }}
-                  />
-                  <Btn small primary label="OK" onClick={() => { renameIsland(i.id, editingIsland.name); setEditingIsland(null); }} />
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {game.islands.map((i) => {
+          const esclavesBonus = Math.min((i.esclaves || 0) * 3, 60);
+          return (
+            <Card key={i.id} style={{ padding: 0, overflow: "hidden" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 11, padding: "12px 14px", borderBottom: `1px solid ${C.borderSoft}` }}>
+                <div style={{
+                  width: 46, height: 46, borderRadius: 10, overflow: "hidden", flexShrink: 0,
+                  background: `linear-gradient(160deg, ${C.playerBlue}, ${C.playerBlue}88)`, border: `1px solid ${C.playerBlue}`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <img src={tileIslandImg} alt="" style={{ width: "82%", height: "82%", objectFit: "contain", display: "block" }} />
                 </div>
-              ) : (
-                <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
-                  <I name="ile" size={16} color={C.goldHi} />
-                  {i.name}
-                  <button onClick={() => setEditingIsland({ id: i.id, name: i.name })}
-                    style={{ background: "transparent", border: "none", cursor: "pointer", padding: 2, lineHeight: 0 }}>
-                    <I name="plume" size={13} color={C.textFaint} />
-                  </button>
-                </span>
-              )}
-              <span style={{ fontSize: 9, fontFamily: "monospace", color: C.textFaint }}>
-                région {i.region.gx}:{i.region.gy}
-              </span>
-            </div>
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", fontSize: 10, fontFamily: "monospace", color: C.textDim }}>
-              <span style={{ display: "flex", alignItems: "center", gap: 3 }}><I name="senat" size={11} color={C.textDim} />niv. {i.buildings.senat}</span>
-              <span style={{ display: "flex", alignItems: "center", gap: 3 }}><I name="port" size={11} color={C.textDim} />{i.buildings.port || "—"}</span>
-              <span style={{ display: "flex", alignItems: "center", gap: 3 }}><I name="caserne" size={11} color={C.textDim} />{i.buildings.caserne || "—"}</span>
-              <span style={{ display: "flex", alignItems: "center", gap: 3 }}><I name="muraille" size={11} color={C.textDim} />{i.buildings.muraille || "—"}</span>
-              <span style={{ display: "flex", alignItems: "center", gap: 3 }}><I name="esclaves" size={11} color={C.textDim} />{i.esclaves || 0}</span>
-              {(i.buildings.colosse || 0) > 0 && (
-                <span style={{ display: "flex", alignItems: "center", gap: 3, color: C.goldHi }}><I name="colosse" size={11} color={C.goldHi} />{i.buildings.colosse}/5</span>
-              )}
-            </div>
-          </Card>
-        ))}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  {editingIsland && editingIsland.id === i.id ? (
+                    <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                      <input
+                        value={editingIsland.name}
+                        onChange={(e) => setEditingIsland({ id: i.id, name: e.target.value })}
+                        maxLength={22}
+                        style={{ flex: 1, background: C.bgDeep, border: `1px solid ${C.gold}`, borderRadius: 6, color: C.text, padding: "5px 9px", fontSize: 12, fontFamily: "inherit", outline: "none" }}
+                      />
+                      <Btn small primary label="OK" onClick={() => { renameIsland(i.id, editingIsland.name); setEditingIsland(null); }} />
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 13.5, fontWeight: 600 }}>
+                      {i.name}
+                      <button onClick={() => setEditingIsland({ id: i.id, name: i.name })}
+                        style={{ background: "transparent", border: "none", cursor: "pointer", padding: 2, lineHeight: 0 }}>
+                        <I name="plume" size={12} color={C.textFaint} />
+                      </button>
+                    </div>
+                  )}
+                  <div style={{ fontSize: 9.5, fontFamily: "monospace", color: C.textFaint, marginTop: 2 }}>
+                    région {i.region.gx}:{i.region.gy}{(i.buildings.colosse || 0) > 0 && (
+                      <span style={{ color: C.goldHi }}> · Colosse {i.buildings.colosse}/5</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+                <div style={{ padding: "10px 12px", borderRight: `1px solid ${C.borderSoft}` }}>
+                  <div style={{ fontSize: 8.5, fontFamily: "'Cinzel', Georgia, serif", letterSpacing: 1.4, color: C.textFaint, marginBottom: 7, textTransform: "uppercase" }}>Bâtiments</div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    <span style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 10.5, fontFamily: "monospace", color: C.textDim }}><I name="senat" size={11} color={C.textDim} />Sénat {i.buildings.senat}</span>
+                    <span style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 10.5, fontFamily: "monospace", color: C.textDim }}><I name="port" size={11} color={C.textDim} />Port {i.buildings.port || "—"}</span>
+                    <span style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 10.5, fontFamily: "monospace", color: C.textDim }}><I name="caserne" size={11} color={C.textDim} />Caserne {i.buildings.caserne || "—"}</span>
+                    <span style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 10.5, fontFamily: "monospace", color: C.textDim }}><I name="muraille" size={11} color={C.textDim} />Muraille {i.buildings.muraille || "—"}</span>
+                    <span style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 10.5, fontFamily: "monospace", color: C.textDim }}><I name="esclaves" size={11} color={C.textDim} />Esclaves {i.esclaves || 0} {esclavesBonus > 0 && <span style={{ color: C.ok }}>(+{esclavesBonus}%)</span>}</span>
+                  </div>
+                </div>
+                <div style={{ padding: "10px 12px" }}>
+                  <div style={{ fontSize: 8.5, fontFamily: "'Cinzel', Georgia, serif", letterSpacing: 1.4, color: C.textFaint, marginBottom: 7, textTransform: "uppercase" }}>Production/h</div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    {RES.map((r) => {
+                      const ph = Math.round(prodPerHour(i.buildings[PROD_BUILDING[r]]) * (1 + esclavesBonus / 100));
+                      return (
+                        <span key={r} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 10.5, fontFamily: "monospace", color: ph > 0 ? C.ok : C.textFaint }}>
+                          <ResIcon r={r} size={12} dim={ph <= 0} />+{fmtNum(ph)}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </Card>
+          );
+        })}
       </div>
 
       {notificationsSupported() && (
