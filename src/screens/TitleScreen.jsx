@@ -9,8 +9,9 @@ import crestLogo from "../assets/images/crest-logo.webp";
 
 const CREST_IMAGES = { athenes: crestAthenes, sparte: crestSparte, senat: crestLogo };
 
-// L'écran-titre garde une ambiance crépusculaire fixe, indépendante du thème
-// clair de la coquille du jeu (photo de fond sombre + texte clair dessus).
+// L'écran-titre garde sa propre ambiance crépusculaire fixe (photo de fond +
+// texte clair dessus), indépendante de la palette C.* de la coquille du jeu
+// — volontaire pour un premier écran cinématique, peu importe le thème actif.
 const T = {
   bgDeep: "#05090e",
   text: "#f0e8d8", textDim: "#c9bfa8", textFaint: "#a89878",
