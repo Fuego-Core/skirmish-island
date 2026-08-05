@@ -164,7 +164,11 @@ export function applyElapsed(state, now) {
         const def = tilePower(agx, agy, px, py, type, now - (s.startedAt || now));
         const mult = (type === "ile_joueur" ? 8 : 4) * (1 + regionDist({ gx: agx, gy: agy }) * 0.5);
         const familyMix = type === "ile_joueur" ? tileFamilyMix(agx, agy, px, py) : null;
-        s.spied[m.key] = { def, butinMin: Math.round(def * mult * 0.7), butinMax: Math.round(def * mult * 1.3), familyMix, at: now };
+        const spied = { def, butinMin: Math.round(def * mult * 0.7), butinMax: Math.round(def * mult * 1.3), familyMix, at: now };
+        s.spied[m.key] = spied;
+        const cible = type === "ile_joueur" ? botName(agx, agy, px, py) : "île inactive";
+        s.reports.unshift({ kind: "espionnage", cible, ...spied });
+        s.reports = s.reports.slice(0, 8);
       }
     });
     const doneSpy = s.spyMissions.filter((m) => now >= m.endsAt).length;

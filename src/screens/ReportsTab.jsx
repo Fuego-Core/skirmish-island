@@ -16,6 +16,9 @@ import reportRaidSubi from "../assets/images/reports/report-raid-subi.webp";
 // aléatoires — mêmes clés "icone" que le moteur (marche/explorateur/peche).
 const EVENT_CRESTS = { marche: eventMarchand, explorateur: eventTempete, peche: eventEpave };
 
+const FAMILY_LABEL = { infantry: "Infanterie", ranged: "Tir", cavalry: "Cavalerie" };
+const FAMILY_COLOR = { infantry: C.water, ranged: C.gold, cavalry: C.copper };
+
 // Vignettes en médaillon pour les 4 issues possibles d'un rapport de combat.
 const BATTLE_CRESTS = {
   victoire: reportVictoire, defaite: reportDefaite,
@@ -29,6 +32,7 @@ function battleCrestKey(rep) {
 function crestFor(rep) {
   if (rep.kind === "evenement") return EVENT_CRESTS[rep.icone];
   if (rep.kind === "marche" || rep.kind === "marche_achat") return eventMarchand;
+  if (rep.kind === "espionnage") return SHIP_PORTRAITS.eclaireur;
   return BATTLE_CRESTS[battleCrestKey(rep)];
 }
 
@@ -36,6 +40,7 @@ function titleFor(rep) {
   if (rep.kind === "evenement") return rep.titre;
   if (rep.kind === "marche") return "OFFRE DU MARCHÉ REMPLIE";
   if (rep.kind === "marche_achat") return "ÉCHANGE CONCLU";
+  if (rep.kind === "espionnage") return "RENSEIGNEMENT D'ÉCLAIREUR";
   if (rep.kind === "defense") return rep.win ? "RAID REPOUSSÉ" : "RAID PIRATE SUBI";
   return rep.win ? "VICTOIRE" : "DÉFAITE";
 }
@@ -44,12 +49,13 @@ function subtitleFor(rep) {
   if (rep.kind === "evenement") return rep.texte;
   if (rep.kind === "marche") return `${fmtNum(rep.give.amt)} donné contre ${rep.want.map((w) => fmtNum(w.amt)).join(" + ")} reçu`;
   if (rep.kind === "marche_achat") return `${rep.paid.map((w) => fmtNum(w.amt)).join(" + ")} payé contre ${fmtNum(rep.received.amt)} reçu`;
+  if (rep.kind === "espionnage") return rep.cible;
   if (rep.kind === "defense") return rep.attaquant || "pirates égéens";
   return rep.cible || (rep.targetType === "ile_joueur" ? "cité rivale" : "île inactive");
 }
 
 function outcomeColor(rep) {
-  if (rep.kind === "evenement" || rep.kind === "marche" || rep.kind === "marche_achat") return C.goldHi;
+  if (rep.kind === "evenement" || rep.kind === "marche" || rep.kind === "marche_achat" || rep.kind === "espionnage") return C.goldHi;
   return rep.win ? C.ok : C.bad;
 }
 
@@ -124,7 +130,37 @@ function ReportDetail({ rep }) {
         </div>
       )}
 
-      {rep.kind !== "evenement" && rep.kind !== "marche" && rep.kind !== "marche_achat" && (<>
+      {rep.kind === "espionnage" && (
+        <div style={{ borderRadius: 9, marginBottom: 8, border: `1px solid ${C.borderSoft}`, overflow: "hidden" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+            <div style={{ padding: "10px 13px", borderRight: `1px solid ${C.borderSoft}` }}>
+              <div style={{ fontSize: 8.5, fontFamily: "'Cinzel', Georgia, serif", letterSpacing: 1.2, color: C.textFaint, textTransform: "uppercase", marginBottom: 4 }}>Défense exacte</div>
+              <div style={{ fontSize: 14, fontFamily: "monospace", fontWeight: 700, color: C.bad }}>{fmtNum(rep.def)}</div>
+            </div>
+            <div style={{ padding: "10px 13px" }}>
+              <div style={{ fontSize: 8.5, fontFamily: "'Cinzel', Georgia, serif", letterSpacing: 1.2, color: C.textFaint, textTransform: "uppercase", marginBottom: 4 }}>Butin est. / ressource</div>
+              <div style={{ fontSize: 13, fontFamily: "monospace", fontWeight: 700, color: C.ok }}>{fmtNum(rep.butinMin)}–{fmtNum(rep.butinMax)}</div>
+            </div>
+          </div>
+          {rep.familyMix && (
+            <div style={{ padding: "10px 13px", borderTop: `1px solid ${C.borderSoft}` }}>
+              <div style={{ fontSize: 8.5, fontFamily: "'Cinzel', Georgia, serif", letterSpacing: 1.2, color: C.textFaint, textTransform: "uppercase", marginBottom: 6 }}>Composition adverse</div>
+              <div style={{ display: "flex", height: 6, borderRadius: 3, overflow: "hidden", marginBottom: 4 }}>
+                {["infantry", "ranged", "cavalry"].map((f) => (
+                  <div key={f} style={{ width: `${rep.familyMix[f] * 100}%`, background: FAMILY_COLOR[f] }} />
+                ))}
+              </div>
+              <div style={{ display: "flex", justifyContent: "center", gap: 10, flexWrap: "wrap" }}>
+                {["infantry", "ranged", "cavalry"].map((f) => (
+                  <span key={f} style={{ fontSize: 8.5, color: C.textFaint }}>{FAMILY_LABEL[f]} {Math.round(rep.familyMix[f] * 100)}%</span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {rep.kind !== "evenement" && rep.kind !== "marche" && rep.kind !== "marche_achat" && rep.kind !== "espionnage" && (<>
         <div style={{ borderRadius: 9, marginBottom: 8, border: `1px solid ${C.borderSoft}`, overflow: "hidden" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
             <div style={{ padding: "10px 13px", borderRight: `1px solid ${C.borderSoft}`, background: rep.win ? `${C.ok}14` : "transparent" }}>

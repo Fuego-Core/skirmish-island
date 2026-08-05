@@ -573,4 +573,22 @@ describe("contre d'unités contre une cité rivale connue", () => {
       expect(after.spied[key].familyMix).toBeNull();
     }
   });
+
+  it("l'espionnage abouti pousse aussi un rapport consultable", () => {
+    const now = Date.now();
+    const s = baseState(now);
+    const region = { gx: 3, gy: -2 };
+    const px = 2, py = 3;
+    const key = rk(region, px, py);
+    s.region = region;
+    s.ships.eclaireur = 1;
+    s.spyMissions = [{ key, arriveAt: now + 500, endsAt: now + 1000 }];
+    const after = applyElapsed(s, now + 600);
+    const rep = after.reports.find((r) => r.kind === "espionnage");
+    expect(rep).toBeTruthy();
+    expect(rep.def).toBe(after.spied[key].def);
+    expect(rep.butinMin).toBe(after.spied[key].butinMin);
+    expect(rep.butinMax).toBe(after.spied[key].butinMax);
+    expect(rep.cible).toBeTruthy();
+  });
 });
