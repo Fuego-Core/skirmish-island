@@ -4,7 +4,7 @@ import { ISLAND_GRID, TILE_LABELS, tileColor } from "../../game/world.js";
 import { botName, tilePower } from "../../game/bots.js";
 import { REGEN_MS } from "../../game/constants.js";
 import { I } from "../Icon.jsx";
-import { Sheet, Btn, Stepper, fmtTime, fmtNum } from "../kit.jsx";
+import { Sheet, Btn, Stepper, fmtTime, fmtNum, fmtAgo } from "../kit.jsx";
 import tileIslandImg from "../../assets/images/tile-island.webp";
 import { TROOP_PORTRAITS } from "../troopPortraits.js";
 
@@ -79,11 +79,29 @@ export function TileSheet({
         {(selectedTile.st === "ile_joueur" || selectedTile.st === "ile_inactive") && !conquered && !alreadyColonized && (
           <div>
             {game.spied[selectedTileKey] ? (
-              <div style={{ fontSize: 10, color: C.textDim, marginBottom: 8 }}>
-                <span style={{ color: C.goldHi }}>Renseignement d'éclaireur</span> — défense exacte :{" "}
-                <span style={{ color: C.bad, fontFamily: "monospace" }}>{game.spied[selectedTileKey].def}</span>
-                {" "}· butin : <span style={{ color: C.ok, fontFamily: "monospace" }}>{fmtNum(game.spied[selectedTileKey].butinMin)}–{fmtNum(game.spied[selectedTileKey].butinMax)}</span>/ressource
-                {game.spied[selectedTileKey].familyMix && <EnemyMixBar mix={game.spied[selectedTileKey].familyMix} />}
+              <div style={{ borderRadius: 10, marginBottom: 10, border: `1px solid ${C.borderSoft}`, overflow: "hidden", textAlign: "left" }}>
+                <div style={{ padding: "8px 12px", borderBottom: `1px solid ${C.borderSoft}`, display: "flex", justifyContent: "space-between", alignItems: "center", background: `${C.gold}0f` }}>
+                  <span style={{ fontSize: 9.5, fontFamily: "'Cinzel', Georgia, serif", letterSpacing: 1, color: C.goldHi, textTransform: "uppercase" }}>
+                    Renseignement d'éclaireur
+                  </span>
+                  <span style={{ fontSize: 9, color: C.textFaint, fontFamily: "monospace" }}>{fmtAgo(nowTick - game.spied[selectedTileKey].at)}</span>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+                  <div style={{ padding: "10px 12px", borderRight: `1px solid ${C.borderSoft}` }}>
+                    <div style={{ fontSize: 8.5, color: C.textFaint, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 4 }}>Défense exacte</div>
+                    <div style={{ fontSize: 15, fontFamily: "monospace", fontWeight: 700, color: C.bad }}>{fmtNum(game.spied[selectedTileKey].def)}</div>
+                  </div>
+                  <div style={{ padding: "10px 12px" }}>
+                    <div style={{ fontSize: 8.5, color: C.textFaint, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 4 }}>Butin est. / ressource</div>
+                    <div style={{ fontSize: 13, fontFamily: "monospace", fontWeight: 700, color: C.ok }}>{fmtNum(game.spied[selectedTileKey].butinMin)}–{fmtNum(game.spied[selectedTileKey].butinMax)}</div>
+                  </div>
+                </div>
+                {game.spied[selectedTileKey].familyMix && (
+                  <div style={{ padding: "10px 12px", borderTop: `1px solid ${C.borderSoft}` }}>
+                    <div style={{ fontSize: 8.5, color: C.textFaint, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 6 }}>Composition adverse</div>
+                    <EnemyMixBar mix={game.spied[selectedTileKey].familyMix} />
+                  </div>
+                )}
               </div>
             ) : (
               <div style={{ fontSize: 10, color: C.textDim, marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
