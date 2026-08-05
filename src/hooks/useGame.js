@@ -366,29 +366,6 @@ export function useGame() {
     });
   }, []);
 
-  const exportSave = useCallback(() => {
-    const g = gameRef.current;
-    if (!g) return "";
-    try {
-      return btoa(unescape(encodeURIComponent(JSON.stringify(g))));
-    } catch (e) {
-      return "erreur d'export";
-    }
-  }, []);
-
-  const importSave = useCallback((importCode) => {
-    try {
-      const parsed = JSON.parse(decodeURIComponent(escape(atob(importCode.trim()))));
-      if (!parsed || !parsed.islands || !parsed.resources) throw new Error("format");
-      const restored = applyElapsed(parsed, Date.now());
-      setGame(restored);
-      try { localStorage.setItem(SAVE_KEY, JSON.stringify(restored)); } catch (e) {}
-      return { ok: true, message: "Sauvegarde restaurée." };
-    } catch (e) {
-      return { ok: false, message: "Code invalide — vérifie le copier-coller." };
-    }
-  }, []);
-
   const resetGame = useCallback(() => {
     const fresh = newGameState();
     setGame(fresh);
@@ -403,6 +380,6 @@ export function useGame() {
     game, setGame, nowTick,
     startUpgrade, buildShip, recruitTroop, startExplore, startColonize, startAttack,
     acceptMarketOffer, postMarketOffer, cancelMarketOffer, assignEsclave, startSpy, tradeEvent, claimMission, renameIsland,
-    exportSave, importSave, resetGame, chooseFaction,
+    resetGame, chooseFaction,
   };
 }

@@ -25,12 +25,9 @@ function ClickableQueue({ onClick, ...props }) {
 export function CityTab({
   game, nowTick, isl, onSelectIsland, setTab,
   tradeEvent, visibleMissions, onOpenMissions,
-  renameIsland, exportSave, importSave, resetGame,
+  renameIsland, resetGame,
 }) {
   const [editingIsland, setEditingIsland] = useState(null);
-  const [importCode, setImportCode] = useState("");
-  const [exportCode, setExportCode] = useState("");
-  const [importMsg, setImportMsg] = useState("");
   const [notifOn, setNotifOn] = useState(notificationsEnabled());
   const [notifMsg, setNotifMsg] = useState("");
 
@@ -44,13 +41,6 @@ export function CityTab({
       setNotifOn(ok);
       setNotifMsg(ok ? "" : "Autorisation refusée par le navigateur.");
     }
-  };
-
-  const handleExport = () => setExportCode(exportSave());
-  const handleImport = () => {
-    const res = importSave(importCode);
-    setImportMsg(res.message);
-    if (res.ok) setImportCode("");
   };
 
   const fShip = (game.faction && FACTIONS[game.faction].shipSpeed) || 1;
@@ -276,26 +266,6 @@ export function CityTab({
           </Card>
         </>
       )}
-
-      <SectionTitle>Sauvegarde</SectionTitle>
-      <Card>
-        <div style={{ display: "flex", gap: 6, marginBottom: 8, flexWrap: "wrap" }}>
-          <Btn small label="Générer le code de sauvegarde" onClick={handleExport} />
-        </div>
-        {exportCode && (
-          <textarea readOnly value={exportCode} rows={3}
-            onFocus={(e) => e.target.select()}
-            style={{ width: "100%", boxSizing: "border-box", background: C.bgDeep, border: `1px solid ${C.borderSoft}`, borderRadius: 6, color: C.textDim, fontSize: 9, fontFamily: "monospace", padding: 8, marginBottom: 10, resize: "vertical" }} />
-        )}
-        <div style={{ fontSize: 10, color: C.textDim, marginBottom: 6, fontStyle: "italic" }}>Restaurer une partie :</div>
-        <textarea value={importCode} onChange={(e) => setImportCode(e.target.value)} rows={2}
-          placeholder="Colle un code de sauvegarde ici…"
-          style={{ width: "100%", boxSizing: "border-box", background: C.bgDeep, border: `1px solid ${C.borderSoft}`, borderRadius: 6, color: C.text, fontSize: 9, fontFamily: "monospace", padding: 8, marginBottom: 6, resize: "vertical" }} />
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <Btn small primary label="Restaurer" disabled={!importCode.trim()} onClick={handleImport} />
-          {importMsg && <span style={{ fontSize: 10, color: importMsg.includes("invalide") ? C.bad : C.ok }}>{importMsg}</span>}
-        </div>
-      </Card>
 
       <div style={{ marginTop: 22, textAlign: "center" }}>
         <button onClick={resetGame}

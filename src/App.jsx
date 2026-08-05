@@ -32,7 +32,7 @@ export default function App() {
     game, setGame, nowTick,
     startUpgrade, buildShip, recruitTroop, startExplore, startColonize, startAttack,
     acceptMarketOffer, postMarketOffer, cancelMarketOffer, assignEsclave, startSpy, tradeEvent, claimMission, renameIsland,
-    exportSave, importSave, resetGame, chooseFaction,
+    resetGame, chooseFaction,
   } = useGame();
 
   const [tab, setTab] = useState("cite");
@@ -220,7 +220,7 @@ export default function App() {
             onSelectIsland={(idx) => { setGame((g) => ({ ...g, activeIsland: idx })); setOpenBuilding(null); }}
             tradeEvent={tradeEvent}
             visibleMissions={visibleMissions} onOpenMissions={() => setShowMissions(true)}
-            renameIsland={renameIsland} exportSave={exportSave} importSave={importSave} resetGame={resetGame}
+            renameIsland={renameIsland} resetGame={resetGame}
           />
         )}
         {tab === "construction" && (
